@@ -1,0 +1,1 @@
+Acá van las configuraciones y las funciones de la comunacion HTTP con el back
