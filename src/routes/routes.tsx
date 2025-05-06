@@ -1,13 +1,12 @@
-import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Landing from '../components/screens/landing/landing';
 
-const Landing = () => {
+const AppRoutes = () => {
   return (
-    <div>
-      
-    ACA VA LA LANDING
-
-    </div>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+    </Routes>
   );
 };
 
-export default Landing;
+export default AppRoutes;
