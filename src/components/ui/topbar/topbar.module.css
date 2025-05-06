@@ -1,0 +1,63 @@
+.topbar {
+    width: 200%;
+    background-color: #100e14;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 100;
+  }
+  
+  .left,
+  .center,
+  .right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .left {
+    flex: 1;
+  }
+  
+  .center {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .right {
+    flex: 1;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+  
+  .logo {
+    height: 25px;
+    filter: brightness(0) invert(1);
+  }
+  
+  .icon {
+    color: white;
+    font-size: 1rem;
+  }
+  
+  .signin,
+  .register {
+    padding: 0.25rem 0.75rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  
+  .signin {
+    background-color: #e5e5e5;
+    color: black;
+  }
+  
+  .register {
+    background-color: #333;
+    color: white;
+  }
+  
