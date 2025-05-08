@@ -3,6 +3,25 @@ import Topbar from '../../ui/topbar/topbar';
 import Footer from '../../ui/footer/footer';
 import styles from './landing.module.css';
 
+const categories = [
+  {
+    name: 'Calzado',
+    products: [
+      { title: 'Zapatillas de running', image: '/images/zapatillas/Zapatillas1.webp' },
+      { title: 'Botín de fútbol', image: '/images/botin1.png' },
+      { title: 'Zapatilla clásica', image: '/images/zapatilla2.png' },
+    ],
+  },
+  {
+    name: 'Ropa',
+    products: [
+      { title: 'Zapatillas de running', image: '/images/zapatilla3.png' },
+      { title: 'Botín de fútbol', image: '/images/botin2.png' },
+      { title: 'Zapatilla casual', image: '/images/zapatilla4.png' },
+    ],
+  },
+];
+
 const Landing = () => {
   return (
     <div className={styles.landingContainer}>
@@ -14,9 +33,7 @@ const Landing = () => {
 
         <hr className={styles.landingDivider} />
 
-        <div className={styles.landingSectionTitle}>
-          Productos Destacados
-        </div>
+        <div className={styles.landingSectionTitle}>Productos Destacados</div>
 
         <div className={styles.landingProducts}>
           <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 1" className={styles.landingProductImage} />
@@ -26,9 +43,27 @@ const Landing = () => {
         </div>
 
         <div className={styles.landingButtonWrapper}>
-          <button className={styles.landingBuyButton}>
-            ¡Compre Ahora!
-          </button>
+          <button className={styles.landingBuyButton}>¡Compre Ahora!</button>
+        </div>
+
+        <hr className={styles.landingDivider} />
+
+        <div className={styles.landingCategoryGrid}>
+          {categories.map((cat) => (
+            <div key={cat.name} className={styles.landingCategoryColumn}>
+              <h3>{cat.name}</h3>
+              {cat.products.map((product, index) => (
+                <div key={index} className={styles.landingProductCard}>
+                  <img src={product.image} alt={product.title} className={styles.cardImage} />
+                  <div className={styles.cardContent}>
+                    <h4>{product.title}</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ut dignissim erat.</p>
+                    <button className={styles.cardButton}>Buy</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       </div>
 

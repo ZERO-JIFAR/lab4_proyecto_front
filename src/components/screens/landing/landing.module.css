@@ -1,67 +1,134 @@
 .landingContainer {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    min-width: 100vw;
-  }
-  
-  .landingMain {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem;
-    text-align: center;
-  }
-  
-  .landingTitle {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .landingSubtitle {
-    color: #555;
-    font-size: 1.2rem;
-  }
-  
-  .landingDivider {
-    width: 100%;
-    max-width: 800px;
-    margin: 2rem auto;
-  }
-  
-  .landingSectionTitle {
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    color: #333;
-  }
-  
-  .landingProducts {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 1rem;
-    justify-content: center;
-    max-width: 100%;
-  }
-  
-  .landingProductImage {
-    height: 120px;
-    border-radius: 8px;
-  }
-  
-  .landingButtonWrapper {
-    margin-top: 1rem;
-  }
-  
-  .landingBuyButton {
-    background-color: black;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 100vw;
+}
+
+.landingMain {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.landingTitle {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.landingSubtitle {
+  color: #555;
+  font-size: 1.2rem;
+}
+
+.landingDivider {
+  width: 100%;
+  max-width: 800px;
+  margin: 2rem auto;
+}
+
+.landingSectionTitle {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Productos destacados */
+.landingProducts {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.landingProductImage {
+  height: 120px;
+  border-radius: 8px;
+}
+
+/* Botón principal */
+.landingButtonWrapper {
+  margin-top: 1rem;
+}
+
+.landingBuyButton {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Categorías con tarjetas */
+.landingCategoryGrid {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.landingCategoryColumn {
+  flex: 1;
+  min-width: 300px;
+  max-width: 400px;
+  background-color: #111;
+  padding: 1rem;
+  border-radius: 8px;
+  color: white;
+}
+
+.landingProductCard {
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 1rem;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.cardImage {
+  width: 100px;
+  height: auto;
+  object-fit: contain;
+  background: #000;
+  padding: 0.5rem;
+}
+
+.cardContent {
+  padding: 0.5rem 1rem;
+  flex: 1;
+  text-align: left;
+}
+
+.cardContent h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.cardContent p {
+  font-size: 0.85rem;
+  color: #ccc;
+  margin: 0.5rem 0;
+}
+
+.cardButton {
+  background-color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+}
