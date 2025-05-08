@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './footer.module.css';
-import { FaXTwitter, FaInstagram, FaYoutube, FaLinkedin } from 'react-icons/fa6';
-import ModalFooter from './modalsFooter/modalFooter'; 
+import { FaTwitter, FaInstagram, FaYoutube, FaLinkedin } from 'react-icons/fa';
+import ModalFooter from './modalsFooter/modalFooter';
 
 const infoMap: Record<string, { title: string; content: string }> = {
   Envíos: {
@@ -44,43 +44,43 @@ const Footer = () => {
 
   return (
     <>
-      <footer className={styles.footer}>
-        <div className={styles.container}>
-          <div className={styles.column}>
-            <div className={styles.socialIcons}>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaXTwitter /></a>
+      <footer className={styles.footerContainer}>
+        <div className={styles.footerGrid}>
+          <div className={styles.footerColumn}>
+            <div className={styles.footerSocialIcons}>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
               <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><FaLinkedin /></a>
             </div>
           </div>
 
-          <div className={styles.column}>
-            <h4>AYUDA</h4>
-            <ul>
+          <div className={styles.footerColumn}>
+            <h4 className={styles.footerTitle}>AYUDA</h4>
+            <ul className={styles.footerList}>
               {Object.keys(infoMap).filter(key =>
                 ['Envíos', 'Devoluciones', 'Cambios', 'Contacto'].includes(key)
               ).map((key) => (
-                <li key={key} onClick={() => handleOpenModal(key)}>{key}</li>
+                <li key={key} className={styles.footerListItem} onClick={() => handleOpenModal(key)}>{key}</li>
               ))}
             </ul>
           </div>
 
-          <div className={styles.column}>
-            <h4>ACERCA DE</h4>
-            <ul>
-              <li>¿Quiénes somos?</li>
-              <li>Noticias</li>
+          <div className={styles.footerColumn}>
+            <h4 className={styles.footerTitle}>ACERCA DE</h4>
+            <ul className={styles.footerList}>
+              <li className={styles.footerListItem}>¿Quiénes somos?</li>
+              <li className={styles.footerListItem}>Noticias</li>
             </ul>
           </div>
 
-          <div className={styles.column}>
-            <h4>Novedades</h4>
-            <ul>
-              <li>Promociones</li>
-              <li>Encontrá tus artículos</li>
+          <div className={styles.footerColumn}>
+            <h4 className={styles.footerTitle}>Novedades</h4>
+            <ul className={styles.footerList}>
+              <li className={styles.footerListItem}>Promociones</li>
+              <li className={styles.footerListItem}>Encontrá tus artículos</li>
               {['Tips', 'Salud'].map((key) => (
-                <li key={key} onClick={() => handleOpenModal(key)}>{key}</li>
+                <li key={key} className={styles.footerListItem} onClick={() => handleOpenModal(key)}>{key}</li>
               ))}
             </ul>
           </div>

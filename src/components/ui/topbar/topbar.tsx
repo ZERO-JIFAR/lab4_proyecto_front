@@ -4,23 +4,23 @@ import { FaBars, FaShoppingCart } from 'react-icons/fa';
 
 const Topbar = () => {
   return (
-    <div className={styles.topbar}>
-      <div className={styles.left}>
+    <div className={styles.topbarContainer}>
+      <div className={styles.topbarLeft}>
         <FaBars />
       </div>
 
-      <div className={styles.center}>
+      <div className={styles.topbarCenter}>
         <img
           src="/logo.png" // tener este logo en public/logo.png o ajustá la ruta
           alt="Logo"
-          className={styles.logo}
+          className={styles.topbarLogo}
         />
       </div>
 
-      <div className={styles.right}>
-        <FaShoppingCart className={styles.icon} />
-        <button className={styles.signin}>Sign in</button>
-        <button className={styles.register}>Register</button>
+      <div className={styles.topbarRight}>
+        <FaShoppingCart className={styles.topbarIcon} />
+        <button className={styles.topbarSignin}>Sign in</button>
+        <button className={styles.topbarRegister}>Register</button>
       </div>
     </div>
   );
