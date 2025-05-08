@@ -1,0 +1,67 @@
+.landingContainer {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-width: 100vw;
+  }
+  
+  .landingMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .landingTitle {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .landingSubtitle {
+    color: #555;
+    font-size: 1.2rem;
+  }
+  
+  .landingDivider {
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem auto;
+  }
+  
+  .landingSectionTitle {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #333;
+  }
+  
+  .landingProducts {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+    justify-content: center;
+    max-width: 100%;
+  }
+  
+  .landingProductImage {
+    height: 120px;
+    border-radius: 8px;
+  }
+  
+  .landingButtonWrapper {
+    margin-top: 1rem;
+  }
+  
+  .landingBuyButton {
+    background-color: black;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
