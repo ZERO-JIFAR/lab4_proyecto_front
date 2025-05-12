@@ -49,7 +49,8 @@
 }
 
 .landingProductImage {
-  height: 120px;
+  height: 250px;
+  width: 250px;
   border-radius: 8px;
 }
 
@@ -140,4 +141,9 @@
 .landingMoreText{
 text-align: center;
 font-size: 1.5rem
+}
+
+.landingProductImage:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

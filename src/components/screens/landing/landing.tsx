@@ -7,17 +7,17 @@ const categories = [
   {
     name: 'Calzado',
     products: [
-      { title: 'Zapatillas de running', image: '/images/zapatillas/Zapatillas1.webp' },
-      { title: 'Botín de fútbol', image: '/images/botin1.png' },
-      { title: 'Zapatilla clásica', image: '/images/zapatilla2.png' },
+      { title: 'Zapatillas de running', image: '/images/zapatillas/Zapatillas1.webp', price: '$69.99' },
+      { title: 'Botín de fútbol', image: '/images/botin1.png', price: '$79.99' },
+      { title: 'Zapatilla clásica', image: '/images/zapatilla2.png', price: '$79.99' },
     ],
   },
   {
     name: 'Ropa',
     products: [
-      { title: 'Zapatillas de running', image: '/images/zapatilla3.png' },
-      { title: 'Botín de fútbol', image: '/images/botin2.png' },
-      { title: 'Zapatilla casual', image: '/images/zapatilla4.png' },
+      { title: 'Buzo hoodie', image: '/images/zapatilla3.png', price: '$49.99' },
+      { title: 'Remera polo', image: '/images/botin2.png', price: '$29.99' },
+      { title: 'Pantalón de jean', image: '/images/zapatilla4.png', price: '$59.99' },
     ],
   },
 ];
@@ -37,9 +37,9 @@ const Landing = () => {
 
         <div className={styles.landingProducts}>
           <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 1" className={styles.landingProductImage} />
-          <img src="/images/zapatilla2.png" alt="Zapatilla 2" className={styles.landingProductImage} />
-          <img src="/images/zapatilla3.png" alt="Zapatilla 3" className={styles.landingProductImage} />
-          <img src="/images/zapatilla4.png" alt="Zapatilla 4" className={styles.landingProductImage} />
+          <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 2" className={styles.landingProductImage} />
+          <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 3" className={styles.landingProductImage} />
+          <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 4" className={styles.landingProductImage} />
         </div>
 
         <div className={styles.landingButtonWrapper}>
@@ -58,7 +58,10 @@ const Landing = () => {
                   <div className={styles.cardContent}>
                     <h4>{product.title}</h4>
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ut dignissim erat.</p>
-                    <button className={styles.cardButton}>Buy</button>
+                    <div className={styles.cardPriceWrapper}>
+                      <span className={styles.cardPrice}>{product.price}</span>
+                      <button className={styles.cardButton}>Comprar</button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -66,8 +69,15 @@ const Landing = () => {
           ))}
         </div>
       </div>
-      <h1 className={styles.landingMore}><strong>¿Quienes somos?</strong></h1>
-      <p className={styles.landingMoreText}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+      <h1 className={styles.landingMore}><strong>¿Quiénes somos?</strong></h1>
+      <p className={styles.landingMoreText}>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+      </p>
+
       <Footer />
     </div>
   );
