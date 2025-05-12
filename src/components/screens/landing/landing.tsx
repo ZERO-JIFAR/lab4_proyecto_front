@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Topbar from '../../ui/topbar/topbar';
 import Footer from '../../ui/footer/footer';
 import styles from './landing.module.css';
@@ -22,7 +22,26 @@ const categories = [
   },
 ];
 
+const featuredImages = [
+  '/images/zapatillas/Zapatillas1.webp',
+  '/images/zapatillas/Zapatillas2.jpeg',
+  '/images/zapatillas/Zapatillas3.webp',
+  '/images/zapatillas/Zapatillas4.webp',
+];
+
 const Landing = () => {
+  const [startIndex, setStartIndex] = useState(0);
+
+  const handleNext = () => {
+    setStartIndex((prevIndex) => (prevIndex + 1) % featuredImages.length);
+  };
+
+  const visibleImages = [
+    featuredImages[startIndex],
+    featuredImages[(startIndex + 1) % featuredImages.length],
+    featuredImages[(startIndex + 2) % featuredImages.length],
+  ];
+
   return (
     <div className={styles.landingContainer}>
       <Topbar />
@@ -35,11 +54,18 @@ const Landing = () => {
 
         <div className={styles.landingSectionTitle}>Productos Destacados</div>
 
-        <div className={styles.landingProducts}>
-          <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 1" className={styles.landingProductImage} />
-          <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 2" className={styles.landingProductImage} />
-          <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 3" className={styles.landingProductImage} />
-          <img src="/images/zapatillas/Zapatillas1.webp" alt="Zapatilla 4" className={styles.landingProductImage} />
+        <div className={styles.carouselContainer}>
+          <div className={styles.landingProducts}>
+            {visibleImages.map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt={`Zapatilla ${idx + 1}`}
+                className={styles.landingProductImage}
+              />
+            ))}
+          </div>
+          <button className={styles.carouselButton} onClick={handleNext}>→</button>
         </div>
 
         <div className={styles.landingButtonWrapper}>

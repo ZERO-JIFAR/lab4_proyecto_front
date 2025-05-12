@@ -147,3 +147,44 @@ font-size: 1.5rem
   transform: scale(1.01);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+
+
+
+.landingContainer {
+  overflow-x: hidden; 
+  overflow-y: auto;   
+}
+
+.landingContainer {
+  overflow: hidden;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.landingProducts {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap; 
+  overflow: hidden; 
+}
+
+
+.cardPriceWrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px; /* Agrega más espacio entre el texto y el botón */
+  gap: 20px;         /* Espacio entre el precio y el botón */
+}
+
+.cardPrice {
+  font-weight: bold;      /* Más resaltado */
+  font-size: 1.2rem;      /* Un poco más grande */
+  color: #333;            /* Puedes usar otro color si deseas destacarlo más */
+}
