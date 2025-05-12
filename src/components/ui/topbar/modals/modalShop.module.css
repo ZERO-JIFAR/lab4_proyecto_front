@@ -50,3 +50,16 @@
   margin-top: 40px; /* Ajusta el margen superior aquí */
   margin-bottom: 20px; /* Opcional, ajusta el espacio al final */
 }
+
+.cartClose {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.cartClose:hover {
+  color: #ccc; 
+}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Topbar from '../../ui/topbar/topbar';
 import Footer from '../../ui/footer/footer';
 import styles from './landing.module.css';
@@ -69,7 +70,10 @@ const Landing = () => {
         </div>
 
         <div className={styles.landingButtonWrapper}>
-          <button className={styles.landingBuyButton}>¡Compre Ahora!</button>
+          {/* Uso de Link para redirigir al hacer clic */}
+          <Link to="/SearchItem">
+            <button className={styles.landingBuyButton}>¡Compre Ahora!</button>
+          </Link>
         </div>
 
         <hr className={styles.landingDivider} />

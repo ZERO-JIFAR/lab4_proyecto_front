@@ -1,0 +1,50 @@
+.modalContainer {
+  position: fixed;
+  top: 60px; /* Más arriba para pegarlo al topbar */
+  right: 20px;
+  background-color: #100e14; /* Fondo negro */
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 150;
+  min-width: 220px;
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modalForm h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.modalForm input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #555;
+  border-radius: 8px;
+  background-color: #1a1a1a;
+  color: white;
+}
+
+.modalForm input::placeholder {
+  color: #ccc;
+}
+
+.modalForm button {
+  padding: 0.5rem;
+  background-color: white;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modalForm button:hover {
+  background-color: #e5e5e5;
+}
