@@ -14,39 +14,37 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
   const [repeatPassword, setRepeatPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleRegister = () => {
-    setError('');
+  if (!show) return null;
 
+  const handleRegister = () => {
     if (!username || !email || !password || !repeatPassword) {
-      setError('Por favor, completa todos los campos.');
+      setError('Completa todos los campos.');
       return;
     }
-
     if (password !== repeatPassword) {
       setError('Las contraseñas no coinciden.');
       return;
     }
 
     const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    const userExists = existingUsers.find((user: any) => user.email === email);
 
-    if (existingUsers.find((user: any) => user.email === email)) {
+    if (userExists) {
       setError('Este correo ya está registrado.');
       return;
     }
 
-    const newUser = { username, email, password };
-    const updatedUsers = [...existingUsers, newUser];
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    alert('¡Registro exitoso!');
+    const newUser = { username, email, password, isAdmin: false };
+    localStorage.setItem('users', JSON.stringify([...existingUsers, newUser]));
+    alert('Usuario registrado correctamente 🎉');
     onClose();
   };
 
-  if (!show) return null;
-
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modal}>
-        <h2>Registro</h2>
+      <div className={styles.modalContainer}>
+        <h2 className={styles.title}>Registro</h2>
+
         <input
           type="text"
           placeholder="Nombre de usuario"
@@ -71,10 +69,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
           value={repeatPassword}
           onChange={(e) => setRepeatPassword(e.target.value)}
         />
+
         {error && <p className={styles.error}>{error}</p>}
-        <div className={styles.buttons}>
+
+        <div className={styles.actions}>
           <button onClick={handleRegister}>Registrarse</button>
-          <button onClick={onClose}>Cancelar</button>
+          <button className={styles.cancel} onClick={onClose}>Cancelar</button>
         </div>
       </div>
     </div>
