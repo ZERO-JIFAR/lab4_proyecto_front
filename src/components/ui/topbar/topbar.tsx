@@ -1,29 +1,43 @@
+// src/components/Topbar.tsx
 import React, { useState } from 'react';
 import styles from './topbar.module.css';
 import { FaBars, FaShoppingCart } from 'react-icons/fa';
 import ModalCarrito from './modals/modalShop';
 import ModalSignIn from './modals/ModalSignIn';
+import AdminMenu from './modals/adminMenu';
 
-const Topbar = () => {
+const Topbar: React.FC = () => {
   const [showCart, setShowCart] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
 
   const toggleCart = () => {
     setShowCart(!showCart);
   };
 
+  const toggleAdminMenu = () => {
+    setShowAdminMenu(!showAdminMenu);
+  };
+
   const handleLogout = () => {
     setIsLoggedIn(false);
     setIsAdmin(false);
+    setShowAdminMenu(false);
   };
 
   return (
     <>
       <div className={styles.topbarContainer}>
         <div className={styles.topbarLeft}>
-          {isAdmin && <FaBars />}
+          {isAdmin && (
+            <FaBars
+              className={styles.adminIcon}
+              onClick={toggleAdminMenu}
+              style={{ cursor: 'pointer' }}
+            />
+          )}
         </div>
 
         <div className={styles.topbarCenter}>
@@ -60,14 +74,17 @@ const Topbar = () => {
         </div>
       </div>
 
-      <ModalCarrito show={showCart} onClose={toggleCart} />
+      {/* Admin dropdown menu */}
+      <AdminMenu visible={showAdminMenu} />
 
+      {/* Modals */}
+      <ModalCarrito show={showCart} onClose={toggleCart} />
       <ModalSignIn
         show={showSignIn}
         onClose={() => setShowSignIn(false)}
-        onLogin={(isAdmin) => {
+        onLogin={(isAdminValue: boolean) => {
           setIsLoggedIn(true);
-          setIsAdmin(isAdmin);
+          setIsAdmin(isAdminValue);
           setShowSignIn(false);
         }}
       />
