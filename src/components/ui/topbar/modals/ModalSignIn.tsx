@@ -1,4 +1,3 @@
-// src/components/modals/ModalSignIn.tsx
 import React, { useState } from 'react';
 import styles from './modalSignin.module.css';
 
@@ -11,13 +10,19 @@ interface ModalSignInProps {
 const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);  // Declaración explícita de tipo
 
   if (!show) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError(null);  // Restablecer el error al enviar el formulario
+
+    // Si vuelve a hacer clic estando ya abierto, cierra el modal
+    if (!username && !password) {
+      onClose();
+      return;
+    }
 
     // admin hardcoded
     if (username === 'admin' && password === 'admin') {
@@ -26,7 +31,7 @@ const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => 
       return;
     }
 
-    //  usuarios registrados desde localStorage
+    // usuarios registrados desde localStorage
     const users = JSON.parse(localStorage.getItem('users') || '[]');
 
     const matchedUser = users.find(
@@ -59,11 +64,11 @@ const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => 
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <p className={styles.error}>{error}</p>}
-        <div className={styles.actions}>
-          <button type="submit">Entrar</button>
-          <button type="button" onClick={onClose}>Cancelar</button>
-        </div>
+        
+        {/* Verificación de error */}
+        {error && <p className={styles.modalSigninError}>{error}</p>} 
+
+        <button type="submit">Entrar</button>
       </form>
     </div>
   );

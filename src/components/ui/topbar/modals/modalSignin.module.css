@@ -1,7 +1,7 @@
 .modalContainer {
   position: fixed;
-  top: 60px; /* Más arriba para pegarlo al topbar */
-  right: 20px;
+  top: 5.3%; 
+  right: 1%;
   background-color: #100e14; /* Fondo negro */
   border-radius: 10px;
   padding: 1rem;
@@ -47,4 +47,11 @@
 
 .modalForm button:hover {
   background-color: #e5e5e5;
+}
+
+/* Estilo para el mensaje de error */
+.modalSigninError {
+  color: red;          /* El texto de error se pondrá en rojo */
+  font-size: 0.9em;    /* Tamaño de fuente un poco más pequeño */
+  margin-top: 1rem;    /* Espacio superior para separar del contenido */
 }

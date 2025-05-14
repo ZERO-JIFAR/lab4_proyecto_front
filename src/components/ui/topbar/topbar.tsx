@@ -29,6 +29,10 @@ const Topbar: React.FC = () => {
     setShowAdminMenu(false);
   };
 
+  const toggleSignInModal = () => {
+    setShowSignIn(!showSignIn);  // Cambiar el estado para abrir o cerrar el modal
+  };
+
   return (
     <>
       <div className={styles.topbarContainer}>
@@ -57,7 +61,7 @@ const Topbar: React.FC = () => {
             <>
               <button
                 className={styles.topbarSignin}
-                onClick={() => setShowSignIn(true)}
+                onClick={toggleSignInModal}  // Cambiar aquí
               >
                 Sign in
               </button>
