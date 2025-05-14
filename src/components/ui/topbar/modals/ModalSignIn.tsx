@@ -1,6 +1,6 @@
 // src/components/modals/ModalSignIn.tsx
 import React, { useState } from 'react';
-import styles from './modalSignIn.module.css';
+import styles from './modalSignin.module.css';
 
 interface ModalSignInProps {
   show: boolean;
@@ -19,14 +19,14 @@ const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => 
     e.preventDefault();
     setError('');
 
-    // Caso especial: admin hardcoded
+    // admin hardcoded
     if (username === 'admin' && password === 'admin') {
       onLogin(true);
       onClose();
       return;
     }
 
-    // Obtener usuarios registrados desde localStorage
+    //  usuarios registrados desde localStorage
     const users = JSON.parse(localStorage.getItem('users') || '[]');
 
     const matchedUser = users.find(

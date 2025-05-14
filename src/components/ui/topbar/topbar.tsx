@@ -1,84 +1,106 @@
-// src/components/modals/RegisterModal.tsx
+// src/components/Topbar.tsx
 import React, { useState } from 'react';
-import styles from './registerModal.module.css';
+import styles from './topbar.module.css';
+import { FaBars, FaShoppingCart } from 'react-icons/fa';
+import ModalCarrito from './modals/modalShop';
+import ModalSignIn from './modals/ModalSignIn';
+import RegisterModal from './modals/registerModal';
+import AdminMenu from './modals/adminMenu';
 
-interface RegisterModalProps {
-  show: boolean;
-  onClose: () => void;
-}
+const Topbar: React.FC = () => {
+  const [showCart, setShowCart] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
 
-const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [repeatPassword, setRepeatPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleRegister = () => {
-    setError('');
-
-    if (!username || !email || !password || !repeatPassword) {
-      setError('Por favor, completa todos los campos.');
-      return;
-    }
-
-    if (password !== repeatPassword) {
-      setError('Las contraseñas no coinciden.');
-      return;
-    }
-
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-
-    if (existingUsers.find((user: any) => user.email === email)) {
-      setError('Este correo ya está registrado.');
-      return;
-    }
-
-    const newUser = { username, email, password };
-    const updatedUsers = [...existingUsers, newUser];
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    alert('¡Registro exitoso!');
-    onClose();
+  const toggleCart = () => {
+    setShowCart(!showCart);
   };
 
-  if (!show) return null;
+  const toggleAdminMenu = () => {
+    setShowAdminMenu(!showAdminMenu);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    setShowAdminMenu(false);
+  };
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modal}>
-        <h2>Registro</h2>
-        <input
-          type="text"
-          placeholder="Nombre de usuario"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="email"
-          placeholder="Correo Electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Repetir Contraseña"
-          value={repeatPassword}
-          onChange={(e) => setRepeatPassword(e.target.value)}
-        />
-        {error && <p className={styles.error}>{error}</p>}
-        <div className={styles.buttons}>
-          <button onClick={handleRegister}>Registrarse</button>
-          <button onClick={onClose}>Cancelar</button>
+    <>
+      <div className={styles.topbarContainer}>
+        <div className={styles.topbarLeft}>
+          {isAdmin && (
+            <FaBars
+              className={styles.adminIcon}
+              onClick={toggleAdminMenu}
+              style={{ cursor: 'pointer' }}
+            />
+          )}
+        </div>
+
+        <div className={styles.topbarCenter}>
+          <img
+            src="/logo/LogoNikeBlanco.png"
+            alt="Logo"
+            className={styles.topbarLogo}
+          />
+        </div>
+
+        <div className={styles.topbarRight}>
+          <FaShoppingCart className={styles.topbarIcon} onClick={toggleCart} />
+
+          {!isLoggedIn && (
+            <>
+              <button
+                className={styles.topbarSignin}
+                onClick={() => setShowSignIn(true)}
+              >
+                Sign in
+              </button>
+              <button
+                className={styles.topbarRegister}
+                onClick={() => setShowRegister(true)}
+              >
+                Register
+              </button>
+            </>
+          )}
+
+          {isLoggedIn && (
+            <>
+              {isAdmin && <span className={styles.adminBadge}>Modo Admin</span>}
+              <button className={styles.topbarSignin} onClick={handleLogout}>
+                Logout
+              </button>
+            </>
+          )}
         </div>
       </div>
-    </div>
+
+      {/* Admin dropdown menu */}
+      <AdminMenu visible={showAdminMenu} />
+
+      {/* Modals */}
+      <ModalCarrito show={showCart} onClose={toggleCart} />
+      <ModalSignIn
+        show={showSignIn}
+        onClose={() => setShowSignIn(false)}
+        onLogin={(isAdminValue: boolean) => {
+          setIsLoggedIn(true);
+          setIsAdmin(isAdminValue);
+          setShowSignIn(false);
+        }}
+      />
+      <RegisterModal
+        show={showRegister}
+        onClose={() => setShowRegister(false)}
+      />
+    </>
   );
 };
 
-export default RegisterModal;
+export default Topbar;
