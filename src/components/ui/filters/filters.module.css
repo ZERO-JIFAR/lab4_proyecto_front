@@ -38,7 +38,7 @@
 .talles {
   display: flex;
   flex-wrap: wrap;
-  gap: 2%;
+  gap: 5%;
 }
 
 .talles button {
@@ -51,6 +51,7 @@
   font-size: 75%;
   transition: background-color 0.2s;
   gap: 5%;
+    margin-top: 3%;
 }
 
 

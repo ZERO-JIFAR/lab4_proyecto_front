@@ -25,10 +25,16 @@ const Filters = () => {
       <div className={styles.seccion}>
         <h4>Talles</h4>
         <div className={styles.talles}>
-          {['3.5Y', '4Y', '4.5Y', '5Y', '5.5Y', '6Y', '6.5Y', '7Y', '7.5Y', '8Y', '8.5Y', '9Y', '9.5Y', '10Y', '10.5Y', '11Y', '11.5Y', '12Y', 'S', 'L'].map(talle => (
+          {['3.5Y', '4Y', '4.5Y', '5Y', '5.5Y', '6Y', '6.5Y', '7Y', '7.5Y', '8Y', '8.5Y', '9Y', '9.5Y', '10Y', '10.5Y', '11Y', '11.5Y', '12Y'].map(talle => (
             <button key={talle}>{talle}</button>
           ))}
         </div>
+        <div className={styles.talles}>
+          {['S', 'L'].map(talle => (
+            <button key={talle}>{talle}</button>
+          ))}
+        </div>
+        
       </div>
 
       <div className={styles.seccion}>
