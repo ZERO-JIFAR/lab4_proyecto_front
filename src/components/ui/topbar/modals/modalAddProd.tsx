@@ -76,6 +76,8 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                 <option value="">11Y</option>
                 <option value="">11.5Y</option>
                 <option value="">12Y</option>
+                <option value="">S</option>
+                <option value="">L</option>
               </select>
 
               <label>Tipo:</label>

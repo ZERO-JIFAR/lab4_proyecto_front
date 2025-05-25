@@ -1,7 +1,7 @@
 .sidebar {
   background-color: #1c1c1c;
   padding: 3%;
-  border-radius: 5%;
+  border-radius: 6px;
   width: 20%;
   color: white;
   font-family: sans-serif;
@@ -36,25 +36,31 @@
 }
 
 .talles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5%;
+  display: grid;
+  justify-content: center;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
+
 
 .talles button {
-  background-color: #f0f0f0;
+  background-color: #e0e0e0;
   color: #000;
   border: none;
-  padding: 1% 2.5%;
-  border-radius: 4%;
+  padding: 0.4rem 0;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 75%;
+  font-size: 0.75rem;
   transition: background-color 0.2s;
-  gap: 5%;
-    margin-top: 3%;
 }
 
-
 .talles button:hover {
-  background-color: #ddd;
+  background-color: #d0d0d0;
+}
+
+.gridLabels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5em 1em;
 }
