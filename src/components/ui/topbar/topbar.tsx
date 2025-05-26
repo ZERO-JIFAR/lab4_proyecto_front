@@ -76,7 +76,7 @@ const Topbar: React.FC = () => {
 
           {isLoggedIn && (
             <>
-              {isAdmin && <span className={styles.adminBadge}>Modo Admin</span>}
+              {isAdmin && <span className={styles.topbarSignin}>Modo Admin</span>}
               <button className={styles.topbarSignin} onClick={handleLogout}>
                 Logout
               </button>
