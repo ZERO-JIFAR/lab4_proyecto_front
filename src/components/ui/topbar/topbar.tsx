@@ -1,11 +1,12 @@
 // src/components/Topbar.tsx
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './topbar.module.css';
 import { FaBars, FaShoppingCart } from 'react-icons/fa';
 import ModalCarrito from './modals/modalShop';
 import ModalSignIn from './modals/ModalSignIn';
 import RegisterModal from './modals/registerModal';
 import AdminMenu from './modals/adminMenu';
+import { AiOutlineSun, AiFillMoon } from "react-icons/ai";
 
 const Topbar: React.FC = () => {
   const [showCart, setShowCart] = useState(false);
@@ -33,6 +34,18 @@ const Topbar: React.FC = () => {
     setShowSignIn(!showSignIn);  // Cambiar el estado para abrir o cerrar el modal
   };
 
+  const [darkMode, setDarkMode] = useState(false);
+  
+  useEffect(() => {
+    const savedMode = localStorage.getItem("darkMode") === "true";
+    setDarkMode(savedMode);
+  }, []);
+
+  useEffect(() => {
+    document.body.className = darkMode ? "dark" : "light";
+    localStorage.setItem("darkMode", darkMode.toString());
+  }, [darkMode]);
+
   return (
     <>
       <div className={styles.topbarContainer}>
@@ -44,6 +57,9 @@ const Topbar: React.FC = () => {
               style={{ cursor: 'pointer' }}
             />
           )}
+          <button className={styles.adminIcon} onClick={() => setDarkMode((prev) => !prev)}>
+            {darkMode ? <AiOutlineSun /> : <AiFillMoon />}
+          </button>
         </div>
 
         <div className={styles.topbarCenter}>
