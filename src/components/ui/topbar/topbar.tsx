@@ -7,6 +7,7 @@ import ModalSignIn from './modals/ModalSignIn';
 import RegisterModal from './modals/modalRegister';
 import AdminMenu from './modals/adminMenu';
 import { AiOutlineSun, AiFillMoon } from "react-icons/ai";
+import ModalLogout from './modals/modalLogout';
 
 const Topbar: React.FC = () => {
   const [showCart, setShowCart] = useState(false);
@@ -15,6 +16,7 @@ const Topbar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminMenu, setShowAdminMenu] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const toggleCart = () => {
     setShowCart(!showCart);
@@ -22,12 +24,6 @@ const Topbar: React.FC = () => {
 
   const toggleAdminMenu = () => {
     setShowAdminMenu(!showAdminMenu);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setIsAdmin(false);
-    setShowAdminMenu(false);
   };
 
   const toggleSignInModal = () => {
@@ -93,13 +89,25 @@ const Topbar: React.FC = () => {
           {isLoggedIn && (
             <>
               {isAdmin && <span className={styles.topbarSignin}>Modo Admin</span>}
-              <button className={styles.topbarSignin} onClick={handleLogout}>
+              <button className={styles.topbarSignin} onClick={() => setShowLogoutConfirm(true)}>
                 Logout
               </button>
             </>
           )}
         </div>
       </div>
+
+      {/* Modal del Logout */}
+      <ModalLogout
+        show={showLogoutConfirm}
+        onConfirm={() => {
+          setIsLoggedIn(false);
+          setIsAdmin(false);
+          setShowAdminMenu(false);
+          setShowLogoutConfirm(false);
+        }}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
 
       {/* Admin dropdown menu */}
       <AdminMenu visible={showAdminMenu} />

@@ -39,7 +39,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
 
     const newUser = { username, email, password, isAdmin: false };
     localStorage.setItem('users', JSON.stringify([...existingUsers, newUser]));
-    alert('Usuario registrado correctamente 🎉');
+    alert('Usuario registrado correctamente');
     onClose();
   };
 
