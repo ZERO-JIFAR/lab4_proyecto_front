@@ -1,7 +1,7 @@
 /* Modo claro (por defecto) */
 body.light {
   --bg-color: #ffffff;
-  --text-color: #000000;
+  --text-color: #1c1c1c;
 }
 
 /* Modo oscuro */
