@@ -57,7 +57,7 @@ const Topbar: React.FC = () => {
               style={{ cursor: 'pointer' }}
             />
           )}
-          <button className={styles.adminIcon} onClick={() => setDarkMode((prev) => !prev)}>
+          <button className={styles.topbarIcon}  onClick={() => setDarkMode((prev) => !prev)}>
             {darkMode ? <AiOutlineSun /> : <AiFillMoon />}
           </button>
         </div>

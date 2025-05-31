@@ -47,6 +47,9 @@
 .topbarIcon {
   color: white;
   font-size: 1rem;
+  padding:.1rem;
+  border-radius:.2rem;
+  margin-left: 1rem;
 }
 
 .topbarSignin,
