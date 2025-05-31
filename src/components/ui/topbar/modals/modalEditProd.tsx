@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './modalAddProd.module.css';
 
 interface ModalEditProdProps {
@@ -8,6 +8,9 @@ interface ModalEditProdProps {
 
 const ModalAddProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
+
+    {/*Buscador */}
+    const [searchTerm, setSearchTerm] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,6 +23,16 @@ const ModalAddProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose }) => {
         <div className={styles.modal}>
             <button className={styles.closeButton} onClick={onClose}>✖</button>
             <h2>Editar Producto</h2>
+
+            {/*Buscador */}
+            <input
+                type="text"
+                placeholder="Buscar producto..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={styles.searchInput}
+            />
+
             <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.inputGrid}>
                 <div>
