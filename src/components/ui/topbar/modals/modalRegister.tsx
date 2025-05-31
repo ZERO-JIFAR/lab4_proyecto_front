@@ -1,6 +1,6 @@
 // src/components/modals/RegisterModal.tsx
 import React, { useState } from 'react';
-import styles from './registerModal.module.css';
+import styles from './modalRegister.module.css';
 
 interface RegisterModalProps {
   show: boolean;

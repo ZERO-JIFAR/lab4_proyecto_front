@@ -22,11 +22,11 @@ const ProductControls = () => {
                 onChange={(e) => setSort(e.target.value)}
                 className={styles.select}
             >
-                <option value="fechaDesc">Fecha: Nuevo a Viejo</option>
-                <option value="fechaAsc">Fecha: Viejo a Nuevo</option>
-                <option value="precioAsc">Precio: Menor a Mayor</option>
-                <option value="precioDesc">Precio: Mayor a Menor</option>
-                <option value="precioDesc">Mas Relevantes</option>
+                <option value="fechaDesc">Fecha: nuevo a viejo</option>
+                <option value="fechaAsc">Fecha: viejo a nuevo</option>
+                <option value="precioAsc">Precio: menor a mayor</option>
+                <option value="precioDesc">Precio: mayor a menor</option>
+                <option value="relevantes">Mas relevantes</option>
             </select>
         </section>
     );

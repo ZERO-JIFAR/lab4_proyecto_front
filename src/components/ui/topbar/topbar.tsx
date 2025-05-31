@@ -4,7 +4,7 @@ import styles from './topbar.module.css';
 import { FaBars, FaShoppingCart } from 'react-icons/fa';
 import ModalCarrito from './modals/modalShop';
 import ModalSignIn from './modals/ModalSignIn';
-import RegisterModal from './modals/registerModal';
+import RegisterModal from './modals/modalRegister';
 import AdminMenu from './modals/adminMenu';
 import { AiOutlineSun, AiFillMoon } from "react-icons/ai";
 
