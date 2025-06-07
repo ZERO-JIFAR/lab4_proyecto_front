@@ -135,7 +135,7 @@
 }
 
 .landingMore{
- text-align: center;
+  text-align: center;
 }
 
 .landingMoreText{
@@ -187,4 +187,53 @@ html, body {
   font-weight: bold;      /* Más resaltado */
   font-size: 1.2rem;      /* Un poco más grande */
   color: #333;            /* Puedes usar otro color si deseas destacarlo más */
+}
+
+.carouselContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 1000px;
+  margin: 2rem auto;
+  overflow: hidden;
+}
+
+.landingProducts {
+  display: flex;
+  gap: 10px;
+  transition: transform 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.landingProductImage {
+  width: 250px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+button:focus, button:focus-visible {
+}
+
+.carouselButton {
+  background-color: #a4a4a4;
+  border: none;
+  border-radius: 10px;
+  width: 50px;
+  height: 180px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -17px;
+  transition: background-color 0.2s ease;
+}
+
+.carouselButton:hover {
+  background-color: #8a8a8a;
 }

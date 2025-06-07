@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Topbar from '../../ui/topbar/topbar';
 import Footer from '../../ui/footer/footer';
 import styles from './landing.module.css';
+import { FaChevronRight } from "react-icons/fa6";
 
 const categories = [
   {
@@ -66,7 +67,7 @@ const Landing = () => {
               />
             ))}
           </div>
-          <button className={styles.carouselButton} onClick={handleNext}>→</button>
+          <button className={styles.carouselButton} onClick={handleNext}><h1><FaChevronRight /></h1></button>
         </div>
 
         <div className={styles.landingButtonWrapper}>
