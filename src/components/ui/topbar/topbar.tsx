@@ -8,6 +8,7 @@ import RegisterModal from './modals/modalRegister';
 import AdminMenu from './modals/adminMenu';
 import { AiOutlineSun, AiFillMoon } from "react-icons/ai";
 import ModalLogout from './modals/modalLogout';
+import { Link } from 'react-router-dom';
 
 const Topbar: React.FC = () => {
   const [showCart, setShowCart] = useState(false);
@@ -59,11 +60,14 @@ const Topbar: React.FC = () => {
         </div>
 
         <div className={styles.topbarCenter}>
-          <img
-            src="/logo/LogoNikeBlanco.png"
-            alt="Logo"
-            className={styles.topbarLogo}
-          />
+          <Link to="/">
+            <img
+              src="/logo/LogoNikeBlanco.png"
+              alt="Logo"
+              className={styles.topbarLogo}
+              style={{ cursor: 'pointer' }}
+            />
+          </Link>
         </div>
 
         <div className={styles.topbarRight}>

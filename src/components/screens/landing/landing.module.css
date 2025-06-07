@@ -216,6 +216,7 @@ html, body {
   flex-shrink: 0;
 }
 
+/* Elimina el contorno del boton del caroucel*/
 button:focus, button:focus-visible {
 }
 
