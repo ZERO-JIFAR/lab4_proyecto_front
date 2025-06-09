@@ -103,10 +103,9 @@ const Landing = () => {
 
       <h1 className={styles.landingMore}><strong>¿Quiénes somos?</strong></h1>
       <p className={styles.landingMoreText}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        Somos una tienda de zapatillas y ropa deportiva con más de 10 años de experiencia en el mercado. 
+        Nos especializamos en ofrecer productos de alta calidad y las últimas tendencias en moda deportiva. 
+        Nuestro objetivo es brindar a nuestros clientes una experiencia de compra excepcional, con un servicio al cliente amigable y eficiente.
       </p>
 
       <Footer />
