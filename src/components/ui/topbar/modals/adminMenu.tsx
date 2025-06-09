@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './adminMenu.module.css';
 import ModalAddProd from './modalAddProd';
-import ModalEditProd from './modalEditProd';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminMenuProps {
   visible: boolean;
@@ -9,7 +9,7 @@ interface AdminMenuProps {
 
 const AdminMenu: React.FC<AdminMenuProps> = ({ visible }) => {
   const [modalAdd, setModalAdd] = useState(false);
-  const [modalEdit, setModalEdit] = useState(false);
+  const navigate = useNavigate();
 
   if (!visible) return null;
 
@@ -18,13 +18,12 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ visible }) => {
       <button className={styles.menuButton} onClick={() => setModalAdd(true)}>
         Agregar Producto
       </button>
-      <button className={styles.menuButton} onClick={() => setModalEdit(true)}>
-        Editar Producto
+      <button className={styles.menuButton} onClick={() => navigate('/SearchItem')}>
+        Productos
       </button>
       <button className={styles.menuButton}>Ver Estadísticas</button>
 
       <ModalAddProd isOpen={modalAdd} onClose={() => setModalAdd(false)} />
-      <ModalEditProd isOpen={modalEdit} onClose={() => setModalEdit(false)} />
     </div>
   );
 };
