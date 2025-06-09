@@ -6,16 +6,6 @@ const Filters = () => {
       <h2 className={styles.titulo}>Filtrar</h2>
 
       <div className={styles.seccion}>
-        <h4>Descuentos</h4>
-        <div className={styles.gridLabels}>
-          <label><input type="checkbox" /> 40% - 60%</label>
-          <label><input type="checkbox" /> 30% - 40%</label>
-          <label><input type="checkbox" /> 20% - 30%</label>
-          <label><input type="checkbox" /> Hasta 20%</label>
-        </div>
-      </div>
-
-      <div className={styles.seccion}>
         <h4>Géneros</h4>
         <div className={styles.gridLabels}>
           <label><input type="checkbox" /> Hombre</label>
