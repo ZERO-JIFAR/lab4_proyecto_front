@@ -218,6 +218,7 @@ html, body {
 
 /* Elimina el contorno del boton del caroucel*/
 button:focus, button:focus-visible {
+  outline: -webkit-focus-ring-color auto 0px;
 }
 
 .carouselButton {
