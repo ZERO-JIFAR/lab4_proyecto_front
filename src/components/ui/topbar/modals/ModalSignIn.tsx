@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './modalSignin.module.css';
+import { loginUser } from '../../../../http/userRequest';
 
 interface ModalSignInProps {
   show: boolean;
@@ -8,41 +9,27 @@ interface ModalSignInProps {
 }
 
 const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);  // Declaración explícita de tipo
 
   if (!show) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);  // Restablecer el error al enviar el formulario
 
-    // Si vuelve a hacer clic estando ya abierto, cierra el modal
-    if (!username && !password) {
+    try {
+      const data = await loginUser({ email, password });
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('rol', data.rol);
+      localStorage.setItem('email', data.email);
+
+      onLogin(data.rol === 'ADMIN');
       onClose();
-      return;
-    }
-
-    // admin hardcoded
-    if (username === 'admin' && password === 'admin') {
-      onLogin(true);
-      onClose();
-      return;
-    }
-
-    // usuarios registrados desde localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-
-    const matchedUser = users.find(
-      (user: any) => user.username === username && user.password === password
-    );
-
-    if (matchedUser) {
-      onLogin(false);
-      onClose();
-    } else {
-      setError('Usuario o contraseña incorrectos. Por favor verifica tus datos.');
+    } catch (err: any) {
+      setError(err.message || 'Usuario o contraseña incorrectos. Por favor verifica tus datos.');
     }
   };
 
@@ -51,10 +38,10 @@ const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => 
       <form className={styles.modalForm} onSubmit={handleSubmit}>
         <h3>Iniciar sesión</h3>
         <input
-          type="text"
-          placeholder="Usuario"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder="Correo electrónico"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
         <input
