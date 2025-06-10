@@ -7,6 +7,10 @@ interface RegisterModalProps {
   onClose: () => void;
 }
 
+// Define the base URL for the API
+const APIURL = import.meta.env.VITE_API_URL
+const baseURL=`${APIURL}/auth`
+
 const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -30,7 +34,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:9000/api/auth/register', {
+      const response = await fetch(`${baseURL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
