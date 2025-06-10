@@ -16,7 +16,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
 
   if (!show) return null;
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     setError('');
 
     if (!username || !email || !password || !repeatPassword) {
@@ -29,18 +29,29 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
       return;
     }
 
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const userExists = existingUsers.find((user: any) => user.email === email);
+    try {
+      const response = await fetch('http://localhost:9000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre: username,
+          email,
+          password,
+        }),
+      });
 
-    if (userExists) {
-      setError('Este correo ya está registrado.');
-      return;
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al registrar usuario');
+      }
 
-    const newUser = { username, email, password, isAdmin: false };
-    localStorage.setItem('users', JSON.stringify([...existingUsers, newUser]));
     alert('Usuario registrado correctamente');
     onClose();
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (
