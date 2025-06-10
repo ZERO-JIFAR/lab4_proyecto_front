@@ -1,15 +1,11 @@
-// src/components/modals/RegisterModal.tsx
 import React, { useState } from 'react';
 import styles from './modalRegister.module.css';
+import { registerUser } from '../../../../http/userRequest';
 
 interface RegisterModalProps {
   show: boolean;
   onClose: () => void;
 }
-
-// Define the base URL for the API
-const APIURL = import.meta.env.VITE_API_URL
-const baseURL=`${APIURL}/auth`
 
 const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
   const [username, setUsername] = useState('');
@@ -34,25 +30,9 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
     }
 
     try {
-      const response = await fetch(`${baseURL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          nombre: username,
-          email,
-          password,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al registrar usuario');
-      }
-
-    alert('Usuario registrado correctamente');
-    onClose();
+      await registerUser({ nombre: username, email, password });
+      alert('Usuario registrado correctamente');
+      onClose();
     } catch (err: any) {
       setError(err.message);
     }
