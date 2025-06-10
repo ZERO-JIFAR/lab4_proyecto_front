@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './modalAddProd.module.css';
+import { getTipos } from '../../../../http/typeRequest';
+import { ITipo } from '../../../../types/IType';
 
 interface ModalAddProdProps {
   isOpen: boolean;
@@ -7,6 +9,14 @@ interface ModalAddProdProps {
 }
 
 const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
+  const [tipos, setTipos] = useState<ITipo[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      getTipos().then(setTipos).catch(() => setTipos([]));
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,53 +50,54 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
               <label>Categoría:</label>
               <select name="categoria" required>
                 <option value="">Seleccionar</option>
-                <option value="">Running</option>
-                <option value="">Casual</option>
-                <option value="">Urbano</option>
-                <option value="">Trail</option>
+                <option value="Running">Running</option>
+                <option value="Casual">Casual</option>
+                <option value="Urbano">Urbano</option>
+                <option value="Trail">Trail</option>
               </select>
 
               <label>Género:</label>
               <select name="genero" required>
                 <option value="">Seleccionar</option>
-                <option value="">Hombre</option>
-                <option value="">Mujer</option>
-                <option value="">Unisex</option>
-                <option value="">Niño/a</option>
+                <option value="Hombre">Hombre</option>
+                <option value="Mujer">Mujer</option>
+                <option value="Unisex">Unisex</option>
+                <option value="Niño/a">Niño/a</option>
               </select>
 
               <label>Talles:</label>
               <select name="talle" required>
                 <option value="">Seleccionar</option>
-                <option value="">3.5Y</option>
-                <option value="">4Y</option>
-                <option value="">4.5Y</option>
-                <option value="">5Y</option>
-                <option value="">5.5Y</option>
-                <option value="">6Y</option>
-                <option value="">6.5Y</option>
-                <option value="">7Y</option>
-                <option value="">7.5Y</option>
-                <option value="">8Y</option>
-                <option value="">8.5Y</option>
-                <option value="">9Y</option>
-                <option value="">9.5Y</option>
-                <option value="">10Y</option>
-                <option value="">10.5Y</option>
-                <option value="">11Y</option>
-                <option value="">11.5Y</option>
-                <option value="">12Y</option>
-                <option value="">S</option>
-                <option value="">L</option>
+                <option value="3.5Y">3.5Y</option>
+                <option value="4Y">4Y</option>
+                <option value="4.5Y">4.5Y</option>
+                <option value="5Y">5Y</option>
+                <option value="5.5Y">5.5Y</option>
+                <option value="6Y">6Y</option>
+                <option value="6.5Y">6.5Y</option>
+                <option value="7Y">7Y</option>
+                <option value="7.5Y">7.5Y</option>
+                <option value="8Y">8Y</option>
+                <option value="8.5Y">8.5Y</option>
+                <option value="9Y">9Y</option>
+                <option value="9.5Y">9.5Y</option>
+                <option value="10Y">10Y</option>
+                <option value="10.5Y">10.5Y</option>
+                <option value="11Y">11Y</option>
+                <option value="11.5Y">11.5Y</option>
+                <option value="12Y">12Y</option>
+                <option value="S">S</option>
+                <option value="L">L</option>
               </select>
 
               <label>Tipo:</label>
               <select name="tipo" required>
                 <option value="">Seleccionar</option>
-                <option value="">Zapatillas</option>
-                <option value="">Botas</option>
-                <option value="">Remeras</option>
-                <option value="">Buzos</option>
+                {tipos.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
