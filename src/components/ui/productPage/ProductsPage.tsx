@@ -1,62 +1,55 @@
+import React, { useEffect, useState } from 'react';
 import CardProduct from '../cardProduct/cardProduct';
 import Filters from '../filters/filters';
 import ProductControls from './ProductControls';
 import styles from './productsPage.module.css';
+import { getProductos } from '../../../http/productRequest';
+import ModalAddProd from '../topbar/modals/modalAddProd';
+import { IProduct } from '../../../types/IProduct';
 
-{/* Borrar */}
-const mockProducts = [
-    {
-        title: 'Artículo 1',
-        price: 39.99,
-        image: '/imgs/shoe1.png'
-    },
-    {
-        title: 'Artículo 2',
-        price: 29.99,
-        image: '/imgs/shoe2.png'
-    },
-    {
-        title: 'Artículo 3',
-        price: 24.99,
-        oldPrice: 39.99,
-        image: '/imgs/shoe3.png'
-    },
-    {
-        title: 'Artículo 4',
-        price: 35.99,
-        image: '/imgs/shoe4.png'
-    },
-    {
-        title: 'Artículo 5',
-        price: 41.99,
-        image: '/imgs/shoe5.png'
-    },
-    {
-        title: 'Artículo 6',
-        price: 21.04,
-        oldPrice: 29.99,
-        image: '/imgs/shoe6.png'
-    },
-];
+// Asegúrate de que IProduct tenga image como opcional:
+// export interface IProduct { ...; image?: string; ... }
 
 const ProductsPage = () => {
+    const [products, setProducts] = useState<IProduct[]>([]);
+    const [showModal, setShowModal] = useState(false);
+
+    const fetchProducts = async () => {
+        const data = await getProductos();
+        setProducts(data);
+    };
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
     return (
         <div className={styles.page}>
             <Filters />
             <div className={styles.right}>
                 <ProductControls />
+                {/* Botón de agregar producto eliminado */}
                 <div className={styles.productsGrid}>
-                    {mockProducts.map((prod, idx) => (
+                    {products.map((prod, idx) => (
                         <CardProduct
-                            key={idx}
-                            title={prod.title}
-                            price={prod.price}
-                            oldPrice={prod.oldPrice}
-                            image={prod.image}
+                            key={prod.id || idx}
+                            title={prod.nombre}
+                            price={prod.precio}
+                            image={prod.image || '/images/zapatillas/default.png'}
                         />
                     ))}
                 </div>
             </div>
+            {/* ModalAddProd solo debe renderizarse si tienes lógica de admin, aquí lo dejamos comentado */}
+            {/* {showModal && (
+                <ModalAddProd
+                    isOpen={showModal}
+                    onClose={() => {
+                        setShowModal(false);
+                        fetchProducts();
+                    }}
+                />
+            )} */}
         </div>
     );
 };

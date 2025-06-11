@@ -10,4 +10,5 @@ export interface IProduct {
   marca?: string;
   eliminado: boolean;
   categoria: ICategory;
+  image?: string;
 }
