@@ -10,6 +10,9 @@ import { IProduct } from '../../../types/IProduct';
 import { ITipo } from '../../../types/IType';
 import { ICategory } from '../../../types/ICategory';
 
+const COLORS = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Gris', 'Amarillo'];
+const MARCAS = ['Nike', 'Adidas', 'Puma', 'Reebok', 'New Balance', 'Fila'];
+
 const ProductsPage = () => {
     const [products, setProducts] = useState<IProduct[]>([]);
     const [sort, setSort] = useState<string>('relevantes');
@@ -19,6 +22,8 @@ const ProductsPage = () => {
     const [selectedTipo, setSelectedTipo] = useState<number | "">("");
     const [selectedCategoria, setSelectedCategoria] = useState<number | "">("");
     const [selectedTalle, setSelectedTalle] = useState<string>("");
+    const [selectedColor, setSelectedColor] = useState<string>("");
+    const [selectedMarca, setSelectedMarca] = useState<string>("");
 
     const fetchProducts = async () => {
         const data = await getProductos();
@@ -35,7 +40,7 @@ const ProductsPage = () => {
         fetchTiposCategorias();
     }, []);
 
-    // Filtrar productos por texto, tipo, categoría y talle
+    // Filtrar productos por texto, tipo, categoría, talle, color y marca
     const filteredProducts = products.filter((prod) => {
         const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
         const matchesTipo = selectedTipo === "" || prod.categoria.idTipo.id === selectedTipo;
@@ -43,7 +48,9 @@ const ProductsPage = () => {
         const matchesTalle =
             selectedTalle === "" ||
             (prod.talles && prod.talles.some(tp => tp.talle.nombre === selectedTalle));
-        return matchesSearch && matchesTipo && matchesCategoria && matchesTalle;
+        const matchesColor = selectedColor === "" || (prod.color && prod.color.toLowerCase() === selectedColor.toLowerCase());
+        const matchesMarca = selectedMarca === "" || (prod.marca && prod.marca.toLowerCase() === selectedMarca.toLowerCase());
+        return matchesSearch && matchesTipo && matchesCategoria && matchesTalle && matchesColor && matchesMarca;
     });
 
     // Ordenar productos según el filtro seleccionado
@@ -69,6 +76,12 @@ const ProductsPage = () => {
                 setSelectedCategoria={setSelectedCategoria}
                 selectedTalle={selectedTalle}
                 setSelectedTalle={setSelectedTalle}
+                selectedColor={selectedColor}
+                setSelectedColor={setSelectedColor}
+                selectedMarca={selectedMarca}
+                setSelectedMarca={setSelectedMarca}
+                colors={COLORS}
+                marcas={MARCAS}
             />
             <div className={styles.right}>
                 <ProductControls

@@ -11,6 +11,12 @@ interface FiltersProps {
     setSelectedCategoria: (id: number | "") => void;
     selectedTalle: string;
     setSelectedTalle: (talle: string) => void;
+    selectedColor: string;
+    setSelectedColor: (color: string) => void;
+    selectedMarca: string;
+    setSelectedMarca: (marca: string) => void;
+    colors: string[];
+    marcas: string[];
 }
 
 const tallesDisponibles = [
@@ -27,7 +33,13 @@ const Filters: React.FC<FiltersProps> = ({
     selectedCategoria,
     setSelectedCategoria,
     selectedTalle,
-    setSelectedTalle
+    setSelectedTalle,
+    selectedColor,
+    setSelectedColor,
+    selectedMarca,
+    setSelectedMarca,
+    colors,
+    marcas
 }) => {
     return (
         <aside className={styles.sidebar}>
@@ -59,6 +71,32 @@ const Filters: React.FC<FiltersProps> = ({
                     <option value="">Todas</option>
                     {categorias.map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div className={styles.seccion}>
+                <h4>Color</h4>
+                <select
+                    value={selectedColor}
+                    onChange={e => setSelectedColor(e.target.value)}
+                >
+                    <option value="">Todos</option>
+                    {colors.map(color => (
+                        <option key={color} value={color}>{color}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div className={styles.seccion}>
+                <h4>Marca</h4>
+                <select
+                    value={selectedMarca}
+                    onChange={e => setSelectedMarca(e.target.value)}
+                >
+                    <option value="">Todas</option>
+                    {marcas.map(marca => (
+                        <option key={marca} value={marca}>{marca}</option>
                     ))}
                 </select>
             </div>
