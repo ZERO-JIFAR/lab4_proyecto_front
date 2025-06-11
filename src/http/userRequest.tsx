@@ -1,5 +1,5 @@
 const APIURL = import.meta.env.VITE_API_URL;
-const baseURL = `${APIURL}/auth`;
+const baseURL = `${APIURL}/api/auth`;
 
 // Define la estructura del payload para el registro de usuario
 interface RegisterPayload {
