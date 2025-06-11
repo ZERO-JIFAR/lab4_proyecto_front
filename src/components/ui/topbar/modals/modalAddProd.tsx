@@ -26,8 +26,10 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     categoria: '',
     genero: '',
     talle: '',
+    image: '', // <-- Añadido
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(''); // <-- Añadido
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -45,8 +47,10 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
         categoria: '',
         genero: '',
         talle: '',
+        image: '',
       });
       setImageFile(null);
+      setImagePreview('');
     }
   }, [isOpen]);
 
@@ -76,6 +80,8 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setImageFile(e.target.files[0]);
+      setForm({ ...form, image: e.target.files[0].name });
+      setImagePreview(URL.createObjectURL(e.target.files[0]));
     }
   };
 
@@ -85,9 +91,9 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
 
     let imageUrl = '';
     if (imageFile) {
-      const fileName = Date.now() + '_' + imageFile.name;
+      // Solo guarda la ruta relativa, pero debes copiar manualmente la imagen a public/images/zapatillas/
+      const fileName = imageFile.name;
       imageUrl = `/images/zapatillas/${fileName}`;
-      // Recuerda copiar la imagen manualmente a public/images/zapatillas/
     }
 
     // Busca la categoría seleccionada
@@ -106,13 +112,13 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
       color: form.color,
       marca: form.marca,
       eliminado: false,
-      categoria: categoriaObj, // nunca undefined
+      categoria: categoriaObj,
       image: imageUrl,
     };
 
     try {
       await createProducto(producto);
-      alert('Producto agregado!');
+      alert('Producto agregado!\nRecuerda copiar la imagen seleccionada a public/images/zapatillas/');
       onClose();
     } catch (err) {
       alert('Error al agregar producto');
@@ -149,6 +155,9 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
 
               <label>Subir imagen:</label>
               <input type="file" name="imagen" accept="image/*" onChange={handleImageChange} />
+              {imagePreview && (
+                <img src={imagePreview} alt="preview" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
+              )}
             </div>
 
             <div>
