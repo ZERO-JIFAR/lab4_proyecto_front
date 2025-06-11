@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import styles from './modalAddProd.module.css';
 import { getTipos } from '../../../../http/typeRequest';
+import { getCategorias } from '../../../../http/categoryRequest';
 import { ITipo } from '../../../../types/IType';
+import { ICategory } from '../../../../types/ICategory';
 
 interface ModalAddProdProps {
   isOpen: boolean;
@@ -10,14 +12,34 @@ interface ModalAddProdProps {
 
 const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
   const [tipos, setTipos] = useState<ITipo[]>([]);
+  const [categorias, setCategorias] = useState<ICategory[]>([]);
+  const [selectedTipoId, setSelectedTipoId] = useState<number | "">("");
+  const [filteredCategorias, setFilteredCategorias] = useState<ICategory[]>([]);
 
   useEffect(() => {
     if (isOpen) {
       getTipos().then(setTipos).catch(() => setTipos([]));
+      getCategorias().then(setCategorias).catch(() => setCategorias([]));
+      setSelectedTipoId(""); // Reset tipo al abrir modal
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (selectedTipoId === "") {
+      setFilteredCategorias([]);
+    } else {
+      setFilteredCategorias(
+        categorias.filter(cat => cat.idTipo.id === selectedTipoId)
+      );
+    }
+  }, [selectedTipoId, categorias]);
+
   if (!isOpen) return null;
+
+  const handleTipoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setSelectedTipoId(value ? Number(value) : "");
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,13 +69,29 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
             </div>
 
             <div>
-              <label>Categoría:</label>
-              <select name="categoria" required>
+              <label>Tipo:</label>
+              <select
+                name="tipo"
+                required
+                value={selectedTipoId}
+                onChange={handleTipoChange}
+              >
                 <option value="">Seleccionar</option>
-                <option value="Running">Running</option>
-                <option value="Casual">Casual</option>
-                <option value="Urbano">Urbano</option>
-                <option value="Trail">Trail</option>
+                {tipos.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.nombre}
+                  </option>
+                ))}
+              </select>
+
+              <label>Categoría:</label>
+              <select name="categoria" required disabled={selectedTipoId === ""}>
+                <option value="">Seleccionar</option>
+                {filteredCategorias.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.nombre}
+                  </option>
+                ))}
               </select>
 
               <label>Género:</label>
@@ -88,16 +126,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                 <option value="12Y">12Y</option>
                 <option value="S">S</option>
                 <option value="L">L</option>
-              </select>
-
-              <label>Tipo:</label>
-              <select name="tipo" required>
-                <option value="">Seleccionar</option>
-                {tipos.map((tipo) => (
-                  <option key={tipo.id} value={tipo.id}>
-                    {tipo.nombre}
-                  </option>
-                ))}
               </select>
             </div>
           </div>

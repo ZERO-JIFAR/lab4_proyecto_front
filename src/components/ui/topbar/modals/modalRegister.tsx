@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './modalRegister.module.css';
-import { registerUser } from '../../../../http/userRequest';
+import { registerUser, loginUser } from '../../../../http/userRequest';
 
 interface RegisterModalProps {
   show: boolean;
@@ -16,7 +16,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
 
   if (!show) return null;
 
-  const handleRegister = async () => {
+   const handleRegister = async () => {
     setError('');
 
     if (!username || !email || !password || !repeatPassword) {
@@ -29,8 +29,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
       return;
     }
 
+    // Limpia el token antes de registrar
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('email');
+
     try {
       await registerUser({ nombre: username, email, password });
+      const data = await loginUser({ email, password });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('rol', data.rol);
+      localStorage.setItem('email', data.email);
       alert('Usuario registrado correctamente');
       onClose();
     } catch (err: any) {

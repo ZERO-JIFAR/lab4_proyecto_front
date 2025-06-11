@@ -11,13 +11,18 @@ interface ModalSignInProps {
 const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);  // Declaración explícita de tipo
+  const [error, setError] = useState<string | null>(null);
 
   if (!show) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);  // Restablecer el error al enviar el formulario
+    setError(null);
+
+    // Limpia el token antes de intentar loguear
+    localStorage.removeItem('token');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('email');
 
     try {
       const data = await loginUser({ email, password });
@@ -51,10 +56,7 @@ const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => 
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        
-        {/* Verificación de error */}
-        {error && <p className={styles.modalSigninError}>{error}</p>} 
-
+        {error && <p className={styles.modalSigninError}>{error}</p>}
         <button type="submit">Entrar</button>
       </form>
     </div>
