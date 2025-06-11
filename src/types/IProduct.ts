@@ -1,4 +1,5 @@
 import { ICategory } from "./ICategory";
+import { ITalleProducto } from "./ITalleProducto";
 
 export interface IProduct {
   id: number;
@@ -11,4 +12,5 @@ export interface IProduct {
   eliminado: boolean;
   categoria: ICategory;
   image?: string;
+  talles: ITalleProducto[];
 }
