@@ -26,10 +26,10 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     categoria: '',
     genero: '',
     talle: '',
-    image: '', // <-- Añadido
+    image: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>(''); // <-- Añadido
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -59,9 +59,12 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
       setFilteredCategorias([]);
     } else {
       setFilteredCategorias(
-        categorias.filter(cat => cat.idTipo.id === selectedTipoId)
+        categorias.filter(
+          cat => cat.tipo && cat.tipo.id !== undefined && cat.tipo.id === Number(selectedTipoId)
+        )
       );
     }
+    setForm(prev => ({ ...prev, categoria: '' }));
   }, [selectedTipoId, categorias]);
 
   if (!isOpen) return null;
@@ -69,7 +72,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
   const handleTipoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedTipoId(value ? Number(value) : "");
-    setForm({ ...form, categoria: '' });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -91,12 +93,10 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
 
     let imageUrl = '';
     if (imageFile) {
-      // Solo guarda la ruta relativa, pero debes copiar manualmente la imagen a public/images/zapatillas/
       const fileName = imageFile.name;
       imageUrl = `/images/zapatillas/${fileName}`;
     }
 
-    // Busca la categoría seleccionada
     const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
     if (!categoriaObj) {
       alert('Selecciona una categoría válida');
