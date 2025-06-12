@@ -32,6 +32,8 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const coloresDisponibles = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Gris', 'Otros'];
+  const marcasDisponibles = ['Nike', 'Adidas', 'Puma', 'Reebok', 'Vans', 'Fila', 'Otros'];
 
   useEffect(() => {
     if (isOpen) {
@@ -119,7 +121,7 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
       marca: form.marca,
       eliminado: false,
       categoria: categoriaObj,
-      imagenUrl: imageUrl, // <--- CAMBIO AQUÍ
+      imagenUrl: imageUrl,
       talles: [],
     };
 
@@ -152,10 +154,20 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
               <input type="number" name="cantidad" value={form.cantidad} onChange={handleInputChange} required />
 
               <label>Marca:</label>
-              <input type="text" name="marca" value={form.marca} onChange={handleInputChange} />
+              <select name="marca" value={form.marca} onChange={handleInputChange} required>
+                <option value="">Seleccionar</option>
+                {marcasDisponibles.map((marca) => (
+                  <option key={marca} value={marca}>{marca}</option>
+                ))}
+              </select>
 
               <label>Color:</label>
-              <input type="text" name="color" value={form.color} onChange={handleInputChange} />
+              <select name="color" value={form.color} onChange={handleInputChange} required>
+                <option value="">Seleccionar</option>
+                {coloresDisponibles.map((color) => (
+                  <option key={color} value={color}>{color}</option>
+                ))}
+              </select>
 
               <label>Descripción:</label>
               <input type="text" name="descripcion" value={form.descripcion} onChange={handleInputChange} />
