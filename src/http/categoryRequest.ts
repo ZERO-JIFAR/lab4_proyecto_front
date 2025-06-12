@@ -1,8 +1,8 @@
 import axios from "axios";
 import { ICategory } from "../types/ICategory";
 
-
-const categoriasURL = "http://localhost:9000/categorias";
+const APIURL = import.meta.env.VITE_API_URL;
+const categoriasURL = `${APIURL}/categorias`;
 
 export const getCategorias = async (): Promise<ICategory[]> => {
   const token = localStorage.getItem('token');

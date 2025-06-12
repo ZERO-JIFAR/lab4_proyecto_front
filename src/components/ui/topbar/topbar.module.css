@@ -15,6 +15,7 @@
 .topbarRight {
   display: flex;
   align-items: center;
+  margin-right: 1rem;
 }
 
 .topbarLeft {
@@ -50,6 +51,13 @@
   padding:.1rem;
   border-radius:.2rem;
   margin-left: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.topbarIcon:hover {
+  color: #ccc; /* Cambia el color al pasar el mouse */
+  transform: scale(1.2); /* Hace un leve zoom */
 }
 
 .topbarSignin,
@@ -70,16 +78,3 @@
   background-color: #333;
   color: white;
 }
-
-.topbarIcon {
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.topbarIcon:hover {
-  color: #ccc; /* Cambia el color al pasar el mouse */
-  transform: scale(1.2); /* Hace un leve zoom */
-}
-

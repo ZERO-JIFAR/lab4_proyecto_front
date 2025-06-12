@@ -5,5 +5,5 @@ export interface ICategory {
   nombre: string;
   descripcion?: string;
   eliminado: boolean;
-  idTipo: ITipo; 
+  tipo: ITipo; // Cambiado de idTipo a tipo
 }

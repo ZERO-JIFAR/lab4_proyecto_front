@@ -96,7 +96,7 @@ const ProductsPage = () => {
                             key={prod.id || idx}
                             title={prod.nombre}
                             price={prod.precio}
-                            image={prod.image || '/images/zapatillas/default.png'}
+                            image={prod.imagenUrl || '/images/zapatillas/default.png'}
                         />
                     ))}
                 </div>

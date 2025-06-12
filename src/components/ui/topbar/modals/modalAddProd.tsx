@@ -5,6 +5,7 @@ import { getCategorias } from '../../../../http/categoryRequest';
 import { createProducto } from '../../../../http/productRequest';
 import { ITipo } from '../../../../types/IType';
 import { ICategory } from '../../../../types/ICategory';
+import { uploadToCloudinary } from '../../../../utils/UploadToCloudinary';
 
 interface ModalAddProdProps {
   isOpen: boolean;
@@ -26,10 +27,10 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     categoria: '',
     genero: '',
     talle: '',
-    image: '', // <-- Añadido
+    image: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>(''); // <-- Añadido
+  const [imagePreview, setImagePreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const coloresDisponibles = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Gris', 'Otros'];
   const marcasDisponibles = ['Nike', 'Adidas', 'Puma', 'Reebok', 'Vans', 'Fila', 'Otros'];
@@ -61,9 +62,12 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
       setFilteredCategorias([]);
     } else {
       setFilteredCategorias(
-        categorias.filter(cat => cat.idTipo.id === selectedTipoId)
+        categorias.filter(
+          cat => cat.tipo && cat.tipo.id !== undefined && cat.tipo.id === Number(selectedTipoId)
+        )
       );
     }
+    setForm(prev => ({ ...prev, categoria: '' }));
   }, [selectedTipoId, categorias]);
 
   if (!isOpen) return null;
@@ -71,7 +75,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
   const handleTipoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedTipoId(value ? Number(value) : "");
-    setForm({ ...form, categoria: '' });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -93,12 +96,15 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
 
     let imageUrl = '';
     if (imageFile) {
-      // Solo guarda la ruta relativa, pero debes copiar manualmente la imagen a public/images/zapatillas/
-      const fileName = imageFile.name;
-      imageUrl = `/images/zapatillas/${fileName}`;
+      try {
+        imageUrl = await uploadToCloudinary(imageFile);
+      } catch (err) {
+        alert('Error al subir la imagen');
+        setLoading(false);
+        return;
+      }
     }
 
-    // Busca la categoría seleccionada
     const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
     if (!categoriaObj) {
       alert('Selecciona una categoría válida');
@@ -115,12 +121,13 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
       marca: form.marca,
       eliminado: false,
       categoria: categoriaObj,
-      image: imageUrl,
+      imagenUrl: imageUrl,
+      talles: [],
     };
 
     try {
       await createProducto(producto);
-      alert('Producto agregado!\nRecuerda copiar la imagen seleccionada a public/images/zapatillas/');
+      alert('Producto agregado!');
       onClose();
     } catch (err) {
       alert('Error al agregar producto');
@@ -136,7 +143,7 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
         <h2>Agregar Producto</h2>
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.inputGrid}>
-            <div>
+            <div className={styles.inputColumn}>
               <label>Nombre del producto:</label>
               <input type="text" name="nombre" value={form.nombre} onChange={handleInputChange} required />
 
@@ -146,17 +153,27 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
               <label>Stock:</label>
               <input type="number" name="cantidad" value={form.cantidad} onChange={handleInputChange} required />
 
+              <label>Marca:</label>
+              <select name="marca" value={form.marca} onChange={handleInputChange} required>
+                <option value="">Seleccionar</option>
+                {marcasDisponibles.map((marca) => (
+                  <option key={marca} value={marca}>{marca}</option>
+                ))}
+              </select>
+
+              <label>Color:</label>
+              <select name="color" value={form.color} onChange={handleInputChange} required>
+                <option value="">Seleccionar</option>
+                {coloresDisponibles.map((color) => (
+                  <option key={color} value={color}>{color}</option>
+                ))}
+              </select>
+
               <label>Descripción:</label>
               <input type="text" name="descripcion" value={form.descripcion} onChange={handleInputChange} />
-
-              <label>Subir imagen:</label>
-              <input type="file" name="imagen" accept="image/*" onChange={handleImageChange} />
-              {imagePreview && (
-                <img src={imagePreview} alt="preview" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
-              )}
             </div>
 
-            <div>
+            <div className={styles.inputColumn}>
               <label>Tipo:</label>
               <select
                 name="tipo"
@@ -188,22 +205,11 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                 ))}
               </select>
 
-              <label>Color:</label>
-              <select name="color" value={form.color} onChange={handleInputChange} required>
-                <option value="">Seleccionar</option>
-                {coloresDisponibles.map((color) => (
-                  <option key={color} value={color}>{color}</option>
-                ))}
-              </select>
-
-              <label>Marca:</label>
-              <select name="marca" value={form.marca} onChange={handleInputChange} required>
-                <option value="">Seleccionar</option>
-                {marcasDisponibles.map((marca) => (
-                  <option key={marca} value={marca}>{marca}</option>
-                ))}
-              </select>
-
+              <label>Subir imagen:</label>
+              <input type="file" name="imagen" accept="image/*" onChange={handleImageChange} />
+              {imagePreview && (
+                <img src={imagePreview} alt="preview" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
+              )}
             </div>
           </div>
 

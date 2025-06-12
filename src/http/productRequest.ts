@@ -1,7 +1,8 @@
 import axios from "axios";
 import { IProduct } from "../types/IProduct";
 
-const productosURL = "http://localhost:9000/productos";
+const APIURL = import.meta.env.VITE_API_URL;
+const productosURL = `${APIURL}/productos`;
 
 export const getProductos = async (): Promise<IProduct[]> => {
   const token = localStorage.getItem('token');
