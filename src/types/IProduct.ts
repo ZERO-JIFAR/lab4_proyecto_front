@@ -11,6 +11,6 @@ export interface IProduct {
   marca?: string;
   eliminado: boolean;
   categoria: ICategory;
-  image?: string;
+  imagenUrl?: string; // <-- CAMBIO AQUÍ
   talles: ITalleProducto[];
 }

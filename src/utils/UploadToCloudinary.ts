@@ -1,8 +1,8 @@
 export const uploadToCloudinary = async (file: File): Promise<string> => {
-  const url = "cloudinary://464372825347451:N2C8PM7_8wgrNaR9BaEe14brrSY@dl7l8o0d6";
+  const url = "https://api.cloudinary.com/v1_1/dl7l8o0d6/image/upload";
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("upload_preset", "<TU_UPLOAD_PRESET>");
+  formData.append("upload_preset", "nikeCloud");
 
   const res = await fetch(url, {
     method: "POST",
