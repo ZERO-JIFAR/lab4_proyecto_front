@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import CardProduct from '../cardProduct/cardProduct';
-import Filters from '../filters/filters';
-import ProductControls from './ProductControls';
-import styles from './productsPage.module.css';
-import { getProductos } from '../../../http/productRequest';
-import { getTipos } from '../../../http/typeRequest';
-import { getCategorias } from '../../../http/categoryRequest';
-import { IProduct } from '../../../types/IProduct';
-import { ITipo } from '../../../types/IType';
-import { ICategory } from '../../../types/ICategory';
+import React, { useEffect, useState } from "react";
+import styles from "./productsPage.module.css";
+import { getProductos } from "../../../http/productRequest";
+import { getTipos } from "../../../http/typeRequest";
+import { getCategorias } from "../../../http/categoryRequest";
+import { IProduct } from "../../../types/IProduct";
+import { ITipo } from "../../../types/IType";
+import { ICategory } from "../../../types/ICategory";
+import Filters from "../filters/filters";
+import CardProduct from "../cardProduct/cardProduct";
+import ProductControls from "./ProductControls";
 
-const COLORS = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Gris', 'Amarillo'];
-const MARCAS = ['Nike', 'Adidas', 'Puma', 'Reebok', 'New Balance', 'Fila'];
+const COLORS = ["Negro", "Blanco", "Rojo", "Azul", "Verde", "Gris", "Otros"];
+const MARCAS = ["Nike", "Adidas", "Puma", "Reebok", "Vans", "Fila", "Otros"];
 
 const ProductsPage = () => {
     const [products, setProducts] = useState<IProduct[]>([]);
@@ -43,8 +43,8 @@ const ProductsPage = () => {
     // Filtrar productos por texto, tipo, categoría, talle, color y marca
     const filteredProducts = products.filter((prod) => {
         const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
-        const matchesTipo = selectedTipo === "" || prod.categoria.idTipo.id === selectedTipo;
-        const matchesCategoria = selectedCategoria === "" || prod.categoria.id === selectedCategoria;
+        const matchesTipo = selectedTipo === "" || (prod.categoria && prod.categoria.tipo && prod.categoria.tipo.id === selectedTipo);
+        const matchesCategoria = selectedCategoria === "" || (prod.categoria && prod.categoria.id === selectedCategoria);
         const matchesTalle =
             selectedTalle === "" ||
             (prod.talles && prod.talles.some(tp => tp.talle.nombre === selectedTalle));
@@ -63,7 +63,7 @@ const ProductsPage = () => {
     // Categorías filtradas por tipo seleccionado
     const categoriasFiltradas = selectedTipo === ""
         ? categorias
-        : categorias.filter(cat => cat.idTipo.id === selectedTipo);
+        : categorias.filter(cat => cat.tipo && cat.tipo.id === selectedTipo);
 
     return (
         <div className={styles.page}>
