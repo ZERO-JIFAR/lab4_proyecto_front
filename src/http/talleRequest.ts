@@ -1,7 +1,8 @@
 import axios from "axios";
 import { ITalle } from "../types/ITalle";
 
-const tallesURL = "http://localhost:9000/talles";
+const APIURL = import.meta.env.VITE_API_URL;
+const tallesURL = `${APIURL}/talles`;
 
 export const getTalles = async (): Promise<ITalle[]> => {
     const token = localStorage.getItem('token');

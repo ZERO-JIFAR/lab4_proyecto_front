@@ -1,5 +1,5 @@
 const APIURL = import.meta.env.VITE_API_URL;
-const baseURL = `${APIURL}/api/auth`;
+const usuarioURL = `${APIURL}/api/auth`;
 
 // Define la estructura del payload para el registro de usuario
 interface RegisterPayload {
@@ -22,7 +22,7 @@ interface LoginResponse {
 
 // Registra un nuevo usuario
 export const registerUser = async ({ nombre, email, password }: RegisterPayload): Promise<void> => {
-    const response = await fetch(`${baseURL}/register`, {
+    const response = await fetch(`${usuarioURL}/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ export const registerUser = async ({ nombre, email, password }: RegisterPayload)
 
 // Inicia sesión y devuelve el token, rol y email del usuario
 export const loginUser = async ({ email, password }: LoginPayload): Promise<LoginResponse> => {
-    const response = await fetch(`${baseURL}/login`, {
+    const response = await fetch(`${usuarioURL}/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
