@@ -1,6 +1,7 @@
 // ProductModal.tsx
 import React, { useState } from 'react';
 import styles from './modalProduct.module.css';
+import { useCart } from '../../../../context/CartContext';
 
 interface ProductModalProps {
     images: string[];
@@ -32,6 +33,21 @@ const ProductModal: React.FC<ProductModalProps> = ({
     const nextImage = () => setImageIndex((prev) => (prev + 1) % images.length);
     const prevImage = () => setImageIndex((prev) => (prev - 1 + images.length) % images.length);
 
+    const { addToCart } = useCart();
+
+    const handleAddToCart = () => {
+        if (!selectedSize) return alert("Selecciona un talle");
+
+        addToCart({
+            title,
+            price,
+            image: images[imageIndex],
+            color: selectedColor,
+            size: selectedSize
+        });
+
+    onClose(); // opcional, para cerrar el modal
+    };
     return (
         <div className={styles.overlay}>
         <div className={styles.modal}>
@@ -55,7 +71,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 <button onClick={nextImage} className={styles.arrow}>→</button>
             </div>
             <div className={styles.buySection}>
-                <button className={styles.buyButton}>Agregar al Carrito</button>
+                <button className={styles.buyButton} onClick={handleAddToCart}>Agregar al Carrito</button>
                 <div className={styles.price}>${price}</div>
                 <div className={styles.productTitle}>{title}</div>
             </div>
