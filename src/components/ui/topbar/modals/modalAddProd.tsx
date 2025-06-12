@@ -31,6 +31,8 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(''); // <-- Añadido
   const [loading, setLoading] = useState(false);
+  const coloresDisponibles = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Gris', 'Otros'];
+  const marcasDisponibles = ['Nike', 'Adidas', 'Puma', 'Reebok', 'Vans', 'Fila', 'Otros'];
 
   useEffect(() => {
     if (isOpen) {
@@ -147,12 +149,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
               <label>Descripción:</label>
               <input type="text" name="descripcion" value={form.descripcion} onChange={handleInputChange} />
 
-              <label>Color:</label>
-              <input type="text" name="color" value={form.color} onChange={handleInputChange} />
-
-              <label>Marca:</label>
-              <input type="text" name="marca" value={form.marca} onChange={handleInputChange} />
-
               <label>Subir imagen:</label>
               <input type="file" name="imagen" accept="image/*" onChange={handleImageChange} />
               {imagePreview && (
@@ -191,6 +187,23 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                   </option>
                 ))}
               </select>
+
+              <label>Color:</label>
+              <select name="color" value={form.color} onChange={handleInputChange} required>
+                <option value="">Seleccionar</option>
+                {coloresDisponibles.map((color) => (
+                  <option key={color} value={color}>{color}</option>
+                ))}
+              </select>
+
+              <label>Marca:</label>
+              <select name="marca" value={form.marca} onChange={handleInputChange} required>
+                <option value="">Seleccionar</option>
+                {marcasDisponibles.map((marca) => (
+                  <option key={marca} value={marca}>{marca}</option>
+                ))}
+              </select>
+
             </div>
           </div>
 
