@@ -28,9 +28,12 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     genero: '',
     talle: '',
     image: '',
+    imageAdicional: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [imageAdicionalFile, setImageAdicionalFile] = useState<File | null>(null);
+  const [imageAdicionalPreview, setImageAdicionalPreview] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const coloresDisponibles = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Gris', 'Otros'];
   const marcasDisponibles = ['Nike', 'Adidas', 'Puma', 'Reebok', 'Vans', 'Fila', 'Otros'];
@@ -51,9 +54,12 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
         genero: '',
         talle: '',
         image: '',
+        imageAdicional: '',
       });
       setImageFile(null);
       setImagePreview('');
+      setImageAdicionalFile(null);
+      setImageAdicionalPreview('');
     }
   }, [isOpen]);
 
@@ -90,16 +96,38 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleImageAdicionalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageAdicionalFile(e.target.files[0]);
+      setForm({ ...form, imageAdicional: e.target.files[0].name });
+      setImageAdicionalPreview(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     let imageUrl = '';
+    let imageAdicionalUrl = '';
+
+    // Subir imagen principal
     if (imageFile) {
       try {
         imageUrl = await uploadToCloudinary(imageFile);
       } catch (err) {
-        alert('Error al subir la imagen');
+        alert('Error al subir la imagen principal');
+        setLoading(false);
+        return;
+      }
+    }
+
+    // Subir imagen adicional
+    if (imageAdicionalFile) {
+      try {
+        imageAdicionalUrl = await uploadToCloudinary(imageAdicionalFile);
+      } catch (err) {
+        alert('Error al subir la imagen adicional');
         setLoading(false);
         return;
       }
@@ -122,6 +150,7 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
       eliminado: false,
       categoria: categoriaObj,
       imagenUrl: imageUrl,
+      imagenesAdicionales: imageAdicionalUrl ? [imageAdicionalUrl] : [],
       talles: [],
     };
 
@@ -156,10 +185,16 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
               <label>Descripción:</label>
               <input type="text" name="descripcion" value={form.descripcion} onChange={handleInputChange} />
 
-              <label>Subir imagen:</label>
+              <label>Subir imagen principal:</label>
               <input type="file" name="imagen" accept="image/*" onChange={handleImageChange} />
               {imagePreview && (
                 <img src={imagePreview} alt="preview" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
+              )}
+
+              <label>Subir imagen adicional:</label>
+              <input type="file" name="imagenAdicional" accept="image/*" onChange={handleImageAdicionalChange} />
+              {imageAdicionalPreview && (
+                <img src={imageAdicionalPreview} alt="preview adicional" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
               )}
             </div>
 

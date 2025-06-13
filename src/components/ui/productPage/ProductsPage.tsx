@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import styles from "./productsPage.module.css";
+import CardProduct from "../cardProduct/cardProduct";
+import Filters from "../filters/filters";
+import ProductControls from "./ProductControls";
 import { getProductos } from "../../../http/productRequest";
 import { getTipos } from "../../../http/typeRequest";
 import { getCategorias } from "../../../http/categoryRequest";
 import { IProduct } from "../../../types/IProduct";
 import { ITipo } from "../../../types/IType";
 import { ICategory } from "../../../types/ICategory";
-import Filters from "../filters/filters";
-import CardProduct from "../cardProduct/cardProduct";
-import ProductControls from "./ProductControls";
 
 const COLORS = ["Negro", "Blanco", "Rojo", "Azul", "Verde", "Gris", "Otros"];
 const MARCAS = ["Nike", "Adidas", "Puma", "Reebok", "Vans", "Fila", "Otros"];
@@ -97,6 +97,13 @@ const ProductsPage = () => {
                             title={prod.nombre}
                             price={prod.precio}
                             image={prod.imagenUrl || '/images/zapatillas/default.png'}
+                            // PASA LOS DATOS REALES:
+                            type={prod.categoria?.tipo?.nombre || ''}
+                            category={prod.categoria?.nombre || ''}
+                            description={prod.descripcion || ''}
+                            sizes={prod.talles?.map(tp => tp.talle.nombre) || []}
+                            colors={prod.color ? [prod.color] : []}
+                            images={prod.imagenUrl ? [prod.imagenUrl] : []}
                         />
                     ))}
                 </div>

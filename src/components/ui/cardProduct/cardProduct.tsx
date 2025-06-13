@@ -6,9 +6,9 @@ interface CardProductProps {
     title: string;
     price: number;
     image: string;
-    images?: string[];      // Imágenes adicionales para el modal
-    colors?: string[];      // Colores disponibles (como imágenes)
-    sizes?: string[];       // Talles disponibles
+    images?: string[];
+    colors?: string[];
+    sizes?: string[];
     type?: string;
     category?: string;
     description?: string;
@@ -19,41 +19,41 @@ const CardProduct: React.FC<CardProductProps> = ({
     price,
     image,
     images = [image],
-    colors = [image],
-    sizes = ['S', 'M', 'L'],
-    type = 'Running',
-    category = 'General',
-    description = 'Descripción no disponible.'
+    colors = [],
+    sizes = [],
+    type = '',
+    category = '',
+    description = ''
 }) => {
     const [showModal, setShowModal] = useState(false);
 
     return (
         <>
-        <div className={styles.card} onClick={() => setShowModal(true)}>
-            <div className={styles.imageContainer}>
-                <img src={image} alt={title} className={styles.image} />
+            <div className={styles.card} onClick={() => setShowModal(true)}>
+                <div className={styles.imageContainer}>
+                    <img src={image} alt={title} className={styles.image} />
+                </div>
+                <div className={styles.content}>
+                    <p className={styles.title}>{title}</p>
+                    <p className={styles.price}>
+                        <span>${price}</span>
+                    </p>
+                </div>
             </div>
-            <div className={styles.content}>
-                <p className={styles.title}>{title}</p>
-                <p className={styles.price}>
-                <span>${price}</span>
-                </p>
-            </div>
-        </div>
 
-        {showModal && (
-            <ProductModal
-            images={images}
-            colors={colors}
-            sizes={sizes}
-            title={title}
-            price={price}
-            type={type}
-            category={category}
-            description={description}
-            onClose={() => setShowModal(false)}
-            />
-        )}
+            {showModal && (
+                <ProductModal
+                    images={images}
+                    colors={colors}
+                    sizes={sizes}
+                    title={title}
+                    price={price}
+                    type={type}
+                    category={category}
+                    description={description}
+                    onClose={() => setShowModal(false)}
+                />
+            )}
         </>
     );
 };
