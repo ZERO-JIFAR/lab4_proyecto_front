@@ -1,48 +1,87 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Topbar from '../../ui/topbar/topbar';
 import Footer from '../../ui/footer/footer';
 import styles from './landing.module.css';
 import { FaChevronRight } from "react-icons/fa6";
+import { getProductos } from '../../../http/productRequest';
+import { IProduct } from '../../../types/IProduct';
 
-const categories = [
-  {
-    name: 'Calzado',
-    products: [
-      { title: 'Zapatillas de running', image: '/images/zapatillas/Zapatillas1.webp', price: '$69.99' },
-      { title: 'Botín de fútbol', image: '/images/botin1.png', price: '$79.99' },
-      { title: 'Zapatilla clásica', image: '/images/zapatilla2.png', price: '$79.99' },
-    ],
-  },
-  {
-    name: 'Ropa',
-    products: [
-      { title: 'Buzo hoodie', image: '/images/zapatilla3.png', price: '$49.99' },
-      { title: 'Remera polo', image: '/images/botin2.png', price: '$29.99' },
-      { title: 'Pantalón de jean', image: '/images/zapatilla4.png', price: '$59.99' },
-    ],
-  },
-];
+const NUM_FEATURED_VISIBLE = 3;
+const NUM_FEATURED_TOTAL = 10;
+const NUM_CATEGORIES = 2;
+const NUM_CATEGORY_PRODUCTS = 3;
 
-const featuredImages = [
-  '/images/zapatillas/Zapatillas1.webp',
-  '/images/zapatillas/Zapatillas2.jpeg',
-  '/images/zapatillas/Zapatillas3.webp',
-  '/images/zapatillas/Zapatillas4.webp',
-];
+function getRandomElements<T>(arr: T[], n: number): T[] {
+  if (arr.length <= n) return [...arr];
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
 
 const Landing = () => {
-  const [startIndex, setStartIndex] = useState(0);
+  const [products, setProducts] = useState<IProduct[]>([]);
+  const [featured, setFeatured] = useState<IProduct[]>([]);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [randomCategories, setRandomCategories] = useState<string[]>([]);
+  const [productsByCategory, setProductsByCategory] = useState<Record<string, IProduct[]>>({});
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const all = await getProductos();
+        setProducts(all);
+
+        // Shuffle for randomness and pick featured
+        const shuffled = [...all].sort(() => Math.random() - 0.5);
+        setFeatured(shuffled.slice(0, NUM_FEATURED_TOTAL));
+
+        // Obtener todas las categorías únicas presentes en los productos
+        const allCategories = Array.from(
+          new Set(
+            all
+              .map(p => p.categoria?.nombre)
+              .filter((x): x is string => Boolean(x))
+          )
+        );
+
+        // Elegir 2 categorías aleatorias (si hay)
+        const selectedCategories = getRandomElements(allCategories, NUM_CATEGORIES);
+        setRandomCategories(selectedCategories);
+
+        // Para cada categoría, elegir 3 productos aleatorios de esa categoría
+        const byCategory: Record<string, IProduct[]> = {};
+        selectedCategories.forEach(category => {
+          const prods = all.filter(
+            p => p.categoria?.nombre === category
+          );
+          byCategory[category] = getRandomElements(prods, NUM_CATEGORY_PRODUCTS);
+        });
+        setProductsByCategory(byCategory);
+
+      } catch (e) {
+        setProducts([]);
+        setFeatured([]);
+        setRandomCategories([]);
+        setProductsByCategory({});
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const handleNext = () => {
-    setStartIndex((prevIndex) => (prevIndex + 1) % featuredImages.length);
+    setCarouselIndex((prev) =>
+      featured.length <= NUM_FEATURED_VISIBLE
+        ? 0
+        : (prev + 1) % featured.length
+    );
   };
 
-  const visibleImages = [
-    featuredImages[startIndex],
-    featuredImages[(startIndex + 1) % featuredImages.length],
-    featuredImages[(startIndex + 2) % featuredImages.length],
-  ];
+  const visibleFeatured =
+    featured.length > 0
+      ? Array.from({ length: Math.min(NUM_FEATURED_VISIBLE, featured.length) }, (_, i) =>
+          featured[(carouselIndex + i) % featured.length]
+        )
+      : [];
 
   return (
     <div className={styles.landingContainer}>
@@ -58,20 +97,24 @@ const Landing = () => {
 
         <div className={styles.carouselContainer}>
           <div className={styles.landingProducts}>
-            {visibleImages.map((img, idx) => (
+            {visibleFeatured.map((prod, idx) => (
               <img
-                key={idx}
-                src={img}
-                alt={`Zapatilla ${idx + 1}`}
+                key={prod.id || idx}
+                src={prod.imagenUrl || (prod.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'}
+                alt={prod.nombre}
                 className={styles.landingProductImage}
+                title={prod.nombre}
               />
             ))}
           </div>
-          <button className={styles.carouselButton} onClick={handleNext}><h1><FaChevronRight /></h1></button>
+          {featured.length > NUM_FEATURED_VISIBLE && (
+            <button className={styles.carouselButton} onClick={handleNext}>
+              <h1><FaChevronRight /></h1>
+            </button>
+          )}
         </div>
 
         <div className={styles.landingButtonWrapper}>
-          {/* Uso de Link para redirigir al hacer clic */}
           <Link to="/SearchItem">
             <button className={styles.landingBuyButton}>¡Compre Ahora!</button>
           </Link>
@@ -80,17 +123,30 @@ const Landing = () => {
         <hr className={styles.landingDivider} />
 
         <div className={styles.landingCategoryGrid}>
-          {categories.map((cat) => (
-            <div key={cat.name} className={styles.landingCategoryColumn}>
-              <h3>{cat.name}</h3>
-              {cat.products.map((product, index) => (
-                <div key={index} className={styles.landingProductCard}>
-                  <img src={product.image} alt={product.title} className={styles.cardImage} />
+          {randomCategories.length === 0 && (
+            <div className={styles.landingCategoryColumn}>
+              <h3>Sin categorías disponibles</h3>
+              <p>No hay productos con categorías cargadas en la base de datos.</p>
+            </div>
+          )}
+          {randomCategories.map(category => (
+            <div key={category} className={styles.landingCategoryColumn}>
+              <h3>{category}</h3>
+              {(!productsByCategory[category] || productsByCategory[category].length === 0) && (
+                <p>No hay productos de esta categoría.</p>
+              )}
+              {productsByCategory[category]?.map((product, index) => (
+                <div key={product.id || index} className={styles.landingProductCard}>
+                  <img
+                    src={product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'}
+                    alt={product.nombre}
+                    className={styles.cardImage}
+                  />
                   <div className={styles.cardContent}>
-                    <h4>{product.title}</h4>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ut dignissim erat.</p>
+                    <h4>{product.nombre}</h4>
+                    <p>{product.descripcion || 'Sin descripción.'}</p>
                     <div className={styles.cardPriceWrapper}>
-                      <span className={styles.cardPrice}>{product.price}</span>
+                      <span className={styles.cardPrice}>${product.precio}</span>
                       <button className={styles.cardButton}>Comprar</button>
                     </div>
                   </div>

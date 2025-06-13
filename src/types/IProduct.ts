@@ -2,6 +2,7 @@ import { ICategory } from "./ICategory";
 import { ITalleProducto } from "./ITalleProducto";
 
 export interface IProduct {
+  imagenesAdicionales: any;
   id: number;
   nombre: string;
   cantidad: number;
