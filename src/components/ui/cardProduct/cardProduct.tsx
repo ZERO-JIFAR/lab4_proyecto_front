@@ -9,6 +9,9 @@ interface CardProductProps {
     images?: string[];
     colors?: string[];
     sizes?: string[];
+    images?: string[];      // Imágenes adicionales para el modal
+    color: string;      // Colores disponibles (como imágenes)
+    sizes?: string[];       // Talles disponibles
     type?: string;
     category?: string;
     description?: string;
@@ -24,6 +27,11 @@ const CardProduct: React.FC<CardProductProps> = ({
     type = '',
     category = '',
     description = ''
+    color,
+    sizes = ['S', 'M', 'L'],
+    type = 'Running',
+    category = 'General',
+    description = 'Descripción no disponible.'
 }) => {
     const [showModal, setShowModal] = useState(false);
 
@@ -54,6 +62,19 @@ const CardProduct: React.FC<CardProductProps> = ({
                     onClose={() => setShowModal(false)}
                 />
             )}
+        {showModal && (
+            <ProductModal
+            images={images}
+            color={color}
+            sizes={sizes}
+            title={title}
+            price={price}
+            type={type}
+            category={category}
+            description={description}
+            onClose={() => setShowModal(false)}
+            />
+        )}
         </>
     );
 };

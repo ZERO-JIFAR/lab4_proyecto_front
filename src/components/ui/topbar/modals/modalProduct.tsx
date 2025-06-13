@@ -1,10 +1,11 @@
 // ProductModal.tsx
 import React, { useState } from 'react';
 import styles from './modalProduct.module.css';
+import { useCart } from '../../../../context/CartContext';
 
 interface ProductModalProps {
     images: string[];
-    colors: string[];
+    color: string;
     sizes: string[];
     title: string;
     price: number;
@@ -16,7 +17,7 @@ interface ProductModalProps {
 
 const ProductModal: React.FC<ProductModalProps> = ({
     images,
-    colors,
+    color,
     sizes,
     title,
     price,
@@ -26,12 +27,26 @@ const ProductModal: React.FC<ProductModalProps> = ({
     onClose
     }) => {
     const [imageIndex, setImageIndex] = useState(0);
-    const [selectedColor, setSelectedColor] = useState(colors[0]);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
     const nextImage = () => setImageIndex((prev) => (prev + 1) % images.length);
     const prevImage = () => setImageIndex((prev) => (prev - 1 + images.length) % images.length);
 
+    const { addToCart } = useCart();
+
+    const handleAddToCart = () => {
+        if (!selectedSize) return alert("Selecciona un talle");
+
+        addToCart({
+            title,
+            price,
+            image: images[imageIndex],
+            color,
+            size: selectedSize
+        });
+
+    onClose(); // opcional, para cerrar el modal
+    };
     return (
         <div className={styles.overlay}>
         <div className={styles.modal}>
@@ -55,7 +70,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 <button onClick={nextImage} className={styles.arrow}>→</button>
             </div>
             <div className={styles.buySection}>
-                <button className={styles.buyButton}>Agregar al Carrito</button>
+                <button className={styles.buyButton} onClick={handleAddToCart}>Agregar al Carrito</button>
                 <div className={styles.price}>${price}</div>
                 <div className={styles.productTitle}>{title}</div>
             </div>
@@ -63,17 +78,8 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
             <div className={styles.right}>
             <div className={styles.subSection}>
-                <div>• Colores:</div>
-                <div className={styles.colorList}>
-                {colors.map((img, i) => (
-                    <img
-                    key={i}
-                    src={img}
-                    className={`${styles.colorThumb} ${selectedColor === img ? styles.selected : ''}`}
-                    onClick={() => setSelectedColor(img)}
-                    />
-                ))}
-                </div>
+                <div>• Color:</div>
+                <div className={styles.colorList}>{color}</div>
             </div>
             <div className={styles.subSection}>
                 <div>• Talles:</div>

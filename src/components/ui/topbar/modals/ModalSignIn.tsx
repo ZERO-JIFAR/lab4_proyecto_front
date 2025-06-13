@@ -5,7 +5,7 @@ import { loginUser } from '../../../../http/userRequest';
 interface ModalSignInProps {
   show: boolean;
   onClose: () => void;
-  onLogin: (isAdmin: boolean) => void;
+  onLogin: (role: string, token: string) => void;
 }
 
 const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => {
@@ -16,27 +16,17 @@ const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => 
   if (!show) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  e.preventDefault();
+  setError(null);
 
-    // Limpia el token antes de intentar loguear
-    localStorage.removeItem('token');
-    localStorage.removeItem('rol');
-    localStorage.removeItem('email');
-
-    try {
-      const data = await loginUser({ email, password });
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('rol', data.rol);
-      localStorage.setItem('email', data.email);
-
-      onLogin(data.rol === 'ADMIN');
-      onClose();
-    } catch (err: any) {
-      setError(err.message || 'Usuario o contraseña incorrectos. Por favor verifica tus datos.');
-    }
-  };
+  try {
+    const data = await loginUser({ email, password });
+    onLogin(data.rol, data.token);
+    onClose();
+  } catch (err: any) {
+    setError(err.message || 'Usuario o contraseña incorrectos. Por favor verifica tus datos.');
+  }
+};
 
   return (
     <div className={styles.modalContainer}>

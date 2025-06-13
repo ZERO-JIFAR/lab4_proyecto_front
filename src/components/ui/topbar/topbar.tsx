@@ -9,15 +9,17 @@ import AdminMenu from './modals/adminMenu';
 import { AiOutlineSun, AiFillMoon } from "react-icons/ai";
 import ModalLogout from './modals/modalLogout';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
 
 const Topbar: React.FC = () => {
   const [showCart, setShowCart] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const { isLoggedIn, isAdmin, logout, login } = useAuth();
+  
 
   const toggleCart = () => {
     setShowCart(!showCart);
@@ -31,8 +33,6 @@ const Topbar: React.FC = () => {
     setShowSignIn(!showSignIn);  // Cambiar el estado para abrir o cerrar el modal
   };
 
-  const [darkMode, setDarkMode] = useState(false);
-  
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
     setDarkMode(savedMode);
@@ -71,42 +71,41 @@ const Topbar: React.FC = () => {
         </div>
 
         <div className={styles.topbarRight}>
-          <FaShoppingCart className={styles.topbarIcon} onClick={toggleCart} />
+        <FaShoppingCart className={styles.topbarIcon} onClick={toggleCart} />
 
-          {!isLoggedIn && (
-            <>
-              <button
-                className={styles.topbarSignin}
-                onClick={toggleSignInModal}  // Cambiar aquí
-              >
-                Sign in
-              </button>
-              <button
-                className={styles.topbarRegister}
-                onClick={() => setShowRegister(true)}
-              >
-                Register
-              </button>
-            </>
-          )}
+        {!isLoggedIn && (
+          <>
+            <button
+              className={styles.topbarSignin}
+              onClick={toggleSignInModal}
+            >
+              Sign in
+            </button>
+            <button
+              className={styles.topbarRegister}
+              onClick={() => setShowRegister(true)}
+            >
+              Register
+            </button>
+          </>
+        )}
 
-          {isLoggedIn && (
-            <>
-              {isAdmin && <span className={styles.topbarSignin}>Modo Admin</span>}
-              <button className={styles.topbarSignin} onClick={() => setShowLogoutConfirm(true)}>
-                Logout
-              </button>
-            </>
-          )}
-        </div>
+        {isLoggedIn && (
+          <>
+            {isAdmin && <span className={styles.topbarSignin}>Modo Admin</span>}
+            <button className={styles.topbarSignin} onClick={() => setShowLogoutConfirm(true)}>
+              Logout
+            </button>
+          </>
+        )}
+      </div>
       </div>
 
       {/* Modal del Logout */}
       <ModalLogout
         show={showLogoutConfirm}
         onConfirm={() => {
-          setIsLoggedIn(false);
-          setIsAdmin(false);
+          logout(); // <--- Usa la función global de logout
           setShowAdminMenu(false);
           setShowLogoutConfirm(false);
         }}
@@ -121,9 +120,8 @@ const Topbar: React.FC = () => {
       <ModalSignIn
         show={showSignIn}
         onClose={() => setShowSignIn(false)}
-        onLogin={(isAdminValue: boolean) => {
-          setIsLoggedIn(true);
-          setIsAdmin(isAdminValue);
+        onLogin={(role: string, token: string) => {
+          login(role, token);
           setShowSignIn(false);
         }}
       />
