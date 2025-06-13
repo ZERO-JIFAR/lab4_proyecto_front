@@ -6,6 +6,8 @@ import styles from './landing.module.css';
 import { FaChevronRight } from "react-icons/fa6";
 import { getProductos } from '../../../http/productRequest';
 import { IProduct } from '../../../types/IProduct';
+import ProductModal from '../../ui/topbar/modals/modalProduct';
+import { useCart } from '../../../context/CartContext';
 
 const NUM_FEATURED_VISIBLE = 3;
 const NUM_FEATURED_TOTAL = 10;
@@ -24,6 +26,10 @@ const Landing = () => {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [randomCategories, setRandomCategories] = useState<string[]>([]);
   const [productsByCategory, setProductsByCategory] = useState<Record<string, IProduct[]>>({});
+  const [showModal, setShowModal] = useState(false);
+  const [modalProduct, setModalProduct] = useState<IProduct | null>(null);
+
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -83,6 +89,28 @@ const Landing = () => {
         )
       : [];
 
+  // Abre el modal con el producto seleccionado
+  const handleOpenModal = (product: IProduct) => {
+    setModalProduct(product);
+    setShowModal(true);
+  };
+
+  // Agrega al carrito el producto (elige primer talle y color si existen)
+  const handleBuy = (product: IProduct) => {
+    const talle = product.talles && product.talles.length > 0
+      ? product.talles[0].talle.nombre
+      : 'Único';
+    const color = product.color || 'N/A';
+    addToCart({
+      title: product.nombre,
+      price: product.precio,
+      image: product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png',
+      color,
+      size: talle
+    });
+    alert('Producto agregado al carrito');
+  };
+
   return (
     <div className={styles.landingContainer}>
       <Topbar />
@@ -104,6 +132,8 @@ const Landing = () => {
                 alt={prod.nombre}
                 className={styles.landingProductImage}
                 title={prod.nombre}
+                style={{ cursor: 'pointer' }}
+                onClick={() => handleOpenModal(prod)}
               />
             ))}
           </div>
@@ -141,13 +171,17 @@ const Landing = () => {
                     src={product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'}
                     alt={product.nombre}
                     className={styles.cardImage}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleOpenModal(product)}
                   />
                   <div className={styles.cardContent}>
                     <h4>{product.nombre}</h4>
                     <p>{product.descripcion || 'Sin descripción.'}</p>
                     <div className={styles.cardPriceWrapper}>
                       <span className={styles.cardPrice}>${product.precio}</span>
-                      <button className={styles.cardButton}>Comprar</button>
+                      <button className={styles.cardButton} onClick={() => handleBuy(product)}>
+                        Comprar
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -165,6 +199,30 @@ const Landing = () => {
       </p>
 
       <Footer />
+
+      {/* Modal de vista previa */}
+      {showModal && modalProduct && (
+        <ProductModal
+          images={[
+            modalProduct.imagenUrl,
+            ...(Array.isArray(modalProduct.imagenesAdicionales)
+              ? modalProduct.imagenesAdicionales
+              : [])
+          ].filter(Boolean)}
+          color={modalProduct.color || ''}
+          sizes={
+            modalProduct.talles && modalProduct.talles.length > 0
+              ? modalProduct.talles.map(tp => tp.talle.nombre)
+              : []
+          }
+          title={modalProduct.nombre}
+          price={modalProduct.precio}
+          type={modalProduct.categoria?.tipo?.nombre || ''}
+          category={modalProduct.categoria?.nombre || ''}
+          description={modalProduct.descripcion || ''}
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </div>
   );
 };
