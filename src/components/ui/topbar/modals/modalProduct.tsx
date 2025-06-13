@@ -5,7 +5,7 @@ import { useCart } from '../../../../context/CartContext';
 
 interface ProductModalProps {
     images: string[];
-    colors: string[];
+    color: string;
     sizes: string[];
     title: string;
     price: number;
@@ -17,7 +17,7 @@ interface ProductModalProps {
 
 const ProductModal: React.FC<ProductModalProps> = ({
     images,
-    colors,
+    color,
     sizes,
     title,
     price,
@@ -27,7 +27,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
     onClose
     }) => {
     const [imageIndex, setImageIndex] = useState(0);
-    const [selectedColor, setSelectedColor] = useState(colors[0]);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
     const nextImage = () => setImageIndex((prev) => (prev + 1) % images.length);
@@ -42,7 +41,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             title,
             price,
             image: images[imageIndex],
-            color: selectedColor,
+            color,
             size: selectedSize
         });
 
@@ -79,17 +78,8 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
             <div className={styles.right}>
             <div className={styles.subSection}>
-                <div>• Colores:</div>
-                <div className={styles.colorList}>
-                {colors.map((img, i) => (
-                    <img
-                    key={i}
-                    src={img}
-                    className={`${styles.colorThumb} ${selectedColor === img ? styles.selected : ''}`}
-                    onClick={() => setSelectedColor(img)}
-                    />
-                ))}
-                </div>
+                <div>• Color:</div>
+                <div className={styles.colorList}>{color}</div>
             </div>
             <div className={styles.subSection}>
                 <div>• Talles:</div>
