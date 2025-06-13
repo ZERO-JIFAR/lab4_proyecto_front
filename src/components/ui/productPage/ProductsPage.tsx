@@ -24,6 +24,8 @@ const ProductsPage = () => {
     const [selectedTalle, setSelectedTalle] = useState<string>("");
     const [selectedColor, setSelectedColor] = useState<string>("");
     const [selectedMarca, setSelectedMarca] = useState<string>("");
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
 
     const fetchProducts = async () => {
         const data = await getProductos();
@@ -41,7 +43,7 @@ const ProductsPage = () => {
     }, []);
 
     // Filtrar productos por texto, tipo, categoría, talle, color y marca
-    const filteredProducts = products.filter((prod) => {
+   const filteredProducts = products.filter((prod) => {
         const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
         const matchesTipo = selectedTipo === "" || (prod.categoria && prod.categoria.tipo && prod.categoria.tipo.id === selectedTipo);
         const matchesCategoria = selectedCategoria === "" || (prod.categoria && prod.categoria.id === selectedCategoria);
@@ -50,7 +52,19 @@ const ProductsPage = () => {
             (prod.talles && prod.talles.some(tp => tp.talle.nombre === selectedTalle));
         const matchesColor = selectedColor === "" || (prod.color && prod.color.toLowerCase() === selectedColor.toLowerCase());
         const matchesMarca = selectedMarca === "" || (prod.marca && prod.marca.toLowerCase() === selectedMarca.toLowerCase());
-        return matchesSearch && matchesTipo && matchesCategoria && matchesTalle && matchesColor && matchesMarca;
+        const matchesMinPrice = minPrice === '' || prod.precio >= Number(minPrice);
+        const matchesMaxPrice = maxPrice === '' || prod.precio <= Number(maxPrice);
+
+        return (
+            matchesSearch &&
+            matchesTipo &&
+            matchesCategoria &&
+            matchesTalle &&
+            matchesColor &&
+            matchesMarca &&
+            matchesMinPrice &&
+            matchesMaxPrice
+        );
     });
 
     // Ordenar productos según el filtro seleccionado
@@ -65,7 +79,7 @@ const ProductsPage = () => {
         ? categorias
         : categorias.filter(cat => cat.tipo && cat.tipo.id === selectedTipo);
 
-    return (
+   return (
         <div className={styles.page}>
             <Filters
                 tipos={tipos}
@@ -82,6 +96,10 @@ const ProductsPage = () => {
                 setSelectedMarca={setSelectedMarca}
                 colors={COLORS}
                 marcas={MARCAS}
+                minPrice={minPrice}
+                setMinPrice={setMinPrice}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
             />
             <div className={styles.right}>
                 <ProductControls
