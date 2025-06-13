@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './cardProduct.module.css';
 import ProductModal from '../topbar/modals/modalProduct';
+import { useAuth } from '../../../context/AuthContext';
 
 interface CardProductProps {
     title: string;
@@ -27,6 +28,9 @@ const CardProduct: React.FC<CardProductProps> = ({
 }) => {
     const [showModal, setShowModal] = useState(false);
 
+    // Usa el contexto de autenticación
+    const { isLoggedIn, isAdmin } = useAuth();
+
     return (
         <>
         <div className={styles.card} onClick={() => setShowModal(true)}>
@@ -36,22 +40,30 @@ const CardProduct: React.FC<CardProductProps> = ({
             <div className={styles.content}>
                 <p className={styles.title}>{title}</p>
                 <p className={styles.price}>
-                <span>${price}</span>
+                    <span>${price}</span>
                 </p>
+                {/* Ejemplo: solo muestra el botón si el usuario está logueado */}
+                {isLoggedIn && (
+                    <button className={styles.buyButton}>Agregar al Carrito</button>
+                )}
+                {/* Ejemplo: muestra un mensaje si es admin */}
+                {isAdmin && (
+                    <span className={styles.adminBadge}>Producto editable (Admin)</span>
+                )}
             </div>
         </div>
 
         {showModal && (
             <ProductModal
-            images={images}
-            colors={colors}
-            sizes={sizes}
-            title={title}
-            price={price}
-            type={type}
-            category={category}
-            description={description}
-            onClose={() => setShowModal(false)}
+                images={images}
+                colors={colors}
+                sizes={sizes}
+                title={title}
+                price={price}
+                type={type}
+                category={category}
+                description={description}
+                onClose={() => setShowModal(false)}
             />
         )}
         </>
