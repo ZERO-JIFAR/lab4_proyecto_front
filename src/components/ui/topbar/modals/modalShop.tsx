@@ -9,7 +9,7 @@ interface ModalCarritoProps {
 }
 
 const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
-  const { cart } = useCart();
+  const { cart, removeFromCart } = useCart();
   if (!show) return null; // Solo renderiza si show es true
 
   return (
@@ -39,6 +39,7 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
                 </p>
                 <p className={styles.cartItemPrice}>${item.price}</p>
               </div>
+              <button className={styles.removeButton} onClick={() => removeFromCart(index)}>✕</button>
             </div>
           ))
         )}

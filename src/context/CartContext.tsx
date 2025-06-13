@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, ReactNode, useContext, useState } from "react";
 
 interface CartItem {
     title: string;
@@ -11,6 +11,7 @@ interface CartItem {
 interface CartContextType {
     cart: CartItem[];
     addToCart: (item: CartItem) => void;
+    removeFromCart: (index: number) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,9 +29,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         setCart(prev => [...prev, item]);
     };
 
+    const removeFromCart = (index: number) => {
+        setCart(prev => prev.filter((_, i) => i !== index));
+    };
+
     return (
-        <CartContext.Provider value={{ cart, addToCart }}>
-            {children}
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart }}>
+        {children}
         </CartContext.Provider>
     );
 };
