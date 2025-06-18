@@ -8,11 +8,11 @@ const CardAdminProduct = ({ product }) => {
   return (
     <div className={styles.card}>
       <div className={styles.imageContainer}>
-        <img src={product.image} alt={product.title} className={styles.image} />
+        <img src={product.imagenUrl || '/images/zapatillas/default.png'} alt={product.nombre} className={styles.image} />
       </div>
       <div className={styles.details}>
-        <h4 className={styles.title}>{product.title}</h4>
-        <p className={styles.price}>${product.price}</p>
+        <h4 className={styles.title}>{product.nombre}</h4>
+        <p className={styles.price}>${product.precio}</p>
       </div>
       <div className={styles.actions}>
         <button className={styles.edit} onClick={() => setModalEdit(true)}>

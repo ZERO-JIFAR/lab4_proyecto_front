@@ -9,6 +9,8 @@ import { getCategorias } from "../../../http/categoryRequest";
 import { IProduct } from "../../../types/IProduct";
 import { ITipo } from "../../../types/IType";
 import { ICategory } from "../../../types/ICategory";
+import CardAdminProduct from "../cardProduct/cardAdminProducts";
+import { useAuth } from "../../../context/AuthContext";
 
 const COLORS = ["Negro", "Blanco", "Rojo", "Azul", "Verde", "Gris", "Otros"];
 const MARCAS = ["Nike", "Adidas", "Puma", "Reebok", "Vans", "Fila", "Otros"];
@@ -26,6 +28,7 @@ const ProductsPage = () => {
     const [selectedMarca, setSelectedMarca] = useState<string>("");
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
+    const { isAdmin } = useAuth();
 
     const fetchProducts = async () => {
         const data = await getProductos();
@@ -108,8 +111,11 @@ const ProductsPage = () => {
                     search={search}
                     onSearchChange={setSearch}
                 />
-                <div className={styles.productsGrid}>
-                    {sortedProducts.map((prod, idx) => (
+                <div className={isAdmin ? styles.adminList : styles.productsGrid}>
+                    {sortedProducts.map((prod, idx) =>
+                        isAdmin ? (
+                            <CardAdminProduct key={prod.id || idx} product={prod} />
+                        ) : (
                         <CardProduct
                             key={prod.id || idx}
                             title={prod.nombre}
