@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import styles from './modalAddProd.module.css';
 import { getTipos } from '../../../../http/typeRequest';
 import { getCategorias } from '../../../../http/categoryRequest';
-import { createProducto } from '../../../../http/productRequest';
 import { getWaistTypes } from '../../../../http/waistTypeRequest';
 import { getTallesByTipoId } from '../../../../http/talleRequest';
 import { ITipo } from '../../../../types/IType';
@@ -10,6 +9,7 @@ import { ICategory } from '../../../../types/ICategory';
 import { IWaistType } from '../../../../types/IWaistType';
 import { ITalle } from '../../../../types/ITalle';
 import { uploadToCloudinary } from '../../../../utils/UploadToCloudinary';
+import axios from "axios";
 
 interface ModalAddProdProps {
   isOpen: boolean;
@@ -93,7 +93,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     setForm(prev => ({ ...prev, categoria: '' }));
   }, [selectedTipoId, categorias]);
 
-  // Cuando cambia el tipo de talle, carga los talles correspondientes
   useEffect(() => {
     if (selectedWaistTypeId) {
       getTallesByTipoId(Number(selectedWaistTypeId)).then(setTalles).catch(() => setTalles([]));
@@ -150,74 +149,87 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    let imageUrl = '';
-    let imageAdicionalUrl = '';
+  let imageUrl = '';
+  let imageAdicionalUrl = '';
 
-    // Subir imagen principal
-    if (imageFile) {
-      try {
-        imageUrl = await uploadToCloudinary(imageFile);
-      } catch (err) {
-        alert('Error al subir la imagen principal');
-        setLoading(false);
-        return;
-      }
-    }
-
-    // Subir imagen adicional
-    if (imageAdicionalFile) {
-      try {
-        imageAdicionalUrl = await uploadToCloudinary(imageAdicionalFile);
-      } catch (err) {
-        alert('Error al subir la imagen adicional');
-        setLoading(false);
-        return;
-      }
-    }
-
-    const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
-    if (!categoriaObj) {
-      alert('Selecciona una categoría válida');
-      setLoading(false);
-      return;
-    }
-
-    if (tallesConStock.length === 0) {
-      alert('Debes agregar al menos un talle con stock');
-      setLoading(false);
-      return;
-    }
-
-    const producto = {
-      nombre: form.nombre,
-      precio: Number(form.precio),
-      descripcion: form.descripcion,
-      color: form.color,
-      marca: form.marca,
-      eliminado: false,
-      categoria: categoriaObj,
-      imagenUrl: imageUrl,
-      imagenesAdicionales: imageAdicionalUrl ? [imageAdicionalUrl] : [],
-      talles: tallesConStock.map(ts => ({
-        ...ts,
-        id: 0 // Para cumplir con ITalleProducto
-      })),
-      cantidad: 0
-    };
-
+  if (imageFile) {
     try {
-      await createProducto(producto);
-      alert('Producto agregado!');
-      onClose();
+      imageUrl = await uploadToCloudinary(imageFile);
     } catch (err) {
-      alert('Error al agregar producto');
-    } finally {
+      alert('Error al subir la imagen principal');
       setLoading(false);
+      return;
     }
+  }
+
+  if (imageAdicionalFile) {
+    try {
+      imageAdicionalUrl = await uploadToCloudinary(imageAdicionalFile);
+    } catch (err) {
+      alert('Error al subir la imagen adicional');
+      setLoading(false);
+      return;
+    }
+  }
+
+  const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
+  if (!categoriaObj) {
+    alert('Selecciona una categoría válida');
+    setLoading(false);
+    return;
+  }
+
+  if (tallesConStock.length === 0) {
+    alert('Debes agregar al menos un talle con stock');
+    setLoading(false);
+    return;
+  }
+
+  const producto = {
+    nombre: form.nombre,
+    cantidad: 0,
+    precio: Number(form.precio),
+    descripcion: form.descripcion,
+    color: form.color,
+    marca: form.marca,
+    imagenUrl: imageUrl,
+    imagenesAdicionales: imageAdicionalUrl ? [imageAdicionalUrl] : [],
+    categoria: { id: categoriaObj.id }
   };
+
+  // Crear un objeto para tallesConStock (no un array)
+  const tallesConStockObj: Record<number, number> = {};
+  tallesConStock.forEach(ts => {
+    tallesConStockObj[ts.talle.id] = ts.stock;
+  });
+
+  const productoConTallesDTO = {
+    producto,
+    tallesConStock: tallesConStockObj
+  };
+
+  try {
+    const APIURL = import.meta.env.VITE_API_URL;
+    await axios.post(`${APIURL}/productos/con-talles`, productoConTallesDTO, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem('token')
+          ? `Bearer ${localStorage.getItem('token')}`
+          : undefined,
+      },
+    });
+    alert('Producto agregado!');
+    onClose();
+  } catch (err) {
+    console.error('Error completo:', err);
+    alert('Error al agregar producto');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className={styles.overlay}>
@@ -297,7 +309,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                 ))}
               </select>
 
-              {/* Selección de tipo de talle y talles con stock */}
               <label>Tipo de Talle:</label>
               <select
                 value={selectedWaistTypeId}
@@ -310,7 +321,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                 ))}
               </select>
 
-              {/* SOLO muestra el campo de talles si hay tipo de talle seleccionado */}
               {selectedWaistTypeId && (
                 <>
                   <label>Talle:</label>
@@ -336,7 +346,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                 </>
               )}
 
-              {/* Lista de talles agregados */}
               {tallesConStock.length > 0 && (
                 <div style={{ marginTop: 10 }}>
                   <strong>Talles agregados:</strong>

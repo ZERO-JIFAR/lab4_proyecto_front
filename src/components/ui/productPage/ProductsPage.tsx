@@ -30,9 +30,17 @@ const ProductsPage = () => {
     const [maxPrice, setMaxPrice] = useState('');
     const { isAdmin } = useAuth();
 
+    // Extiende el tipo para aceptar tallesProducto temporalmente
+    type ProductWithTallesProducto = IProduct & { tallesProducto?: any[] };
+
     const fetchProducts = async () => {
         const data = await getProductos();
-        setProducts(data);
+        setProducts(
+            (data as ProductWithTallesProducto[]).map(prod => ({
+                ...prod,
+                talles: prod.talles ?? prod.tallesProducto ?? []
+            }))
+        );
     };
 
     const fetchTiposCategorias = async () => {
@@ -46,7 +54,7 @@ const ProductsPage = () => {
     }, []);
 
     // Filtrar productos por texto, tipo, categoría, talle, color y marca
-   const filteredProducts = products.filter((prod) => {
+    const filteredProducts = products.filter((prod) => {
         const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
         const matchesTipo = selectedTipo === "" || (prod.categoria && prod.categoria.tipo && prod.categoria.tipo.id === selectedTipo);
         const matchesCategoria = selectedCategoria === "" || (prod.categoria && prod.categoria.id === selectedCategoria);
@@ -82,7 +90,7 @@ const ProductsPage = () => {
         ? categorias
         : categorias.filter(cat => cat.tipo && cat.tipo.id === selectedTipo);
 
-   return (
+    return (
         <div className={styles.page}>
             <Filters
                 tipos={tipos}
@@ -116,20 +124,9 @@ const ProductsPage = () => {
                         isAdmin ? (
                             <CardAdminProduct key={prod.id || idx} product={prod} />
                         ) : (
-                        <CardProduct
-                            key={prod.id || idx}
-                            title={prod.nombre}
-                            price={prod.precio}
-                            image={prod.imagenUrl || '/images/zapatillas/default.png'}
-                            // PASA LOS DATOS REALES:
-                            type={prod.categoria?.tipo?.nombre || ''}
-                            category={prod.categoria?.nombre || ''}
-                            description={prod.descripcion || ''}
-                            sizes={prod.talles?.map(tp => tp.talle.nombre) || []}
-                            colors={prod.color ? [prod.color] : []}
-                            images={prod.imagenUrl ? [prod.imagenUrl] : []}
-                        />
-                    ))}
+                            <CardProduct key={prod.id || idx} product={prod} />
+                        )
+                    )}
                 </div>
             </div>
         </div>
