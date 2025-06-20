@@ -10,10 +10,12 @@ import { IWaistType } from '../../../../types/IWaistType';
 import { ITalle } from '../../../../types/ITalle';
 import { uploadToCloudinary } from '../../../../utils/UploadToCloudinary';
 import axios from "axios";
+import { IProduct } from '../../../../types/IProduct';
 
 interface ModalEditProdProps {
     isOpen: boolean;
     onClose: () => void;
+    product?: IProduct;
 }
 
 
@@ -22,7 +24,7 @@ interface TalleConStock {
     stock: number;
 }
 
-const ModalAddProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose }) => {
+const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product }) => {
     const [tipos, setTipos] = useState<ITipo[]>([]);
     const [categorias, setCategorias] = useState<ICategory[]>([]);
     const [selectedTipoId, setSelectedTipoId] = useState<number | "">("");
@@ -40,7 +42,6 @@ const ModalAddProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose }) => {
         color: '',
         marca: '',
         categoria: '',
-        genero: '',
         image: '',
         imageAdicional: '',
     });
@@ -53,33 +54,31 @@ const ModalAddProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose }) => {
     const marcasDisponibles = ['Nike', 'Adidas', 'Puma', 'Reebok', 'Vans', 'Fila', 'Otros'];
 
     useEffect(() => {
-        if (isOpen) {
-        getTipos().then(setTipos).catch(() => setTipos([]));
-        getCategorias().then(setCategorias).catch(() => setCategorias([]));
-        getWaistTypes().then(setWaistTypes).catch(() => setWaistTypes([]));
-        setSelectedTipoId("");
-        setSelectedWaistTypeId("");
-        setTalles([]);
-        setSelectedTalleId("");
-        setTalleStock("");
-        setTallesConStock([]);
-        setForm({
-            nombre: '',
-            precio: '',
-            descripcion: '',
-            color: '',
-            marca: '',
-            categoria: '',
-            genero: '',
-            image: '',
-            imageAdicional: '',
-        });
-        setImageFile(null);
-        setImagePreview('');
-        setImageAdicionalFile(null);
-        setImageAdicionalPreview('');
+        if (isOpen && product) {
+            // setear datos del formulario
+            setForm({
+                nombre: product.nombre,
+                precio: String(product.precio),
+                descripcion: product.descripcion || '',
+                color: product.color || '',
+                marca: product.marca || '',
+                categoria: String(product.categoria?.id || ''),
+                image: product.imagenUrl || '',
+                imageAdicional: product.imagenesAdicionales?.[0] || ''
+            });
+
+            setSelectedTipoId(product.categoria?.tipo?.id || '');
+            setSelectedWaistTypeId(product.talles?.[0]?.talle?.tipo?.id || '');
+            setTallesConStock(
+                (product.talles || []).map(tp => ({
+                    talle: tp.talle,
+                    stock: tp.stock
+                }))
+            );
+            if (product.imagenUrl) setImagePreview(product.imagenUrl);
+            if (product.imagenesAdicionales?.[0]) setImageAdicionalPreview(product.imagenesAdicionales[0]);
         }
-    }, [isOpen]);
+    }, [isOpen, product]);
 
     useEffect(() => {
         if (selectedTipoId === "") {
@@ -379,4 +378,4 @@ const ModalAddProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose }) => {
     );
 };
 
-export default ModalAddProd;
+export default ModalEditProd ;

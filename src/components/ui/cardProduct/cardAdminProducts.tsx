@@ -18,7 +18,11 @@ const CardAdminProduct = ({ product }) => {
         <button className={styles.edit} onClick={() => setModalEdit(true)}>
           Editar
         </button>
-        <ModalEditProd isOpen={modalEdit} onClose={() => setModalEdit(false)} />
+        <ModalEditProd
+          isOpen={modalEdit}
+          onClose={() => setModalEdit(false)}
+          product={product}
+        />
         <button className={styles.delete}><MdDelete /></button>
       </div>
     </div>
