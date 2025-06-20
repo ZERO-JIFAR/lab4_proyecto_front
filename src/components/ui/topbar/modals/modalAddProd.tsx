@@ -2,14 +2,23 @@ import React, { useEffect, useState } from 'react';
 import styles from './modalAddProd.module.css';
 import { getTipos } from '../../../../http/typeRequest';
 import { getCategorias } from '../../../../http/categoryRequest';
-import { createProducto } from '../../../../http/productRequest';
+import { getWaistTypes } from '../../../../http/waistTypeRequest';
+import { getTallesByTipoId } from '../../../../http/talleRequest';
 import { ITipo } from '../../../../types/IType';
 import { ICategory } from '../../../../types/ICategory';
+import { IWaistType } from '../../../../types/IWaistType';
+import { ITalle } from '../../../../types/ITalle';
 import { uploadToCloudinary } from '../../../../utils/UploadToCloudinary';
+import axios from "axios";
 
 interface ModalAddProdProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface TalleConStock {
+  talle: ITalle;
+  stock: number;
 }
 
 const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
@@ -17,16 +26,20 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
   const [categorias, setCategorias] = useState<ICategory[]>([]);
   const [selectedTipoId, setSelectedTipoId] = useState<number | "">("");
   const [filteredCategorias, setFilteredCategorias] = useState<ICategory[]>([]);
+  const [waistTypes, setWaistTypes] = useState<IWaistType[]>([]);
+  const [selectedWaistTypeId, setSelectedWaistTypeId] = useState<number | "">("");
+  const [talles, setTalles] = useState<ITalle[]>([]);
+  const [selectedTalleId, setSelectedTalleId] = useState<number | "">("");
+  const [talleStock, setTalleStock] = useState<string>("");
+  const [tallesConStock, setTallesConStock] = useState<TalleConStock[]>([]);
   const [form, setForm] = useState({
     nombre: '',
     precio: '',
-    cantidad: '',
     descripcion: '',
     color: '',
     marca: '',
     categoria: '',
     genero: '',
-    talle: '',
     image: '',
     imageAdicional: '',
   });
@@ -42,17 +55,21 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     if (isOpen) {
       getTipos().then(setTipos).catch(() => setTipos([]));
       getCategorias().then(setCategorias).catch(() => setCategorias([]));
+      getWaistTypes().then(setWaistTypes).catch(() => setWaistTypes([]));
       setSelectedTipoId("");
+      setSelectedWaistTypeId("");
+      setTalles([]);
+      setSelectedTalleId("");
+      setTalleStock("");
+      setTallesConStock([]);
       setForm({
         nombre: '',
         precio: '',
-        cantidad: '',
         descripcion: '',
         color: '',
         marca: '',
         categoria: '',
         genero: '',
-        talle: '',
         image: '',
         imageAdicional: '',
       });
@@ -75,6 +92,16 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     }
     setForm(prev => ({ ...prev, categoria: '' }));
   }, [selectedTipoId, categorias]);
+
+  useEffect(() => {
+    if (selectedWaistTypeId) {
+      getTallesByTipoId(Number(selectedWaistTypeId)).then(setTalles).catch(() => setTalles([]));
+      setSelectedTalleId("");
+    } else {
+      setTalles([]);
+      setSelectedTalleId("");
+    }
+  }, [selectedWaistTypeId]);
 
   if (!isOpen) return null;
 
@@ -104,66 +131,105 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleAddTalleStock = () => {
+    if (!selectedTalleId || talleStock === "" || Number(talleStock) < 0) return;
+    const talleObj = talles.find(t => t.id === Number(selectedTalleId));
+    if (!talleObj) return;
+    if (tallesConStock.some(ts => ts.talle.id === talleObj.id)) {
+      alert("Ya agregaste ese talle.");
+      return;
+    }
+    setTallesConStock([...tallesConStock, { talle: talleObj, stock: Number(talleStock) }]);
+    setSelectedTalleId("");
+    setTalleStock("");
+  };
+
+  const handleRemoveTalleStock = (id: number) => {
+    setTallesConStock(tallesConStock.filter(ts => ts.talle.id !== id));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    let imageUrl = '';
-    let imageAdicionalUrl = '';
+  let imageUrl = '';
+  let imageAdicionalUrl = '';
 
-    // Subir imagen principal
-    if (imageFile) {
-      try {
-        imageUrl = await uploadToCloudinary(imageFile);
-      } catch (err) {
-        alert('Error al subir la imagen principal');
-        setLoading(false);
-        return;
-      }
-    }
-
-    // Subir imagen adicional
-    if (imageAdicionalFile) {
-      try {
-        imageAdicionalUrl = await uploadToCloudinary(imageAdicionalFile);
-      } catch (err) {
-        alert('Error al subir la imagen adicional');
-        setLoading(false);
-        return;
-      }
-    }
-
-    const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
-    if (!categoriaObj) {
-      alert('Selecciona una categoría válida');
+  if (imageFile) {
+    try {
+      imageUrl = await uploadToCloudinary(imageFile);
+    } catch (err) {
+      alert('Error al subir la imagen principal');
       setLoading(false);
       return;
     }
+  }
 
-    const producto = {
-      nombre: form.nombre,
-      cantidad: Number(form.cantidad),
-      precio: Number(form.precio),
-      descripcion: form.descripcion,
-      color: form.color,
-      marca: form.marca,
-      eliminado: false,
-      categoria: categoriaObj,
-      imagenUrl: imageUrl,
-      imagenesAdicionales: imageAdicionalUrl ? [imageAdicionalUrl] : [],
-      talles: [],
-    };
-
+  if (imageAdicionalFile) {
     try {
-      await createProducto(producto);
-      alert('Producto agregado!');
-      onClose();
+      imageAdicionalUrl = await uploadToCloudinary(imageAdicionalFile);
     } catch (err) {
-      alert('Error al agregar producto');
-    } finally {
+      alert('Error al subir la imagen adicional');
       setLoading(false);
+      return;
     }
+  }
+
+  const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
+  if (!categoriaObj) {
+    alert('Selecciona una categoría válida');
+    setLoading(false);
+    return;
+  }
+
+  if (tallesConStock.length === 0) {
+    alert('Debes agregar al menos un talle con stock');
+    setLoading(false);
+    return;
+  }
+
+  const producto = {
+    nombre: form.nombre,
+    cantidad: 0,
+    precio: Number(form.precio),
+    descripcion: form.descripcion,
+    color: form.color,
+    marca: form.marca,
+    imagenUrl: imageUrl,
+    imagenesAdicionales: imageAdicionalUrl ? [imageAdicionalUrl] : [],
+    categoria: { id: categoriaObj.id }
   };
+
+  // Crear un objeto para tallesConStock (no un array)
+  const tallesConStockObj: Record<number, number> = {};
+  tallesConStock.forEach(ts => {
+    tallesConStockObj[ts.talle.id] = ts.stock;
+  });
+
+  const productoConTallesDTO = {
+    producto,
+    tallesConStock: tallesConStockObj
+  };
+
+  try {
+    const APIURL = import.meta.env.VITE_API_URL;
+    await axios.post(`${APIURL}/productos/con-talles`, productoConTallesDTO, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: localStorage.getItem('token')
+          ? `Bearer ${localStorage.getItem('token')}`
+          : undefined,
+      },
+    });
+    alert('Producto agregado!');
+    onClose();
+  } catch (err) {
+    console.error('Error completo:', err);
+    alert('Error al agregar producto');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className={styles.overlay}>
@@ -178,9 +244,6 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
 
               <label>Precio:</label>
               <input type="number" name="precio" value={form.precio} onChange={handleInputChange} required />
-
-              <label>Stock:</label>
-              <input type="number" name="cantidad" value={form.cantidad} onChange={handleInputChange} required />
 
               <label>Descripción:</label>
               <input type="text" name="descripcion" value={form.descripcion} onChange={handleInputChange} />
@@ -245,6 +308,59 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                   <option key={color} value={color}>{color}</option>
                 ))}
               </select>
+
+              <label>Tipo de Talle:</label>
+              <select
+                value={selectedWaistTypeId}
+                onChange={e => setSelectedWaistTypeId(e.target.value ? Number(e.target.value) : "")}
+                required
+              >
+                <option value="">Seleccionar</option>
+                {waistTypes.map(wt => (
+                  <option key={wt.id} value={wt.id}>{wt.nombre}</option>
+                ))}
+              </select>
+
+              {selectedWaistTypeId && (
+                <>
+                  <label>Talle:</label>
+                  <select
+                    value={selectedTalleId}
+                    onChange={e => setSelectedTalleId(e.target.value ? Number(e.target.value) : "")}
+                  >
+                    <option value="">Seleccionar</option>
+                    {talles.map(t => (
+                      <option key={t.id} value={t.id}>{t.valor}</option>
+                    ))}
+                  </select>
+                  <label>Stock para este talle:</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={talleStock}
+                    onChange={e => setTalleStock(e.target.value)}
+                  />
+                  <button type="button" onClick={handleAddTalleStock} disabled={!selectedTalleId || !talleStock}>
+                    Agregar Talle
+                  </button>
+                </>
+              )}
+
+              {tallesConStock.length > 0 && (
+                <div style={{ marginTop: 10 }}>
+                  <strong>Talles agregados:</strong>
+                  <ul>
+                    {tallesConStock.map(ts => (
+                      <li key={ts.talle.id}>
+                        {ts.talle.valor} - Stock: {ts.stock}
+                        <button type="button" style={{ marginLeft: 8 }} onClick={() => handleRemoveTalleStock(ts.talle.id)}>
+                          Quitar
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 

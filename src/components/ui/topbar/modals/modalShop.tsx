@@ -11,41 +11,93 @@ interface ModalCarritoProps {
   onClose: () => void;
 }
 
+interface GroupedCartItem {
+  title: string;
+  price: number;
+  image: string;
+  color: string;
+  size: string;
+  quantity: number;
+}
+
 const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
   const { cart, removeFromCart, clearCart } = useCart();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, token } = useAuth();
   const [showPayModal, setShowPayModal] = useState(false);
+
+  // Agrupa los productos del carrito por título, color y talle
+  const groupedCart: GroupedCartItem[] = [];
+  cart.forEach(item => {
+    const found = groupedCart.find(
+      g =>
+        g.title === item.title &&
+        g.color === item.color &&
+        g.size === item.size
+    );
+    if (found) {
+      found.quantity += 1;
+    } else {
+      groupedCart.push({ ...item, quantity: 1 });
+    }
+  });
 
   // Maneja el pago con Mercado Pago
   const handlePay = async (
     email: string,
     nombre: string,
+    tipoEntrega: string,
     direccion: string,
     ciudad: string,
     tarjeta: string,
     vencimiento: string,
-    cvv: string
+    cvv: string,
+    metodoTarjeta: string
   ) => {
     try {
-      // 1. Crear la orden en tu backend
-      const ordenRes = await axios.post('/api/ordenes', {
-        items: cart,
-        email,
-        nombre,
-        direccion,
-        ciudad,
-        tarjeta,
-        vencimiento,
-        cvv
-      });
+      // 1. Crear la orden en tu backend (con token)
+      const ordenRes = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/ordenes`,
+        {
+          items: cart,
+          email,
+          nombre,
+          tipoEntrega,
+          direccion,
+          ciudad
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token || localStorage.getItem('token') || ''}`
+          }
+        }
+      );
       const ordenId = ordenRes.data.id;
 
       // 2. Llamar a tu endpoint de Mercado Pago para obtener la preferencia
-      const mpRes = await axios.post('/pay/mp', { id: [ordenId] });
-      window.location.href = mpRes.data.urlMP; // Redirige a Mercado Pago
+      const mpRes = await axios.post(
+        `${import.meta.env.VITE_API_URL}/pay/mp`,
+        {
+          ordenId: ordenId,
+          descripcion: `Compra de productos - Orden #${ordenId}`,
+          monto: cart.reduce((acc, item) => acc + item.price, 0),
+          emailComprador: email
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token || localStorage.getItem('token') || ''}`
+          }
+        }
+      );
+
+      // 3. Redirige a Mercado Pago
+      window.location.href = mpRes.data.urlMP;
       clearCart(); // Limpia el carrito localmente
-    } catch (err) {
-      alert('Error al iniciar el pago');
+    } catch (err: any) {
+      if (err.response && err.response.status === 403) {
+        alert('No tienes permisos para realizar esta acción. Inicia sesión nuevamente.');
+      } else {
+        alert('Error al iniciar el pago');
+      }
     }
   };
 
@@ -56,6 +108,22 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
     }
     setShowPayModal(true);
   };
+
+  // Elimina todos los productos de ese grupo del carrito
+  const handleRemoveGroup = (group: GroupedCartItem) => {
+    for (let i = cart.length - 1; i >= 0; i--) {
+      if (
+        cart[i].title === group.title &&
+        cart[i].color === group.color &&
+        cart[i].size === group.size
+      ) {
+        removeFromCart(i);
+      }
+    }
+  };
+
+  // Suma total del carrito
+  const total = groupedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
   if (!show) return null;
 
@@ -70,10 +138,10 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
         </div>
 
         <div className={styles.cartContent}>
-          {cart.length === 0 ? (
+          {groupedCart.length === 0 ? (
             <p className={styles.cartEmpty}>No hay artículos en el carrito...</p>
           ) : (
-            cart.map((item, index) => (
+            groupedCart.map((item, index) => (
               <div key={index} className={styles.cartItem}>
                 <img
                   src={item.image}
@@ -81,25 +149,34 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
                   className={styles.cartItemImage}
                 />
                 <div className={styles.cartItemDetails}>
-                  <p className={styles.cartItemTitle}>{item.title}</p>
+                  <p className={styles.cartItemTitle}>
+                    {item.title} {item.quantity > 1 && <span style={{ color: "#aaa" }}>x{item.quantity}</span>}
+                  </p>
                   <p className={styles.cartItemOptions}>
                     Color: {item.color} | Talle: {item.size}
                   </p>
-                  <p className={styles.cartItemPrice}>${item.price}</p>
+                  <p className={styles.cartItemPrice}>
+                    ${item.price * item.quantity}
+                  </p>
                 </div>
-                <button className={styles.removeButton} onClick={() => removeFromCart(index)}>✕</button>
+                <button className={styles.removeButton} onClick={() => handleRemoveGroup(item)}>✕</button>
               </div>
             ))
           )}
         </div>
 
-        {cart.length > 0 && (
-          <button
-            className={styles.cartCheckout}
-            onClick={handleOpenPayModal}
-          >
-            Comprar
-          </button>
+        {groupedCart.length > 0 && (
+          <>
+            <div style={{ textAlign: "right", fontWeight: "bold", fontSize: "1.1rem", margin: "10px 0" }}>
+              Total: ${total}
+            </div>
+            <button
+              className={styles.cartCheckout}
+              onClick={handleOpenPayModal}
+            >
+              Comprar
+            </button>
+          </>
         )}
       </div>
 

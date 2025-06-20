@@ -1,56 +1,57 @@
 import React, { useState } from 'react';
 import styles from './cardProduct.module.css';
 import ProductModal from '../topbar/modals/modalProduct';
+import { IProduct } from '../../../types/IProduct';
 
 interface CardProductProps {
-    title: string;
-    price: number;
-    image: string;
-    images?: string[];      // Imágenes adicionales para el modal
-    colors?: string[];      // Colores disponibles
-    sizes?: string[];       // Talles disponibles
-    type?: string;
-    category?: string;
-    description?: string;
+    product: IProduct | undefined;
 }
 
-const CardProduct: React.FC<CardProductProps> = ({
-    title,
-    price,
-    image,
-    images = [image],
-    colors = [],
-    sizes = [],
-    type = 'Running',
-    category = 'General',
-    description = 'Descripción no disponible.'
-}) => {
+const CardProduct: React.FC<CardProductProps> = ({ product }) => {
     const [showModal, setShowModal] = useState(false);
+
+    if (!product) return null;
+
+    // Debug: Verifica qué talles llegan para este producto
+    console.log('Talles para producto', product.nombre, product.talles);
+
+    // Extraer talles disponibles (solo los que tiene stock > 0)
+    const tallesDisponibles = product.talles
+        ? product.talles
+            .filter(tp => tp.stock > 0 && tp.talle && (tp.talle.valor || tp.talle.nombre))
+            .map(tp => tp.talle.valor ? tp.talle.valor : tp.talle.nombre)
+        : [];
+
+    const colorDisponible = product.color || 'N/A';
+    const imagenes = [
+        product.imagenUrl,
+        ...(Array.isArray(product.imagenesAdicionales) ? product.imagenesAdicionales : [])
+    ].filter(Boolean);
 
     return (
         <>
             <div className={styles.card} onClick={() => setShowModal(true)}>
                 <div className={styles.imageContainer}>
-                    <img src={image} alt={title} className={styles.image} />
+                    <img src={product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'} alt={product.nombre} className={styles.image} />
                 </div>
                 <div className={styles.content}>
-                    <p className={styles.title}>{title}</p>
+                    <p className={styles.title}>{product.nombre}</p>
                     <p className={styles.price}>
-                        <span>${price}</span>
+                        <span>${product.precio}</span>
                     </p>
                 </div>
             </div>
 
             {showModal && (
                 <ProductModal
-                    images={images}
-                    colors={colors}
-                    sizes={sizes}
-                    title={title}
-                    price={price}
-                    type={type}
-                    category={category}
-                    description={description}
+                    images={imagenes}
+                    color={colorDisponible}
+                    sizes={tallesDisponibles}
+                    title={product.nombre}
+                    price={product.precio}
+                    type={product.categoria?.tipo?.nombre || ''}
+                    category={product.categoria?.nombre || ''}
+                    description={product.descripcion || ''}
                     onClose={() => setShowModal(false)}
                 />
             )}

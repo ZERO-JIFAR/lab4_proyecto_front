@@ -83,17 +83,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
             </div>
             <div className={styles.subSection}>
                 <div>• Talles:</div>
-                <div className={styles.sizes}>
-                {sizes.map((sz) => (
-                    <button
-                    key={sz}
-                    className={`${styles.sizeBtn} ${selectedSize === sz ? styles.selected : ''}`}
-                    onClick={() => setSelectedSize(sz)}
-                    >
-                    {sz}
-                    </button>
-                ))}
-                </div>
+              <div className={styles.sizes}>
+    {sizes.map((sz) => (
+        <button
+            key={sz}
+            className={`${styles.sizeBtn} ${selectedSize === sz ? styles.selected : ''}`}
+            onClick={() => setSelectedSize(sz)}
+        >
+            {sz}
+        </button>
+    ))}
+</div>
             </div>
             <div className={styles.subSection}>• TIPO: {type}</div>
             <div className={styles.subSection}>• CATEGORIA: {category}</div>
