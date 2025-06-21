@@ -62,19 +62,47 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
                 descripcion: product.descripcion || '',
                 color: product.color || '',
                 marca: product.marca || '',
-                categoria: String(product.categoria?.id || ''),
+                categoria: '', // todavía no lo seteamos
                 image: product.imagenUrl || '',
                 imageAdicional: product.imagenesAdicionales?.[0] || ''
             });
 
-            setSelectedTipoId(product.categoria?.tipo?.id || '');
-            setSelectedWaistTypeId(product.talles?.[0]?.talle?.tipo?.id || '');
+            getTipos().then(setTipos).catch(console.error);
+
+            getCategorias()
+                .then((cats) => {
+                    setCategorias(cats);
+                    const tipoId = product.categoria?.tipo?.id || '';
+                    const categoriaId = product.categoria?.id || '';
+
+                    setSelectedTipoId(tipoId); // Esto disparará el filtro
+
+                    // Esperamos a que setFilteredCategorias se complete en el siguiente efecto
+                    // pero guardamos la categoría para setearla después
+                    setTimeout(() => {
+                        setForm(prev => ({ ...prev, categoria: String(categoriaId) }));
+                    }, 100); // pequeño delay para esperar el filtro
+                })
+                .catch(console.error);
+
+            getWaistTypes()
+                .then((wt) => {
+                    setWaistTypes(wt);
+                    const waistTypeId = product.talles?.[0]?.talle?.tipoTalle?.id || '';
+                    const exists = wt.some(w => w.id === Number(waistTypeId));
+                    if (exists) {
+                        setSelectedWaistTypeId(Number(waistTypeId));
+                    }
+                })
+                .catch(console.error);
+
             setTallesConStock(
                 (product.talles || []).map(tp => ({
                     talle: tp.talle,
                     stock: tp.stock
                 }))
             );
+
             if (product.imagenUrl) setImagePreview(product.imagenUrl);
             if (product.imagenesAdicionales?.[0]) setImageAdicionalPreview(product.imagenesAdicionales[0]);
         }
@@ -152,9 +180,10 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
         e.preventDefault();
     setLoading(true);
 
-    let imageUrl = '';
-    let imageAdicionalUrl = '';
+    let imageUrl = form.image;
+    let imageAdicionalUrl = form.imageAdicional;
 
+    // Subir imagen si hay una nueva
     if (imageFile) {
         try {
             imageUrl = await uploadToCloudinary(imageFile);
@@ -189,6 +218,7 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
     }
 
     const producto = {
+        id: product?.id,
         nombre: form.nombre,
         cantidad: 0,
         precio: Number(form.precio),
@@ -213,23 +243,44 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
 
     try {
         const APIURL = import.meta.env.VITE_API_URL;
-        await axios.post(`${APIURL}/productos/con-talles`, productoConTallesDTO, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: localStorage.getItem('token')
-                ? `Bearer ${localStorage.getItem('token')}`
-                : undefined,
-            },
-        });
-        alert('Producto agregado!');
+
+        if (product?.id) {
+            // PUT para editar
+            await axios.put(`${APIURL}/productos/con-talles/${product.id}`, productoConTallesDTO, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem('token')
+                        ? `Bearer ${localStorage.getItem('token')}`
+                        : undefined,
+                },
+            });
+            alert('Producto actualizado!');
+        } else {
+            // POST para agregar
+            await axios.post(`${APIURL}/productos/con-talles`, productoConTallesDTO, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: localStorage.getItem('token')
+                        ? `Bearer ${localStorage.getItem('token')}`
+                        : undefined,
+                },
+            });
+            alert('Producto agregado!');
+        }
+
         onClose();
-    } catch (err) {
+    } catch (err: any) {
         console.error('Error completo:', err);
-        alert('Error al agregar producto');
+        if (axios.isAxiosError(err)) {
+            const message = err.response?.data?.message || err.message;
+            alert(`Error al guardar producto: ${message}`);
+        } else {
+            alert(`Error inesperado: ${err.message}`);
+        }
     } finally {
         setLoading(false);
     }
-    };
+};
 
     return (
         <div className={styles.overlay}>
