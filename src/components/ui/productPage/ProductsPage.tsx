@@ -29,6 +29,7 @@ const ProductsPage = () => {
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
     const { isAdmin } = useAuth();
+    const [selectedWaistType, setSelectedWaistType] = useState<number | "">("");
 
     // Extiende el tipo para aceptar tallesProducto temporalmente
     type ProductWithTallesProducto = IProduct & { tallesProducto?: any[] };
@@ -54,30 +55,38 @@ const ProductsPage = () => {
     }, []);
 
     // Filtrar productos por texto, tipo, categoría, talle, color y marca
-    const filteredProducts = products.filter((prod) => {
-        const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
-        const matchesTipo = selectedTipo === "" || (prod.categoria && prod.categoria.tipo && prod.categoria.tipo.id === selectedTipo);
-        const matchesCategoria = selectedCategoria === "" || (prod.categoria && prod.categoria.id === selectedCategoria);
-        const matchesTalle =
-            selectedTalle === "" ||
-            (prod.talles && prod.talles.some(tp => tp.talle.nombre === selectedTalle));
-        const matchesColor = selectedColor === "" || (prod.color && prod.color.toLowerCase() === selectedColor.toLowerCase());
-        const matchesMarca = selectedMarca === "" || (prod.marca && prod.marca.toLowerCase() === selectedMarca.toLowerCase());
-        const matchesMinPrice = minPrice === '' || prod.precio >= Number(minPrice);
-        const matchesMaxPrice = maxPrice === '' || prod.precio <= Number(maxPrice);
+ const filteredProducts = products.filter((prod) => {
+    const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
+    const matchesTipo = selectedTipo === "" || (prod.categoria && prod.categoria.tipo && prod.categoria.tipo.id === selectedTipo);
+    const matchesCategoria = selectedCategoria === "" || (prod.categoria && prod.categoria.id === selectedCategoria);
 
-        return (
-            matchesSearch &&
-            matchesTipo &&
-            matchesCategoria &&
-            matchesTalle &&
-            matchesColor &&
-            matchesMarca &&
-            matchesMinPrice &&
-            matchesMaxPrice
+    // FILTRO CORRECTO POR TALLE: compara por nombre y valor, y solo muestra productos que tengan ese talle
+    const matchesTalle =
+        selectedTalle === "" ||
+        (
+            prod.talles &&
+            prod.talles.some(tp =>
+                (tp.talle.nombre === selectedTalle || tp.talle.valor === selectedTalle)
+                && tp.stock > 0 // Solo si tiene stock
+            )
         );
-    });
 
+    const matchesColor = selectedColor === "" || (prod.color && prod.color.toLowerCase() === selectedColor.toLowerCase());
+    const matchesMarca = selectedMarca === "" || (prod.marca && prod.marca.toLowerCase() === selectedMarca.toLowerCase());
+    const matchesMinPrice = minPrice === '' || prod.precio >= Number(minPrice);
+    const matchesMaxPrice = maxPrice === '' || prod.precio <= Number(maxPrice);
+
+    return (
+        matchesSearch &&
+        matchesTipo &&
+        matchesCategoria &&
+        matchesTalle &&
+        matchesColor &&
+        matchesMarca &&
+        matchesMinPrice &&
+        matchesMaxPrice
+    );
+});
     // Ordenar productos según el filtro seleccionado
     const sortedProducts = [...filteredProducts].sort((a, b) => {
         if (sort === 'precioAsc') return a.precio - b.precio;
@@ -91,26 +100,28 @@ const ProductsPage = () => {
         : categorias.filter(cat => cat.tipo && cat.tipo.id === selectedTipo);
 
     return (
-        <div className={styles.page}>
-            <Filters
-                tipos={tipos}
-                categorias={categoriasFiltradas}
-                selectedTipo={selectedTipo}
-                setSelectedTipo={setSelectedTipo}
-                selectedCategoria={selectedCategoria}
-                setSelectedCategoria={setSelectedCategoria}
-                selectedTalle={selectedTalle}
-                setSelectedTalle={setSelectedTalle}
-                selectedColor={selectedColor}
-                setSelectedColor={setSelectedColor}
-                selectedMarca={selectedMarca}
-                setSelectedMarca={setSelectedMarca}
-                colors={COLORS}
-                marcas={MARCAS}
-                minPrice={minPrice}
-                setMinPrice={setMinPrice}
-                maxPrice={maxPrice}
-                setMaxPrice={setMaxPrice}
+    <div className={styles.page}>
+        <Filters
+            tipos={tipos}
+            categorias={categoriasFiltradas}
+            selectedTipo={selectedTipo}
+            setSelectedTipo={setSelectedTipo}
+            selectedCategoria={selectedCategoria}
+            setSelectedCategoria={setSelectedCategoria}
+            selectedWaistType={selectedWaistType} // <-- AGREGA ESTO
+            setSelectedWaistType={setSelectedWaistType} // <-- AGREGA ESTO
+            selectedTalle={selectedTalle}
+            setSelectedTalle={setSelectedTalle}
+            selectedColor={selectedColor}
+            setSelectedColor={setSelectedColor}
+            selectedMarca={selectedMarca}
+            setSelectedMarca={setSelectedMarca}
+            colors={COLORS}
+            marcas={MARCAS}
+            minPrice={minPrice}
+            setMinPrice={setMinPrice}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
             />
             <div className={styles.right}>
                 <ProductControls

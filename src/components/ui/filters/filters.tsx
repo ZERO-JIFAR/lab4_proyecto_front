@@ -121,20 +121,22 @@ const Filters: React.FC<FiltersProps> = ({
             <div className={styles.seccion}>
                 <h4>Talles</h4>
                 <div className={styles.talles}>
-                    {talles.length === 0 ? (
-                        <span style={{ color: '#aaa', fontSize: 13 }}>Selecciona un tipo de talle</span>
-                    ) : (
-                        talles.map(talle => (
-                            <button
-                                key={talle.id}
-                                className={selectedTalle === talle.nombre ? styles.selectedTalle : ''}
-                                onClick={() => setSelectedTalle(selectedTalle === talle.nombre ? "" : talle.nombre)}
-                                type="button"
-                            >
-                                {talle.valor || talle.nombre}
-                            </button>
-                        ))
-                    )}
+                   
+{talles.length === 0 ? (
+    <span style={{ color: '#aaa', fontSize: 13 }}>Selecciona un tipo de talle</span>
+) : (
+    talles.map(talle => (
+        <button
+            key={talle.id}
+            className={selectedTalle === talle.valor ? styles.selectedTalle : ''}
+            onClick={() => setSelectedTalle(selectedTalle === talle.valor ? "" : talle.valor)}
+            type="button"
+        >
+            {talle.valor || talle.nombre}
+        </button>
+    ))
+)}
+
                 </div>
             </div>
 
