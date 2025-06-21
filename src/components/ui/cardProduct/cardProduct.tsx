@@ -2,18 +2,17 @@ import React, { useState } from 'react';
 import styles from './cardProduct.module.css';
 import ProductModal from '../topbar/modals/modalProduct';
 import { IProduct } from '../../../types/IProduct';
+import { useCart } from '../../../context/CartContext';
 
 interface CardProductProps {
-    product: IProduct | undefined;
+    product: IProduct;
 }
 
 const CardProduct: React.FC<CardProductProps> = ({ product }) => {
     const [showModal, setShowModal] = useState(false);
+    const { cart } = useCart();
 
     if (!product) return null;
-
-    // Debug: Verifica qué talles llegan para este producto
-    console.log('Talles para producto', product.nombre, product.talles);
 
     // Extraer talles disponibles (solo los que tiene stock > 0)
     const tallesDisponibles = product.talles
@@ -21,12 +20,6 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
             .filter(tp => tp.stock > 0 && tp.talle && (tp.talle.valor || tp.talle.nombre))
             .map(tp => tp.talle.valor ? tp.talle.valor : tp.talle.nombre)
         : [];
-
-    const colorDisponible = product.color || 'N/A';
-    const imagenes = [
-        product.imagenUrl,
-        ...(Array.isArray(product.imagenesAdicionales) ? product.imagenesAdicionales : [])
-    ].filter(Boolean);
 
     return (
         <>
@@ -44,14 +37,8 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
 
             {showModal && (
                 <ProductModal
-                    images={imagenes}
-                    color={colorDisponible}
-                    sizes={tallesDisponibles}
-                    title={product.nombre}
-                    price={product.precio}
-                    type={product.categoria?.tipo?.nombre || ''}
-                    category={product.categoria?.nombre || ''}
-                    description={product.descripcion || ''}
+                    product={product}
+                    cart={cart}
                     onClose={() => setShowModal(false)}
                 />
             )}
