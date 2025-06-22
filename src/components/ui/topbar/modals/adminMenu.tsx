@@ -21,8 +21,9 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ visible }) => {
       <button className={styles.menuButton} onClick={() => navigate('/SearchItem')}>
         Productos
       </button>
-      <button className={styles.menuButton}>Ver Estadísticas</button>
-
+      <button className={styles.menuButton} onClick={() => navigate('/admin-usuarios')}>
+        Administrar Usuarios
+      </button>
       <ModalAddProd isOpen={modalAdd} onClose={() => setModalAdd(false)} />
     </div>
   );

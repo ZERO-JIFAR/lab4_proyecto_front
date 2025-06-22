@@ -1,0 +1,91 @@
+.container {
+  padding: 32px 16px;
+  max-width: 900px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+}
+
+.title {
+  margin-bottom: 24px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #222;
+  text-align: center;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fafbfc;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.table th, .table td {
+  padding: 12px 10px;
+  text-align: left;
+}
+
+.table th {
+  background: #f3f4f6;
+  color: #333;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.table tr {
+  transition: background 0.2s;
+}
+
+.table tr:hover {
+  background: #f1f5f9;
+}
+
+.table tr.disabled {
+  background: #ffeaea !important;
+  color: #b91c1c;
+}
+
+.button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 5px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background 0.2s;
+}
+
+.button:disabled {
+  background: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.button.secondary {
+  background: #f59e42;
+  color: #fff;
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding: 12px 2px;
+  }
+  .table th, .table td {
+    padding: 8px 4px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Al final de tu AdminUserPage.module.css */
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+}
