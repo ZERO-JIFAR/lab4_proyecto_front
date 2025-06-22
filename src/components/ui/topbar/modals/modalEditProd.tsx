@@ -204,6 +204,11 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
         }
     }
 
+    // Esto evita enviar un "nombre de archivo" si no hay URL válida
+    if (!imageAdicionalFile && !form.imageAdicional.startsWith('http')) {
+        imageAdicionalUrl = '';
+    }
+
     const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
     if (!categoriaObj) {
         alert('Selecciona una categoría válida');
