@@ -41,6 +41,11 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
     }
   });
 
+  // Suma total del carrito
+  const total = groupedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  if (!show) return null;
+
   // Maneja el pago con Mercado Pago
   const handlePay = async (
     email: string,
@@ -63,7 +68,7 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
           nombre,
           tipoEntrega,
           direccion,
-          ciudad
+          ciudad,
         },
         {
           headers: {
@@ -77,10 +82,7 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
       const mpRes = await axios.post(
         `${import.meta.env.VITE_API_URL}/pay/mp`,
         {
-          ordenId: ordenId,
-          descripcion: `Compra de productos - Orden #${ordenId}`,
-          monto: cart.reduce((acc, item) => acc + item.price, 0),
-          emailComprador: email
+          id: [ordenId]
         },
         {
           headers: {
@@ -89,8 +91,25 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
         }
       );
 
-      // 3. Redirige a Mercado Pago
-      window.location.href = mpRes.data.urlMP;
+      // 3. Renderiza el botón de Mercado Pago usando el SDK
+      const preferenceId = mpRes.data.preferenceId;
+      const urlMP = mpRes.data.urlMP;
+
+      // Opción 1: Redirigir directamente (más simple y seguro)
+      window.location.href = urlMP;
+
+      // Opción 2: Renderizar el botón en el frontend (requiere un div con id 'mp-checkout')
+      // if (window.MercadoPago) {
+      //   const mp = new window.MercadoPago('TU_PUBLIC_KEY', { locale: 'es-AR' });
+      //   mp.checkout({
+      //     preference: { id: preferenceId },
+      //     render: {
+      //       container: '#mp-checkout',
+      //       label: 'Pagar con Mercado Pago'
+      //     }
+      //   });
+      // }
+
       clearCart(); // Limpia el carrito localmente
     } catch (err: any) {
       if (err.response && err.response.status === 403) {
@@ -122,11 +141,6 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
     }
   };
 
-  // Suma total del carrito
-  const total = groupedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
-  if (!show) return null;
-
   return (
     <>
       <div className={`${styles.cartSidebar} ${show ? styles.open : ''}`}>
@@ -149,17 +163,20 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
                   className={styles.cartItemImage}
                 />
                 <div className={styles.cartItemDetails}>
-                  <p className={styles.cartItemTitle}>
-                    {item.title} {item.quantity > 1 && <span style={{ color: "#aaa" }}>x{item.quantity}</span>}
-                  </p>
-                  <p className={styles.cartItemOptions}>
+                  <p className={styles.cartItemTitle}>{item.title}</p>
+                  <div className={styles.cartItemOptions}>
                     Color: {item.color} | Talle: {item.size}
-                  </p>
-                  <p className={styles.cartItemPrice}>
-                    ${item.price * item.quantity}
-                  </p>
+                  </div>
+                  <div className={styles.cartItemPrice}>
+                    ${item.price} x {item.quantity}
+                  </div>
                 </div>
-                <button className={styles.removeButton} onClick={() => handleRemoveGroup(item)}>✕</button>
+                <button
+                  className={styles.removeBtn}
+                  onClick={() => handleRemoveGroup(item)}
+                >
+                  Quitar
+                </button>
               </div>
             ))
           )}
@@ -167,7 +184,7 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
 
         {groupedCart.length > 0 && (
           <>
-            <div style={{ textAlign: "right", fontWeight: "bold", fontSize: "1.1rem", margin: "10px 0" }}>
+            <div className={styles.cartTotal}>
               Total: ${total}
             </div>
             <button
@@ -186,6 +203,9 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
         onClose={() => setShowPayModal(false)}
         onPay={handlePay}
       />
+
+      {/* Si quieres usar el botón renderizado por el SDK, agrega este div: */}
+      {/* <div id="mp-checkout"></div> */}
     </>
   );
 };

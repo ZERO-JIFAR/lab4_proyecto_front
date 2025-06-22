@@ -29,22 +29,27 @@ const Landing = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalProduct, setModalProduct] = useState<IProduct | null>(null);
 
-  const { addToCart } = useCart();
+  const { cart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const all = await getProductos();
-        setProducts(all);
+        // Normaliza los productos para que siempre tengan el campo talles
+        const normalized = all.map((prod: any) => ({
+          ...prod,
+          talles: prod.talles ?? prod.tallesProducto ?? []
+        }));
+        setProducts(normalized);
 
         // Shuffle for randomness and pick featured
-        const shuffled = [...all].sort(() => Math.random() - 0.5);
+        const shuffled = [...normalized].sort(() => Math.random() - 0.5);
         setFeatured(shuffled.slice(0, NUM_FEATURED_TOTAL));
 
         // Obtener todas las categorías únicas presentes en los productos
         const allCategories = Array.from(
           new Set(
-            all
+            normalized
               .map(p => p.categoria?.nombre)
               .filter((x): x is string => Boolean(x))
           )
@@ -57,7 +62,7 @@ const Landing = () => {
         // Para cada categoría, elegir 3 productos aleatorios de esa categoría
         const byCategory: Record<string, IProduct[]> = {};
         selectedCategories.forEach(category => {
-          const prods = all.filter(
+          const prods = normalized.filter(
             p => p.categoria?.nombre === category
           );
           byCategory[category] = getRandomElements(prods, NUM_CATEGORY_PRODUCTS);
@@ -93,22 +98,6 @@ const Landing = () => {
   const handleOpenModal = (product: IProduct) => {
     setModalProduct(product);
     setShowModal(true);
-  };
-
-  // Agrega al carrito el producto (elige primer talle y color si existen)
-  const handleBuy = (product: IProduct) => {
-    const talle = product.talles && product.talles.length > 0
-      ? product.talles[0].talle.nombre
-      : 'Único';
-    const color = product.color || 'N/A';
-    addToCart({
-      title: product.nombre,
-      price: product.precio,
-      image: product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png',
-      color,
-      size: talle
-    });
-    alert('Producto agregado al carrito');
   };
 
   return (
@@ -179,7 +168,10 @@ const Landing = () => {
                     <p>{product.descripcion || 'Sin descripción.'}</p>
                     <div className={styles.cardPriceWrapper}>
                       <span className={styles.cardPrice}>${product.precio}</span>
-                      <button className={styles.cardButton} onClick={() => handleBuy(product)}>
+                      <button
+                        className={styles.cardButton}
+                        onClick={() => handleOpenModal(product)}
+                      >
                         Comprar
                       </button>
                     </div>
@@ -203,23 +195,8 @@ const Landing = () => {
       {/* Modal de vista previa */}
       {showModal && modalProduct && (
         <ProductModal
-          images={[
-            modalProduct.imagenUrl,
-            ...(Array.isArray(modalProduct.imagenesAdicionales)
-              ? modalProduct.imagenesAdicionales
-              : [])
-          ].filter(Boolean)}
-          color={modalProduct.color || ''}
-          sizes={
-            modalProduct.talles && modalProduct.talles.length > 0
-              ? modalProduct.talles.map(tp => tp.talle.nombre)
-              : []
-          }
-          title={modalProduct.nombre}
-          price={modalProduct.precio}
-          type={modalProduct.categoria?.tipo?.nombre || ''}
-          category={modalProduct.categoria?.nombre || ''}
-          description={modalProduct.descripcion || ''}
+          product={modalProduct}
+          cart={cart}
           onClose={() => setShowModal(false)}
         />
       )}
