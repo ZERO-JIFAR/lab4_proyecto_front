@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getAllUsers, updateUser } from '../../../http/userRequest';
 import styles from './AdminUserPage.module.css';
+import Topbar from '../../ui/topbar/topbar';
+import { FaUserShield, FaUserAlt } from "react-icons/fa";
+import { MdOutlineLockOpen, MdOutlineLock } from "react-icons/md";
 
 interface Usuario {
   id: number;
@@ -67,48 +70,69 @@ const AdminUsersPage: React.FC = () => {
   const usuariosFiltrados = usuarios;
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>Administrar Usuarios</h2>
-      {loading && <p>Cargando usuarios...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {usuariosFiltrados.map((usuario) => (
-            <tr key={usuario.id} className={usuario.eliminado ? styles.disabled : ''}>
-              <td>{usuario.id}</td>
-              <td>{usuario.nombre}</td>
-              <td>{usuario.email}</td>
-              <td>{usuario.rol === 'ADMIN' ? 'Admin' : 'Cliente'}</td>
-              <td>{usuario.eliminado ? 'Deshabilitado' : 'Activo'}</td>
-              <td>
-                <button
-                  className={styles.button}
-                  onClick={() => handleToggleActivo(usuario)}
-                >
-                  {usuario.eliminado ? 'Habilitar' : 'Deshabilitar'}
-                </button>
-                <button
-                  className={`${styles.button} ${styles.secondary}`}
-                  onClick={() => handleToggleRol(usuario)}
-                  disabled={usuario.eliminado}
-                >
-                  Cambiar a {usuario.rol === 'ADMIN' ? 'Cliente' : 'Admin'}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className={styles.landingContainer}>
+      <Topbar />
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <h2 className={styles.title}>Administrar Usuarios</h2>
+          {loading && <p>Cargando usuarios...</p>}
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usuariosFiltrados.map((usuario) => (
+                <tr key={usuario.id} className={usuario.eliminado ? styles.disabled : ''}>
+                  <td>{usuario.id}</td>
+                  <td>{usuario.nombre}</td>
+                  <td>{usuario.email}</td>
+                  <td>{usuario.rol === 'ADMIN' ? 'Admin' : 'Cliente'}</td>
+                  <td>{usuario.eliminado ? 'Deshabilitado' : 'Activo'}</td>
+                  <td>
+                    <button
+                      className={`${styles.button} ${usuario.eliminado ? styles.enable : styles.disable}`}
+                      onClick={() => handleToggleActivo(usuario)}
+                    >
+                      {usuario.eliminado ? (
+                        <>
+                          <MdOutlineLockOpen /> Habilitar
+                        </>
+                      ) : (
+                        <>
+                          <MdOutlineLock /> Deshabilitar
+                        </>
+                      )}
+                    </button>
+                    <button
+                      className={`${styles.button} ${styles.role}`}
+                      onClick={() => handleToggleRol(usuario)}
+                      disabled={usuario.eliminado}
+                    >
+                      {usuario.rol === 'ADMIN' ? (
+                        <>
+                          <FaUserAlt /> Cambiar a Cliente
+                        </>
+                      ) : (
+                        <>
+                          <FaUserShield /> Cambiar a Admin
+                        </>
+                      )}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
