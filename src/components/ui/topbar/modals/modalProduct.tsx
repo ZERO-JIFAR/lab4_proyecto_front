@@ -43,6 +43,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
         ...(Array.isArray(product.imagenesAdicionales) ? product.imagenesAdicionales : [])
     ].filter(Boolean);
 
+    // Leer descuento de localStorage
+    const discount = Number(localStorage.getItem(`discount_${product.id}`)) || 0;
+    const hasDiscount = discount > 0 && discount <= 90;
+    const discountedPrice = hasDiscount
+        ? Math.round(product.precio * (1 - discount / 100))
+        : product.precio;
+
     const handleAddToCart = () => {
         if (!selectedSize) return alert("Selecciona un talle");
         if (getStockDisponible(selectedSize) <= 0) {
@@ -51,7 +58,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         }
         addToCart({
             title: product.nombre,
-            price: product.precio,
+            price: discountedPrice,
             image: images[imageIndex],
             color: product.color || '',
             size: selectedSize
@@ -91,7 +98,23 @@ const ProductModal: React.FC<ProductModalProps> = ({
                         >
                             {productoAgotado ? "Sin stock" : "Agregar al Carrito"}
                         </button>
-                        <div className={styles.price}>${product.precio}</div>
+                        <div className={styles.price}>
+                            {hasDiscount ? (
+                                <>
+                                    <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
+                                        ${product.precio}
+                                    </span>
+                                    <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
+                                        ${discountedPrice}
+                                    </span>
+                                    <span style={{ color: '#4caf50', fontWeight: 'bold', marginLeft: 8 }}>
+                                        (-{discount}%)
+                                    </span>
+                                </>
+                            ) : (
+                                <>${product.precio}</>
+                            )}
+                        </div>
                         <div className={styles.productTitle}>{product.nombre}</div>
                     </div>
                 </div>
