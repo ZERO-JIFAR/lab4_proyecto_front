@@ -1,6 +1,11 @@
+import React, { useEffect, useState } from 'react';
 import styles from './filters.module.css';
 import { ITipo } from '../../../types/IType';
 import { ICategory } from '../../../types/ICategory';
+import { IWaistType } from '../../../types/IWaistType';
+import { ITalle } from '../../../types/ITalle';
+import { getWaistTypes } from '../../../http/waistTypeRequest';
+import { getTallesByTipoId } from '../../../http/talleRequest';
 
 interface FiltersProps {
     tipos: ITipo[];
@@ -9,6 +14,8 @@ interface FiltersProps {
     setSelectedTipo: (id: number | "") => void;
     selectedCategoria: number | "";
     setSelectedCategoria: (id: number | "") => void;
+    selectedWaistType: number | "";
+    setSelectedWaistType: (id: number | "") => void;
     selectedTalle: string;
     setSelectedTalle: (talle: string) => void;
     selectedColor: string;
@@ -23,12 +30,6 @@ interface FiltersProps {
     setMaxPrice: (value: string) => void;
 }
 
-const tallesDisponibles = [
-    '3.5Y', '4Y', '4.5Y', '5Y', '5.5Y', '6Y',
-    '6.5Y', '7Y', '7.5Y', '8Y', '8.5Y', '9Y',
-    '9.5Y', '10Y', '10.5Y', '11Y', '11.5Y', '12Y', 'S', 'L'
-];
-
 const Filters: React.FC<FiltersProps> = ({
     tipos,
     categorias,
@@ -36,6 +37,8 @@ const Filters: React.FC<FiltersProps> = ({
     setSelectedTipo,
     selectedCategoria,
     setSelectedCategoria,
+    selectedWaistType,
+    setSelectedWaistType,
     selectedTalle,
     setSelectedTalle,
     selectedColor,
@@ -49,6 +52,25 @@ const Filters: React.FC<FiltersProps> = ({
     maxPrice,
     setMaxPrice
 }) => {
+    const [waistTypes, setWaistTypes] = useState<IWaistType[]>([]);
+    const [talles, setTalles] = useState<ITalle[]>([]);
+
+    // Cargar tipos de talle al montar
+    useEffect(() => {
+        getWaistTypes().then(setWaistTypes).catch(() => setWaistTypes([]));
+    }, []);
+
+    // Cargar talles cuando cambia el tipo de talle
+    useEffect(() => {
+        if (selectedWaistType) {
+            getTallesByTipoId(Number(selectedWaistType)).then(setTalles).catch(() => setTalles([]));
+            setSelectedTalle(""); // Limpiar talle seleccionado al cambiar tipo
+        } else {
+            setTalles([]);
+            setSelectedTalle("");
+        }
+    }, [selectedWaistType, setSelectedTalle]);
+
     return (
         <aside className={styles.sidebar}>
             <h2 className={styles.titulo}>Filtrar</h2>
@@ -81,6 +103,43 @@ const Filters: React.FC<FiltersProps> = ({
                 </select>
             </div>
 
+            {/* Filtro por Tipo de Talle */}
+            <div className={styles.seccion}>
+                <h4>Tipo de Talle</h4>
+                <select
+                    value={selectedWaistType}
+                    onChange={e => setSelectedWaistType(e.target.value === "" ? "" : Number(e.target.value))}
+                >
+                    <option value="">Todos</option>
+                    {waistTypes.map(wt => (
+                        <option key={wt.id} value={wt.id}>{wt.nombre}</option>
+                    ))}
+                </select>
+            </div>
+
+            {/* Filtro por Talle */}
+            <div className={styles.seccion}>
+                <h4>Talles</h4>
+                <div className={styles.talles}>
+                   
+{talles.length === 0 ? (
+    <span style={{ color: '#aaa', fontSize: 13 }}>Selecciona un tipo de talle</span>
+) : (
+    talles.map(talle => (
+        <button
+            key={talle.id}
+            className={selectedTalle === talle.valor ? styles.selectedTalle : ''}
+            onClick={() => setSelectedTalle(selectedTalle === talle.valor ? "" : talle.valor)}
+            type="button"
+        >
+            {talle.valor || talle.nombre}
+        </button>
+    ))
+)}
+
+                </div>
+            </div>
+
             {/* Filtro por Precio */}
             <div className={styles.seccion}>
                 <h4>Precio</h4>
@@ -102,23 +161,6 @@ const Filters: React.FC<FiltersProps> = ({
                         onChange={e => setMaxPrice(e.target.value)}
                         style={{ width: '70px' }}
                     />
-                </div>
-            </div>
-
-            {/* Filtro por Talle */}
-            <div className={styles.seccion}>
-                <h4>Talles</h4>
-                <div className={styles.talles}>
-                    {tallesDisponibles.map(talle => (
-                        <button
-                            key={talle}
-                            className={selectedTalle === talle ? styles.selectedTalle : ''}
-                            onClick={() => setSelectedTalle(selectedTalle === talle ? "" : talle)}
-                            type="button"
-                        >
-                            {talle}
-                        </button>
-                    ))}
                 </div>
             </div>
 

@@ -29,6 +29,7 @@ const ProductsPage = () => {
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
     const { isAdmin } = useAuth();
+    const [selectedWaistType, setSelectedWaistType] = useState<number | "">("");
 
     // Extiende el tipo para aceptar tallesProducto temporalmente
     type ProductWithTallesProducto = IProduct & { tallesProducto?: any[] };
@@ -54,14 +55,25 @@ const ProductsPage = () => {
         fetchTiposCategorias();
     }, []);
 
-    // Filtrar productos por texto, tipo, categoría, talle, color y marca
+    // Filtrar productos por texto, tipo, categoría, talle, color, marca y eliminado
     const filteredProducts = products.filter((prod) => {
+        if (prod.eliminado) return false; // NO mostrar productos eliminados
+
         const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
         const matchesTipo = selectedTipo === "" || (prod.categoria && prod.categoria.tipo && prod.categoria.tipo.id === selectedTipo);
         const matchesCategoria = selectedCategoria === "" || (prod.categoria && prod.categoria.id === selectedCategoria);
+
+        // FILTRO CORRECTO POR TALLE: compara por nombre y valor, y solo muestra productos que tengan ese talle
         const matchesTalle =
             selectedTalle === "" ||
-            (prod.talles && prod.talles.some(tp => tp.talle.nombre === selectedTalle));
+            (
+                prod.talles &&
+                prod.talles.some(tp =>
+                    (tp.talle.nombre === selectedTalle || tp.talle.valor === selectedTalle)
+                    && tp.stock > 0 // Solo si tiene stock
+                )
+            );
+
         const matchesColor = selectedColor === "" || (prod.color && prod.color.toLowerCase() === selectedColor.toLowerCase());
         const matchesMarca = selectedMarca === "" || (prod.marca && prod.marca.toLowerCase() === selectedMarca.toLowerCase());
         const matchesMinPrice = minPrice === '' || prod.precio >= Number(minPrice);
@@ -100,6 +112,8 @@ const ProductsPage = () => {
                 setSelectedTipo={setSelectedTipo}
                 selectedCategoria={selectedCategoria}
                 setSelectedCategoria={setSelectedCategoria}
+                selectedWaistType={selectedWaistType}
+                setSelectedWaistType={setSelectedWaistType}
                 selectedTalle={selectedTalle}
                 setSelectedTalle={setSelectedTalle}
                 selectedColor={selectedColor}
