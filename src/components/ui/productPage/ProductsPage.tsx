@@ -35,12 +35,13 @@ const ProductsPage = () => {
 
     const fetchProducts = async () => {
         const data = await getProductos();
-        setProducts(
-            (data as ProductWithTallesProducto[]).map(prod => ({
+        const filtrados = (data as ProductWithTallesProducto[])
+            .filter(prod => !prod.eliminado) // filtrado manual
+            .map(prod => ({
                 ...prod,
                 talles: prod.talles ?? prod.tallesProducto ?? []
-            }))
-        );
+            }));
+        setProducts(filtrados);
     };
 
     const fetchTiposCategorias = async () => {
