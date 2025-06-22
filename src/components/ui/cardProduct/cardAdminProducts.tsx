@@ -91,6 +91,40 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
         </p>
       </div>
       <div className={styles.actions}>
+        {/* Sección de descuento */}
+        <div>
+          {discount > 0 ? (
+            <div>
+              <span className={styles.desc}>
+                Descuento activo: {discount}%
+              </span>
+              <button
+                className={styles.delete}
+                onClick={handleRemoveDiscount}
+              >
+                Quitar descuento
+              </button>
+            </div>
+          ) : (
+            <div className={styles.sectDesc}>
+              <input
+                type="number"
+                min={1}
+                max={90}
+                placeholder="Descuento %"
+                value={discountInput}
+                onChange={e => setDiscountInput(e.target.value)}
+                className={styles.cuadroDesc}
+              />
+              <button
+                className={styles.edit}
+                onClick={handleSetDiscount}
+              >
+                Aplicar
+              </button>
+            </div>
+          )}
+      </div>
         <button className={styles.edit} onClick={() => setModalEdit(true)}>
           Editar
         </button>
@@ -102,55 +136,6 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
         <button className={styles.delete} onClick={handleDelete}>
           <MdDelete />
         </button>
-      </div>
-      {/* Sección de descuento */}
-      <div style={{ marginTop: 10 }}>
-        {discount > 0 ? (
-          <div>
-            <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
-              Descuento activo: {discount}%
-            </span>
-            <button
-              style={{
-                marginLeft: 10,
-                background: '#f44336',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 4,
-                padding: '4px 10px',
-                cursor: 'pointer'
-              }}
-              onClick={handleRemoveDiscount}
-            >
-              Quitar descuento
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <input
-              type="number"
-              min={1}
-              max={90}
-              placeholder="Descuento %"
-              value={discountInput}
-              onChange={e => setDiscountInput(e.target.value)}
-              style={{ width: 70, padding: 4, borderRadius: 4, border: '1px solid #ccc' }}
-            />
-            <button
-              style={{
-                background: '#4caf50',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 4,
-                padding: '4px 10px',
-                cursor: 'pointer'
-              }}
-              onClick={handleSetDiscount}
-            >
-              Aplicar
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
