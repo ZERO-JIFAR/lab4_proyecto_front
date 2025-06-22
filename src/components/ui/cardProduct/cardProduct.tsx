@@ -14,6 +14,13 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
 
     if (!product) return null;
 
+    // Leer descuento de localStorage
+    const discount = Number(localStorage.getItem(`discount_${product.id}`)) || 0;
+    const hasDiscount = discount > 0 && discount <= 90;
+    const discountedPrice = hasDiscount
+        ? Math.round(product.precio * (1 - discount / 100))
+        : product.precio;
+
     // Extraer talles disponibles (solo los que tiene stock > 0)
     const tallesDisponibles = product.talles
         ? product.talles
@@ -26,11 +33,25 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
             <div className={styles.card} onClick={() => setShowModal(true)}>
                 <div className={styles.imageContainer}>
                     <img src={product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'} alt={product.nombre} className={styles.image} />
+                    {hasDiscount && (
+                        <span className={styles.offerBadge}>-{discount}%</span>
+                    )}
                 </div>
                 <div className={styles.content}>
                     <p className={styles.title}>{product.nombre}</p>
                     <p className={styles.price}>
-                        <span>${product.precio}</span>
+                        {hasDiscount ? (
+                            <>
+                                <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
+                                    ${product.precio}
+                                </span>
+                                <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
+                                    ${discountedPrice}
+                                </span>
+                            </>
+                        ) : (
+                            <span>${product.precio}</span>
+                        )}
                     </p>
                 </div>
             </div>

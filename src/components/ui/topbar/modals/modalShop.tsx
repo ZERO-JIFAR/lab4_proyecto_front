@@ -28,6 +28,13 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
   // Agrupa los productos del carrito por título, color y talle
   const groupedCart: GroupedCartItem[] = [];
   cart.forEach(item => {
+    // Leer descuento de localStorage por producto
+    const discount = Number(localStorage.getItem(`discount_${item.title.replace(/"/g, '').replace(/'/g, '')}`)) || 0;
+    const hasDiscount = discount > 0 && discount <= 90;
+    const discountedPrice = hasDiscount
+      ? Math.round(item.price * (1 - discount / 100))
+      : item.price;
+
     const found = groupedCart.find(
       g =>
         g.title === item.title &&
@@ -37,7 +44,7 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
     if (found) {
       found.quantity += 1;
     } else {
-      groupedCart.push({ ...item, quantity: 1 });
+      groupedCart.push({ ...item, price: discountedPrice, quantity: 1 });
     }
   });
 
@@ -63,7 +70,7 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
       const ordenRes = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/ordenes`,
         {
-          items: cart,
+          items: groupedCart, // Usar precios con descuento
           email,
           nombre,
           tipoEntrega,
@@ -91,24 +98,9 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
         }
       );
 
-      // 3. Renderiza el botón de Mercado Pago usando el SDK
-      const preferenceId = mpRes.data.preferenceId;
+      // 3. Redirigir a Mercado Pago
       const urlMP = mpRes.data.urlMP;
-
-      // Opción 1: Redirigir directamente (más simple y seguro)
       window.location.href = urlMP;
-
-      // Opción 2: Renderizar el botón en el frontend (requiere un div con id 'mp-checkout')
-      // if (window.MercadoPago) {
-      //   const mp = new window.MercadoPago('TU_PUBLIC_KEY', { locale: 'es-AR' });
-      //   mp.checkout({
-      //     preference: { id: preferenceId },
-      //     render: {
-      //       container: '#mp-checkout',
-      //       label: 'Pagar con Mercado Pago'
-      //     }
-      //   });
-      // }
 
       clearCart(); // Limpia el carrito localmente
     } catch (err: any) {
@@ -168,7 +160,18 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
                     Color: {item.color} | Talle: {item.size}
                   </div>
                   <div className={styles.cartItemPrice}>
-                    ${item.price} x {item.quantity}
+                    {item.price < item.price + 1 ? (
+                      <>
+                        <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
+                          ${item.price}
+                        </span>
+                        <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
+                          ${item.price}
+                        </span>
+                      </>
+                    ) : (
+                      <>${item.price} x {item.quantity}</>
+                    )}
                   </div>
                 </div>
                 <button
@@ -203,9 +206,6 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
         onClose={() => setShowPayModal(false)}
         onPay={handlePay}
       />
-
-      {/* Si quieres usar el botón renderizado por el SDK, agrega este div: */}
-      {/* <div id="mp-checkout"></div> */}
     </>
   );
 };
