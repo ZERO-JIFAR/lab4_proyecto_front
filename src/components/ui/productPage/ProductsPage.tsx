@@ -30,19 +30,19 @@ const ProductsPage = () => {
     const [maxPrice, setMaxPrice] = useState('');
     const { isAdmin } = useAuth();
     const [selectedWaistType, setSelectedWaistType] = useState<number | "">("");
+    const [showEliminados, setShowEliminados] = useState(false);
 
     // Extiende el tipo para aceptar tallesProducto temporalmente
     type ProductWithTallesProducto = IProduct & { tallesProducto?: any[] };
 
     const fetchProducts = async () => {
         const data = await getProductos();
-        const filtrados = (data as ProductWithTallesProducto[])
-            .filter(prod => !prod.eliminado) // filtrado manual
+        const normalizados = (data as ProductWithTallesProducto[])
             .map(prod => ({
                 ...prod,
                 talles: prod.talles ?? prod.tallesProducto ?? []
             }));
-        setProducts(filtrados);
+        setProducts(normalizados);
     };
 
     const fetchTiposCategorias = async () => {
@@ -57,7 +57,7 @@ const ProductsPage = () => {
 
     // Filtrar productos por texto, tipo, categoría, talle, color, marca y eliminado
     const filteredProducts = products.filter((prod) => {
-        if (prod.eliminado) return false; // NO mostrar productos eliminados
+        if (isAdmin && !showEliminados && prod.eliminado) return false;
 
         const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
         const matchesTipo = selectedTipo === "" || (prod.categoria && prod.categoria.tipo && prod.categoria.tipo.id === selectedTipo);
@@ -135,6 +135,21 @@ const ProductsPage = () => {
                     onSearchChange={setSearch}
                 />
                 <div className={isAdmin ? styles.adminList : styles.productsGrid}>
+
+                    {/* Filtro solo visible para admin */}
+                    {isAdmin && (
+                        <div className={styles.filtElim}>
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={showEliminados}
+                                    onChange={e => setShowEliminados(e.target.checked)}
+                                />
+                                Mostrar productos eliminados
+                            </label>
+                        </div>
+                    )}
+
                     {sortedProducts.map((prod, idx) =>
                         isAdmin ? (
                             <CardAdminProduct key={prod.id || idx} product={prod} />

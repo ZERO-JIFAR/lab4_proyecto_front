@@ -103,3 +103,29 @@
   gap: 8px;
   align-items: center;
 }
+
+.disabled {
+  background-color: #555 !important;
+  opacity: 0.5;
+  pointer-events: auto;
+}
+
+/* Aplicar cursor: not-allowed solo a los botones que NO son enable */
+.disabled .edit:not(.enable),
+.disabled .delete:not(.enable),
+.disabled input {
+  cursor: not-allowed !important;
+  opacity: 0.5;
+}
+
+input:disabled {
+  background-color: #ccc;
+  color: #666;
+}
+
+.enable {
+  background-color: #00ff0d !important;
+  color: black !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}

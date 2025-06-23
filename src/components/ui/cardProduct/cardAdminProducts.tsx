@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './cardAdminProducts.module.css';
 import ModalEditProd from '../topbar/modals/modalEditProd';
-import { MdDelete } from "react-icons/md";
 import { IProduct } from '../../../types/IProduct';
 
 interface CardAdminProductProps {
@@ -12,6 +11,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
   const [modalEdit, setModalEdit] = useState(false);
   const [discount, setDiscount] = useState<number>(0);
   const [discountInput, setDiscountInput] = useState<string>('');
+  const [eliminado, setEliminado] = useState(product.eliminado);
 
   // Cargar descuento guardado en localStorage
   useEffect(() => {
@@ -25,8 +25,10 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
     return Math.round(product.precio * (1 - discount / 100));
   };
 
-  const handleDelete = async () => {
-    const confirm = window.confirm(`¿Estás seguro de que querés eliminar el producto "${product.nombre}"?`);
+  const handleToggleActivo = async () => {
+    const confirm = window.confirm(
+      `¿Estás seguro de que querés ${eliminado ? 'habilitar' : 'deshabilitar'} el producto "${product.nombre}"?`
+    );
     if (!confirm) return;
 
     try {
@@ -38,15 +40,18 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       };
       await fetch(`${APIURL}/productos/${product.id}`, {
-        method: 'DELETE',
+        method: 'PUT',
         headers,
+        body: JSON.stringify({
+          ...product,
+          eliminado: !eliminado,
+        }),
       });
 
-      alert('Producto eliminado correctamente.');
-      window.location.reload();
+      setEliminado(!eliminado); // Actualiza el estado local
     } catch (error) {
-      console.error('Error al eliminar:', error);
-      alert('Hubo un error al intentar eliminar el producto.');
+      console.error('Error al actualizar producto:', error);
+      alert('Hubo un error al intentar actualizar el producto.');
     }
   };
 
@@ -69,7 +74,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
   };
 
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${eliminado ? styles.disabled : ''}`}>
       <div className={styles.imageContainer}>
         <img src={product.imagenUrl || '/images/zapatillas/default.png'} alt={product.nombre} className={styles.image} />
       </div>
@@ -101,6 +106,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
               <button
                 className={styles.delete}
                 onClick={handleRemoveDiscount}
+                disabled={eliminado}
               >
                 Quitar descuento
               </button>
@@ -115,17 +121,23 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
                 value={discountInput}
                 onChange={e => setDiscountInput(e.target.value)}
                 className={styles.cuadroDesc}
+                disabled={eliminado}
               />
               <button
                 className={styles.edit}
                 onClick={handleSetDiscount}
+                disabled={eliminado}
               >
                 Aplicar
               </button>
             </div>
           )}
-      </div>
-        <button className={styles.edit} onClick={() => setModalEdit(true)}>
+        </div>
+        <button
+          className={styles.edit}
+          onClick={() => setModalEdit(true)}
+          disabled={eliminado}
+        >
           Editar
         </button>
         <ModalEditProd
@@ -133,8 +145,11 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
           onClose={() => setModalEdit(false)}
           product={product}
         />
-        <button className={styles.delete} onClick={handleDelete}>
-          <MdDelete />
+        <button
+          className={`${styles.delete} ${eliminado ? styles.enable : ''}`}
+          onClick={handleToggleActivo}
+        >
+          {eliminado ? 'Habilitar' : 'Deshabilitar'}
         </button>
       </div>
     </div>
