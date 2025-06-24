@@ -15,7 +15,6 @@ const NUM_CATEGORIES = 2;
 const NUM_CATEGORY_PRODUCTS = 3;
 
 function getRandomElements<T>(arr: T[], n: number): T[] {
-  if (arr.length <= n) return [...arr];
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, n);
 }
@@ -40,16 +39,20 @@ const Landing = () => {
           ...prod,
           talles: prod.talles ?? prod.tallesProducto ?? []
         }));
-        setProducts(normalized);
+
+        // FILTRAR SOLO HABILITADOS
+        const enabled = normalized.filter((p: any) => p.eliminado !== true);
+
+        setProducts(enabled);
 
         // Shuffle for randomness and pick featured
-        const shuffled = [...normalized].sort(() => Math.random() - 0.5);
+        const shuffled = [...enabled].sort(() => Math.random() - 0.5);
         setFeatured(shuffled.slice(0, NUM_FEATURED_TOTAL));
 
         // Obtener todas las categorías únicas presentes en los productos
         const allCategories = Array.from(
           new Set(
-            normalized
+            enabled
               .map(p => p.categoria?.nombre)
               .filter((x): x is string => Boolean(x))
           )
@@ -62,7 +65,7 @@ const Landing = () => {
         // Para cada categoría, elegir 3 productos aleatorios de esa categoría
         const byCategory: Record<string, IProduct[]> = {};
         selectedCategories.forEach(category => {
-          const prods = normalized.filter(
+          const prods = enabled.filter(
             p => p.categoria?.nombre === category
           );
           byCategory[category] = getRandomElements(prods, NUM_CATEGORY_PRODUCTS);
