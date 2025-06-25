@@ -18,6 +18,8 @@
     gap: 24px;
     padding: 24px;
     justify-items: center;
+    align-items: center;
+    min-height: 300px;
 }
 
 .productsList {
@@ -31,4 +33,13 @@
     margin-top: -2%;
     margin-block-end: 1%;
     border-radius: 4px;
+}
+
+.noEncontrado {
+    grid-column: 1 / -1;     /* <-- ocupa todas las columnas del grid */
+    text-align: center;
+    color: #606060;
+    font-size: 1.2rem;
+    padding: 2rem;
+    font-weight: bold;
 }
