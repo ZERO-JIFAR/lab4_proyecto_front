@@ -308,7 +308,9 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
                   <option key={color} value={color}>{color}</option>
                 ))}
               </select>
+            </div>
 
+            <div className={styles.inputColumn}>
               <label>Tipo de Talle:</label>
               <select
                 value={selectedWaistTypeId}
@@ -364,8 +366,8 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <p className={styles.confirmText}>¿Guardar?</p>
           <div className={styles.buttonGroup}>
+            <p className={styles.confirmText}>¿Guardar?</p>
             <button type="submit" className={styles.yesButton} disabled={loading}>
               {loading ? 'Guardando...' : 'Sí'}
             </button>
