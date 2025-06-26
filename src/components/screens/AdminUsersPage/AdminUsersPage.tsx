@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { getAllUsers, updateUser } from '../../../http/userRequest';
 import styles from './AdminUserPage.module.css';
 import Topbar from '../../ui/topbar/topbar';
-import { FaUserShield, FaUserAlt } from "react-icons/fa";
 import { MdOutlineLockOpen, MdOutlineLock } from "react-icons/md";
+import RegisterAdminModal from './modal/RegisterAdminModal';
 
 interface Usuario {
   id: number;
@@ -19,6 +19,7 @@ const AdminUsersPage: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   const fetchUsuarios = async () => {
     setLoading(true);
@@ -51,21 +52,6 @@ const AdminUsersPage: React.FC = () => {
     }
   };
 
-  const handleToggleRol = async (usuario: Usuario) => {
-    try {
-      await updateUser(usuario.id, {
-        nombre: usuario.nombre,
-        email: usuario.email,
-        contrasena: usuario.contrasena || '1234',
-        rol: usuario.rol === 'ADMIN' ? 'USER' : 'ADMIN',
-        eliminado: usuario.eliminado
-      });
-      fetchUsuarios();
-    } catch (err: any) {
-      setError(err.message || 'Error al cambiar rol');
-    }
-  };
-
   // Mostrar todos los usuarios, sin filtrar
   const usuariosFiltrados = usuarios;
 
@@ -75,6 +61,13 @@ const AdminUsersPage: React.FC = () => {
       <div className={styles.container}>
         <div className={styles.content}>
           <h2 className={styles.title}>Administrar Usuarios</h2>
+          <button
+            className={styles.yesButton}
+            style={{ marginBottom: 20 }}
+            onClick={() => setShowRegisterModal(true)}
+          >
+            Registrar nuevo admin
+          </button>
           {loading && <p>Cargando usuarios...</p>}
           {error && <p style={{ color: 'red' }}>{error}</p>}
           <table className={styles.table}>
@@ -111,21 +104,6 @@ const AdminUsersPage: React.FC = () => {
                         </>
                       )}
                     </button>
-                    <button
-                      className={`${styles.button} ${styles.role}`}
-                      onClick={() => handleToggleRol(usuario)}
-                      disabled={usuario.eliminado}
-                    >
-                      {usuario.rol === 'ADMIN' ? (
-                        <>
-                          <FaUserAlt /> Cambiar a Cliente
-                        </>
-                      ) : (
-                        <>
-                          <FaUserShield /> Cambiar a Admin
-                        </>
-                      )}
-                    </button>
                   </td>
                 </tr>
               ))}
@@ -133,6 +111,11 @@ const AdminUsersPage: React.FC = () => {
           </table>
         </div>
       </div>
+      <RegisterAdminModal
+        show={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onSuccess={fetchUsuarios}
+      />
     </div>
   );
 };

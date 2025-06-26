@@ -1,0 +1,45 @@
+.containerScreenPaymentFailure {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  background: #2a7b9b;
+  background: linear-gradient(
+    180deg,
+    rgba(42, 123, 155, 1) 0%,
+    rgb(255, 255, 255) 99%
+  );
+}
+.containerCardFailure {
+  padding: 2rem;
+  text-align: center;
+  background-color: #fdecea;
+  border-radius: 10px;
+  height: 15vh;
+  margin: 3rem auto;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.1);
+}
+
+.containerCardFailure h1 {
+  color: #c62828;
+}
+
+.containerCardFailure p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}
+
+.btnLinkFailure {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 0.8rem 1.5rem;
+  background-color: #c62828;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.btnLinkFailure:hover {
+  background-color: #8e0000;
+}

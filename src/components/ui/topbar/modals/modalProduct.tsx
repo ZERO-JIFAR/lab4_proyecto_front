@@ -43,11 +43,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
         ...(Array.isArray(product.imagenesAdicionales) ? product.imagenesAdicionales : [])
     ].filter(Boolean);
 
-    // Leer descuento de localStorage
-    const discount = Number(localStorage.getItem(`discount_${product.id}`)) || 0;
-    const hasDiscount = discount > 0 && discount <= 90;
+    // Descuento real desde backend
+    const hasDiscount = !!product.precioOriginal && product.precioOriginal > product.precio;
+    const discount = hasDiscount
+        ? Math.round(100 - (product.precio / (product.precioOriginal ?? product.precio)) * 100)
+        : 0;
     const discountedPrice = hasDiscount
-        ? Math.round(product.precio * (1 - discount / 100))
+        ? Math.round(product.precio)
         : product.precio;
 
     const handleAddToCart = () => {
@@ -57,6 +59,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             return;
         }
         addToCart({
+            id: product.id,
             title: product.nombre,
             price: discountedPrice,
             image: images[imageIndex],
@@ -102,7 +105,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                             {hasDiscount ? (
                                 <>
                                     <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
-                                        ${product.precio}
+                                        ${product.precioOriginal}
                                     </span>
                                     <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
                                         ${discountedPrice}
