@@ -8,9 +8,9 @@ export const PaymentSuccess: FC = () => {
     const purchase = localStorage.getItem('lastPurchase');
     if (purchase) {
       const items = JSON.parse(purchase);
+      // Llama a la API para restar stock de cada producto/talle
       Promise.all(items.map(async (item: any) => {
         try {
-          // PUT a tu endpoint para restar stock por producto y talle
           await axios.put(
             `${import.meta.env.VITE_API_URL}/productos/${item.id}/restar-stock`,
             {
@@ -19,9 +19,10 @@ export const PaymentSuccess: FC = () => {
             }
           );
         } catch (e) {
-          // Maneja errores si lo deseas
+          console.error("Error al restar stock:", e);
         }
       })).then(() => {
+        // Limpia el carrito local y la compra temporal
         localStorage.removeItem('lastPurchase');
       });
     }

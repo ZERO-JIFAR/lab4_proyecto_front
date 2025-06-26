@@ -15,4 +15,5 @@ export interface IProduct {
   categoria: ICategory;
   imagenUrl?: string;
   talles: ITalleProducto[];
+  tallesProducto?: ITalleProducto[]; // <-- AGREGA ESTA LÍNEA
 }
