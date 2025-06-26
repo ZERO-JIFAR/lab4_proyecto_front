@@ -139,7 +139,7 @@ const ProductsPage = () => {
                     {/* Filtro solo visible para admin */}
                     {isAdmin && (
                         <div className={styles.filtElim}>
-                            <label>
+                            <label style={{ marginLeft: '10px' }}>
                                 <input
                                     type="checkbox"
                                     checked={showEliminados}
@@ -150,11 +150,17 @@ const ProductsPage = () => {
                         </div>
                     )}
 
-                    {sortedProducts.map((prod, idx) =>
-                        isAdmin ? (
-                            <CardAdminProduct key={prod.id || idx} product={prod} />
-                        ) : (
-                            <CardProduct key={prod.id || idx} product={prod} />
+                    {sortedProducts.length === 0 ? (
+                        <div className={styles.noEncontrado}>
+                            Ningún producto encontrado
+                        </div>
+                    ) : (
+                        sortedProducts.map((prod, idx) =>
+                            isAdmin ? (
+                                <CardAdminProduct key={prod.id || idx} product={prod} />
+                            ) : (
+                                <CardProduct key={prod.id || idx} product={prod} />
+                            )
                         )
                     )}
                 </div>

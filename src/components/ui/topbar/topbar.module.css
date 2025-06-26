@@ -70,8 +70,8 @@
 }
 
 .topbarSignin {
-  background-color: #e5e5e5;
-  color: black;
+  font-weight: bold;
+  color: #e5e5e5;
 }
 
 .topbarRegister {
