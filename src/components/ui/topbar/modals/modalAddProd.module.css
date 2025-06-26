@@ -88,7 +88,7 @@ img {
 
 .confirmText {
     text-align: right;
-    margin-top: 1rem;
+    margin-right: 6%;
     font-size: 1rem;
 }
 
@@ -97,6 +97,7 @@ img {
     justify-content: flex-end;
     gap: 1.5rem;
     padding-right: 1rem;
+    margin-top: -1rem;
 }
 
 .yesButton,

@@ -366,8 +366,8 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
 
+          <p className={styles.confirmText}>¿Guardar?</p>
           <div className={styles.buttonGroup}>
-            <p className={styles.confirmText}>¿Guardar?</p>
             <button type="submit" className={styles.yesButton} disabled={loading}>
               {loading ? 'Guardando...' : 'Sí'}
             </button>

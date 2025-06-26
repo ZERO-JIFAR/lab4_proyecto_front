@@ -365,7 +365,9 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
                                     <option key={color} value={color}>{color}</option>
                                 ))}
                             </select>
+                        </div>
 
+                        <div className={styles.inputColumn}>
                             <label>Tipo de Talle:</label>
                             <select
                                 value={selectedWaistTypeId}
