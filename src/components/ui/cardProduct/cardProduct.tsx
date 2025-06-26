@@ -14,11 +14,13 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
 
     if (!product) return null;
 
-    // Leer descuento de localStorage
-    const discount = Number(localStorage.getItem(`discount_${product.id}`)) || 0;
-    const hasDiscount = discount > 0 && discount <= 90;
+    // Descuento real desde backend
+    const hasDiscount = !!product.precioOriginal && product.precioOriginal > product.precio;
+    const discount = hasDiscount
+        ? Math.round(100 - (product.precio / (product.precioOriginal ?? 1)) * 100)
+        : 0;
     const discountedPrice = hasDiscount
-        ? Math.round(product.precio * (1 - discount / 100))
+        ? Math.round(product.precio)
         : product.precio;
 
     // Extraer talles disponibles (solo los que tiene stock > 0)
@@ -43,7 +45,7 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
                         {hasDiscount ? (
                             <>
                                 <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
-                                    ${product.precio}
+                                    ${product.precioOriginal}
                                 </span>
                                 <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
                                     ${discountedPrice}

@@ -7,11 +7,12 @@ export interface IProduct {
   nombre: string;
   cantidad: number;
   precio: number;
+  precioOriginal?: number; 
   descripcion?: string;
   color?: string;
   marca?: string;
   eliminado: boolean;
   categoria: ICategory;
-  imagenUrl?: string; // <-- CAMBIO AQUÍ
+  imagenUrl?: string;
   talles: ITalleProducto[];
 }

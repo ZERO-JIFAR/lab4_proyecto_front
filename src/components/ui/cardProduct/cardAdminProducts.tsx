@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import styles from './cardAdminProducts.module.css';
 import ModalEditProd from '../topbar/modals/modalEditProd';
 import { IProduct } from '../../../types/IProduct';
+import { applyDiscount, removeDiscount } from '../../../http/productRequest';
+import { useAuth } from '../../../context/AuthContext';
 
 interface CardAdminProductProps {
   product: IProduct;
@@ -9,20 +11,27 @@ interface CardAdminProductProps {
 
 const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
   const [modalEdit, setModalEdit] = useState(false);
-  const [discount, setDiscount] = useState<number>(0);
-  const [discountInput, setDiscountInput] = useState<string>('');
   const [eliminado, setEliminado] = useState(product.eliminado);
+  const [loading, setLoading] = useState(false);
+  const [discountInput, setDiscountInput] = useState<string>('');
+  const [discount, setDiscount] = useState<number>(0);
+  const { isAdmin } = useAuth();
 
-  // Cargar descuento guardado en localStorage
+  // Refresca el descuento desde el producto (precioOriginal)
   useEffect(() => {
-    const saved = localStorage.getItem(`discount_${product.id}`);
-    if (saved) setDiscount(Number(saved));
-  }, [product.id]);
+    if (product.precioOriginal && product.precioOriginal > product.precio) {
+      // Si el precio original es mayor, calcula el descuento real
+      const realDiscount = Math.round(100 - (product.precio / product.precioOriginal) * 100);
+      setDiscount(realDiscount);
+    } else {
+      setDiscount(0);
+    }
+  }, [product.precio, product.precioOriginal]);
 
   // Calcular precio con descuento
   const getDiscountedPrice = () => {
     if (!discount || discount <= 0) return product.precio;
-    return Math.round(product.precio * (1 - discount / 100));
+    return Math.round(product.precioOriginal ? product.precioOriginal * (1 - discount / 100) : product.precio);
   };
 
   const handleToggleActivo = async () => {
@@ -33,7 +42,6 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
 
     try {
       const APIURL = import.meta.env.VITE_API_URL;
-      // Construir headers sin Authorization si es undefined
       const token = localStorage.getItem('token');
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
@@ -55,22 +63,40 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
     }
   };
 
-  // Guardar descuento en localStorage
-  const handleSetDiscount = () => {
+  // Aplicar descuento usando backend
+  const handleApplyDiscount = async () => {
     const value = Number(discountInput);
+    if (!isAdmin) return alert("Solo un admin puede aplicar descuentos");
     if (isNaN(value) || value < 1 || value > 90) {
       alert('El descuento debe ser un número entre 1 y 90');
       return;
     }
-    setDiscount(value);
-    localStorage.setItem(`discount_${product.id}`, String(value));
-    setDiscountInput('');
+    setLoading(true);
+    try {
+      await applyDiscount(product.id, value);
+      setDiscount(value);
+      setDiscountInput('');
+      // Opcional: podrías recargar el producto desde backend aquí si lo necesitas
+      window.location.reload(); // Para reflejar el cambio en la lista
+    } catch (e) {
+      alert("Error al aplicar descuento");
+    }
+    setLoading(false);
   };
 
-  // Quitar descuento
-  const handleRemoveDiscount = () => {
-    setDiscount(0);
-    localStorage.removeItem(`discount_${product.id}`);
+  // Quitar descuento usando backend
+  const handleRemoveDiscount = async () => {
+    if (!isAdmin) return alert("Solo un admin puede quitar descuentos");
+    setLoading(true);
+    try {
+      await removeDiscount(product.id);
+      setDiscount(0);
+      // Opcional: podrías recargar el producto desde backend aquí si lo necesitas
+      window.location.reload(); // Para reflejar el cambio en la lista
+    } catch (e) {
+      alert("Error al quitar descuento");
+    }
+    setLoading(false);
   };
 
   return (
@@ -81,10 +107,10 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
       <div className={styles.details}>
         <h4 className={styles.title}>{product.nombre}</h4>
         <p className={styles.price}>
-          {discount > 0 ? (
+          {discount > 0 && product.precioOriginal ? (
             <>
               <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
-                ${product.precio}
+                ${product.precioOriginal}
               </span>
               <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
                 ${getDiscountedPrice()} (-{discount}%)
@@ -106,7 +132,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
               <button
                 className={styles.delete}
                 onClick={handleRemoveDiscount}
-                disabled={eliminado}
+                disabled={eliminado || loading}
               >
                 Quitar descuento
               </button>
@@ -121,12 +147,12 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
                 value={discountInput}
                 onChange={e => setDiscountInput(e.target.value)}
                 className={styles.cuadroDesc}
-                disabled={eliminado}
+                disabled={eliminado || loading}
               />
               <button
                 className={styles.edit}
-                onClick={handleSetDiscount}
-                disabled={eliminado}
+                onClick={handleApplyDiscount}
+                disabled={eliminado || loading}
               >
                 Aplicar
               </button>
