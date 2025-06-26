@@ -139,7 +139,7 @@ const ProductsPage = () => {
                     {/* Filtro solo visible para admin */}
                     {isAdmin && (
                         <div className={styles.filtElim}>
-                            <label>
+                            <label style={{ marginLeft: '10px' }}>
                                 <input
                                     type="checkbox"
                                     checked={showEliminados}

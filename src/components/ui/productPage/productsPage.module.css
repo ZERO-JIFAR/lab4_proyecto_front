@@ -30,9 +30,10 @@
 
 .filtElim{
     background-color: #1c1c1c;
-    margin-top: -2%;
+    margin-top: -5%;
     margin-block-end: 1%;
-    border-radius: 4px;
+    border-radius: 6px;
+    padding: 1%;
 }
 
 .noEncontrado {
