@@ -57,6 +57,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             return;
         }
         addToCart({
+            id: product.id,
             title: product.nombre,
             price: discountedPrice,
             image: images[imageIndex],

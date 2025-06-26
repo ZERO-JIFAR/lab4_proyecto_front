@@ -10,5 +10,10 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
+<script>
+  const mp = new MercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
+    locale: 'es-AR'
+  });
+</script>
   </body>
 </html>

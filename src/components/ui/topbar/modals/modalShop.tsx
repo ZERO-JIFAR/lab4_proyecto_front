@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import styles from './modalShop.module.css';
 import { useCart } from "../../../../context/CartContext";
 import { useAuth } from "../../../../context/AuthContext";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaTrash } from "react-icons/fa";
 import PayDataModal from '../../PayDataModal/payDataModal';
 import axios from 'axios';
+import { Wallet } from "@mercadopago/sdk-react";
+import { IProduct } from "../../../../types/IProduct";
 
 interface ModalCarritoProps {
   show: boolean;
@@ -12,6 +14,7 @@ interface ModalCarritoProps {
 }
 
 interface GroupedCartItem {
+  id: number;
   title: string;
   price: number;
   image: string;
@@ -25,10 +28,24 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
   const { isLoggedIn, token } = useAuth();
   const [showPayModal, setShowPayModal] = useState(false);
 
+  // Estado para Wallet de Mercado Pago
+  const [stateConfirm, setStateConfirm] = useState<{
+    preferenceId: string | null;
+    open: boolean;
+  }>({
+    preferenceId: null,
+    open: false,
+  });
+
+  // Estado para agrupación y datos de envío/retiro
+  const [deliveryType, setDeliveryType] = useState<"" | "envio" | "local">("");
+  const [address, setAddress] = useState("");
+  const [storeNumber, setStoreNumber] = useState("");
+  const [mpReady, setMpReady] = useState(false);
+
   // Agrupa los productos del carrito por título, color y talle
   const groupedCart: GroupedCartItem[] = [];
   cart.forEach(item => {
-    // Leer descuento de localStorage por producto
     const discount = Number(localStorage.getItem(`discount_${item.title.replace(/"/g, '').replace(/'/g, '')}`)) || 0;
     const hasDiscount = discount > 0 && discount <= 90;
     const discountedPrice = hasDiscount
@@ -44,16 +61,47 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
     if (found) {
       found.quantity += 1;
     } else {
-      groupedCart.push({ ...item, price: discountedPrice, quantity: 1 });
+      groupedCart.push({
+        id: item.id,
+        title: item.title,
+        price: discountedPrice,
+        image: item.image,
+        color: item.color,
+        size: item.size,
+        quantity: 1
+      });
     }
   });
 
-  // Suma total del carrito
   const total = groupedCart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  // Controla si se puede mostrar el botón de Mercado Pago
+  React.useEffect(() => {
+    if (deliveryType === "envio" && address.trim().length > 0) {
+      setMpReady(true);
+    } else if (deliveryType === "local" && storeNumber.trim().length > 0) {
+      setMpReady(true);
+    } else {
+      setMpReady(false);
+    }
+  }, [deliveryType, address, storeNumber]);
+
+  const resetState = () => {
+    setDeliveryType("");
+    setAddress("");
+    setStoreNumber("");
+    setMpReady(false);
+    setStateConfirm({ preferenceId: null, open: false });
+  };
+
+  React.useEffect(() => {
+    if (!show) resetState();
+    // eslint-disable-next-line
+  }, [show]);
 
   if (!show) return null;
 
-  // Maneja el pago con Mercado Pago
+  // Maneja el pago con Mercado Pago (modal de datos)
   const handlePay = async (
     email: string,
     nombre: string,
@@ -66,11 +114,11 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
     metodoTarjeta: string
   ) => {
     try {
-      // 1. Crear la orden en tu backend (con token)
+      const realToken = token || localStorage.getItem('token') || '';
       const ordenRes = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/ordenes`,
+        `${import.meta.env.VITE_API_URL}/ordenes`,
         {
-          items: groupedCart, // Usar precios con descuento
+          items: groupedCart,
           email,
           nombre,
           tipoEntrega,
@@ -79,13 +127,12 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
         },
         {
           headers: {
-            Authorization: `Bearer ${token || localStorage.getItem('token') || ''}`
+            Authorization: `Bearer ${realToken}`
           }
         }
       );
       const ordenId = ordenRes.data.id;
 
-      // 2. Llamar a tu endpoint de Mercado Pago para obtener la preferencia
       const mpRes = await axios.post(
         `${import.meta.env.VITE_API_URL}/pay/mp`,
         {
@@ -93,22 +140,43 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
         },
         {
           headers: {
-            Authorization: `Bearer ${token || localStorage.getItem('token') || ''}`
+            Authorization: `Bearer ${realToken}`
           }
         }
       );
 
-      // 3. Redirigir a Mercado Pago
       const urlMP = mpRes.data.urlMP;
       window.location.href = urlMP;
 
-      clearCart(); // Limpia el carrito localmente
+      clearCart();
     } catch (err: any) {
       if (err.response && err.response.status === 403) {
         alert('No tienes permisos para realizar esta acción. Inicia sesión nuevamente.');
       } else {
         alert('Error al iniciar el pago');
       }
+    }
+  };
+
+  // Pagar directo con Wallet de Mercado Pago (sin modal de datos)
+  const handleGetPreferenceId = async () => {
+    try {
+      // Envía solo los ids de los productos agrupados
+      const ids = groupedCart.map((el) => el.id);
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const res = await axios.post<{ preferenceId: string }>(
+        `${apiUrl}/pay/mp`,
+        { id: ids }
+      );
+      if (res.data && res.data.preferenceId) {
+        setStateConfirm({
+          preferenceId: res.data.preferenceId,
+          open: true,
+        });
+        // clearCart(); // NO limpiar el carrito aquí
+      }
+    } catch (error) {
+      alert("Error al obtener preferencia de Mercado Pago");
     }
   };
 
@@ -160,25 +228,20 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
                     Color: {item.color} | Talle: {item.size}
                   </div>
                   <div className={styles.cartItemPrice}>
-                    {item.price < item.price + 1 ? (
-                      <>
-                        <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
-                          ${item.price}
-                        </span>
-                        <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
-                          ${item.price}
-                        </span>
-                      </>
-                    ) : (
-                      <>${item.price} x {item.quantity}</>
-                    )}
+                    ${item.price} x {item.quantity}
                   </div>
+                  {item.quantity > 1 && (
+                    <div className={styles.cartItemSubtotal}>
+                      Subtotal: <span>${item.price * item.quantity}</span>
+                    </div>
+                  )}
                 </div>
                 <button
                   className={styles.removeBtn}
                   onClick={() => handleRemoveGroup(item)}
+                  title="Eliminar producto"
                 >
-                  Quitar
+                  <FaTrash />
                 </button>
               </div>
             ))
@@ -190,12 +253,72 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
             <div className={styles.cartTotal}>
               Total: ${total}
             </div>
-            <button
-              className={styles.cartCheckout}
-              onClick={handleOpenPayModal}
-            >
-              Comprar
-            </button>
+
+            {/* Paso 1: Elegir tipo de entrega */}
+            {!deliveryType && (
+              <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 12 }}>
+                <button
+                  className={styles.cartCheckout}
+                  style={{ background: "#009ee3" }}
+                  onClick={() => setDeliveryType("envio")}
+                >
+                  Envío a domicilio
+                </button>
+                <button
+                  className={styles.cartCheckout}
+                  style={{ background: "#4caf50" }}
+                  onClick={() => setDeliveryType("local")}
+                >
+                  Retiro en local
+                </button>
+              </div>
+            )}
+
+            {/* Paso 2: Si elige envío, pide dirección */}
+            {deliveryType === "envio" && (
+              <div style={{ marginTop: 18 }}>
+                <label style={{ color: "#fff" }}>Dirección de envío:</label>
+                <input
+                  type="text"
+                  className={styles.cartCheckout}
+                  style={{ background: "#222", color: "#fff", marginTop: 8, marginBottom: 8 }}
+                  placeholder="Ingresá tu dirección"
+                  value={address}
+                  onChange={e => setAddress(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* Paso 2: Si elige local, pide número de local */}
+            {deliveryType === "local" && (
+              <div style={{ marginTop: 18 }}>
+                <label style={{ color: "#fff" }}>Número de local:</label>
+                <input
+                  type="text"
+                  className={styles.cartCheckout}
+                  style={{ background: "#222", color: "#fff", marginTop: 8, marginBottom: 8 }}
+                  placeholder="Ingresá el número del local"
+                  value={storeNumber}
+                  onChange={e => setStoreNumber(e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* Paso 3: Botón Mercado Pago solo si datos completos */}
+            {mpReady && !stateConfirm.open && (
+              <button
+                className={styles.cartCheckout}
+                style={{ background: "#009ee3", marginTop: 8 }}
+                onClick={handleGetPreferenceId}
+              >
+                Pagar con Mercado Pago
+              </button>
+            )}
+
+            {/* Wallet de Mercado Pago embebido */}
+            {stateConfirm.open && stateConfirm.preferenceId && (
+              <Wallet initialization={{ preferenceId: stateConfirm.preferenceId }} />
+            )}
           </>
         )}
       </div>

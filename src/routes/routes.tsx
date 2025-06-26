@@ -4,6 +4,11 @@ import Landing from '../components/screens/landing/landing';
 import SearchItem from '../components/screens/searchItem/searchItem';
 import AdminUsersPage from '../components/screens/AdminUsersPage/AdminUsersPage';
 import { useAuth } from '../context/AuthContext';
+import PaymentFailure from '../components/mp/Payment/PaymentFailure';
+import { PaymentSuccess } from '../components/mp/Payment/PaymentSuccess';
+
+
+// ...rest of your code...
 
 // Componente para proteger rutas de admin
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -27,6 +32,8 @@ const AppRoutes = () => {
           </AdminRoute>
         }
       />
+      <Route path="/paymentFailure" element={<PaymentFailure />} />
+      <Route path="/paymentSuccess" element={<PaymentSuccess />} />
     </Routes>
   );
 };
