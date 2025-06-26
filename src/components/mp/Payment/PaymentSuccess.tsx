@@ -1,8 +1,32 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import styles from "./PaymentSuccess.module.css";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 export const PaymentSuccess: FC = () => {
+  useEffect(() => {
+    const purchase = localStorage.getItem('lastPurchase');
+    if (purchase) {
+      const items = JSON.parse(purchase);
+      Promise.all(items.map(async (item: any) => {
+        try {
+          // PUT a tu endpoint para restar stock por producto y talle
+          await axios.put(
+            `${import.meta.env.VITE_API_URL}/productos/${item.id}/restar-stock`,
+            {
+              talle: item.size,
+              cantidad: item.quantity
+            }
+          );
+        } catch (e) {
+          // Maneja errores si lo deseas
+        }
+      })).then(() => {
+        localStorage.removeItem('lastPurchase');
+      });
+    }
+  }, []);
+
   return (
     <div className={styles.containerPageSuccess}>
       <div className={styles.containerCardSuccess}>

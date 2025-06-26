@@ -103,82 +103,88 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
 
   // Maneja el pago con Mercado Pago (modal de datos)
   const handlePay = async (
-    email: string,
-    nombre: string,
-    tipoEntrega: string,
-    direccion: string,
-    ciudad: string,
-    tarjeta: string,
-    vencimiento: string,
-    cvv: string,
-    metodoTarjeta: string
-  ) => {
-    try {
-      const realToken = token || localStorage.getItem('token') || '';
-      const ordenRes = await axios.post(
-        `${import.meta.env.VITE_API_URL}/ordenes`,
-        {
-          items: groupedCart,
-          email,
-          nombre,
-          tipoEntrega,
-          direccion,
-          ciudad,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${realToken}`
-          }
+  email: string,
+  nombre: string,
+  tipoEntrega: string,
+  direccion: string,
+  ciudad: string,
+  tarjeta: string,
+  vencimiento: string,
+  cvv: string,
+  metodoTarjeta: string
+) => {
+  try {
+    const realToken = token || localStorage.getItem('token') || '';
+    const ordenRes = await axios.post(
+      `${import.meta.env.VITE_API_URL}/ordenes`,
+      {
+        items: groupedCart,
+        email,
+        nombre,
+        tipoEntrega,
+        direccion,
+        ciudad,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${realToken}`
         }
-      );
-      const ordenId = ordenRes.data.id;
+      }
+    );
+    const ordenId = ordenRes.data.id;
 
-      const mpRes = await axios.post(
-        `${import.meta.env.VITE_API_URL}/pay/mp`,
-        {
-          id: [ordenId]
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${realToken}`
-          }
+    // Guarda la compra en localStorage para descontar stock en PaymentSuccess
+    localStorage.setItem('lastPurchase', JSON.stringify(groupedCart));
+
+    const mpRes = await axios.post(
+      `${import.meta.env.VITE_API_URL}/pay/mp`,
+      {
+        id: [ordenId]
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${realToken}`
         }
-      );
-
-      const urlMP = mpRes.data.urlMP;
-      window.location.href = urlMP;
-
-      clearCart();
-    } catch (err: any) {
-      if (err.response && err.response.status === 403) {
-        alert('No tienes permisos para realizar esta acción. Inicia sesión nuevamente.');
-      } else {
-        alert('Error al iniciar el pago');
       }
-    }
-  };
+    );
 
-  // Pagar directo con Wallet de Mercado Pago (sin modal de datos)
-  const handleGetPreferenceId = async () => {
-    try {
-      // Envía solo los ids de los productos agrupados
-      const ids = groupedCart.map((el) => el.id);
-      const apiUrl = import.meta.env.VITE_API_URL;
-      const res = await axios.post<{ preferenceId: string }>(
-        `${apiUrl}/pay/mp`,
-        { id: ids }
-      );
-      if (res.data && res.data.preferenceId) {
-        setStateConfirm({
-          preferenceId: res.data.preferenceId,
-          open: true,
-        });
-        // clearCart(); // NO limpiar el carrito aquí
-      }
-    } catch (error) {
-      alert("Error al obtener preferencia de Mercado Pago");
+    const urlMP = mpRes.data.urlMP;
+    window.location.href = urlMP;
+
+    clearCart();
+  } catch (err: any) {
+    if (err.response && err.response.status === 403) {
+      alert('No tienes permisos para realizar esta acción. Inicia sesión nuevamente.');
+    } else {
+      alert('Error al iniciar el pago');
     }
-  };
+  }
+};
+
+// Pagar directo con Wallet de Mercado Pago (sin modal de datos)
+const handleGetPreferenceId = async () => {
+  try {
+    const ids = groupedCart.map((el) => el.id);
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    // Guarda la compra en localStorage para descontar stock en PaymentSuccess
+    localStorage.setItem('lastPurchase', JSON.stringify(groupedCart));
+
+    const res = await axios.post<{ preferenceId: string }>(
+      `${apiUrl}/pay/mp`,
+      { id: ids }
+    );
+    if (res.data && res.data.preferenceId) {
+      setStateConfirm({
+        preferenceId: res.data.preferenceId,
+        open: true,
+      });
+      // clearCart(); // NO limpiar el carrito aquí
+    }
+  } catch (error) {
+    alert("Error al obtener preferencia de Mercado Pago");
+  }
+};
 
   const handleOpenPayModal = () => {
     if (!isLoggedIn) {

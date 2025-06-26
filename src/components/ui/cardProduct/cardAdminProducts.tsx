@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import styles from './cardAdminProducts.module.css';
 import ModalEditProd from '../topbar/modals/modalEditProd';
+import ModalProduct from '../topbar/modals/modalProduct';
 import { IProduct } from '../../../types/IProduct';
 import { applyDiscount, removeDiscount } from '../../../http/productRequest';
 import { useAuth } from '../../../context/AuthContext';
+import { useCart } from '../../../context/CartContext';
 
 interface CardAdminProductProps {
   product: IProduct;
@@ -11,16 +13,17 @@ interface CardAdminProductProps {
 
 const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
   const [modalEdit, setModalEdit] = useState(false);
+  const [modalProduct, setModalProduct] = useState(false);
   const [eliminado, setEliminado] = useState(product.eliminado);
   const [loading, setLoading] = useState(false);
   const [discountInput, setDiscountInput] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
   const { isAdmin } = useAuth();
+  const { cart } = useCart();
 
   // Refresca el descuento desde el producto (precioOriginal)
   useEffect(() => {
     if (product.precioOriginal && product.precioOriginal > product.precio) {
-      // Si el precio original es mayor, calcula el descuento real
       const realDiscount = Math.round(100 - (product.precio / product.precioOriginal) * 100);
       setDiscount(realDiscount);
     } else {
@@ -56,7 +59,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
         }),
       });
 
-      setEliminado(!eliminado); // Actualiza el estado local
+      setEliminado(!eliminado);
     } catch (error) {
       console.error('Error al actualizar producto:', error);
       alert('Hubo un error al intentar actualizar el producto.');
@@ -76,8 +79,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
       await applyDiscount(product.id, value);
       setDiscount(value);
       setDiscountInput('');
-      // Opcional: podrías recargar el producto desde backend aquí si lo necesitas
-      window.location.reload(); // Para reflejar el cambio en la lista
+      window.location.reload();
     } catch (e) {
       alert("Error al aplicar descuento");
     }
@@ -91,8 +93,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
     try {
       await removeDiscount(product.id);
       setDiscount(0);
-      // Opcional: podrías recargar el producto desde backend aquí si lo necesitas
-      window.location.reload(); // Para reflejar el cambio en la lista
+      window.location.reload();
     } catch (e) {
       alert("Error al quitar descuento");
     }
@@ -101,7 +102,12 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
 
   return (
     <div className={`${styles.card} ${eliminado ? styles.disabled : ''}`}>
-      <div className={styles.imageContainer}>
+      <div
+        className={styles.imageContainer}
+        style={{ cursor: 'pointer' }}
+        onClick={() => setModalProduct(true)}
+        title="Ver y comprar producto"
+      >
         <img src={product.imagenUrl || '/images/zapatillas/default.png'} alt={product.nombre} className={styles.image} />
       </div>
       <div className={styles.details}>
@@ -178,6 +184,13 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
           {eliminado ? 'Habilitar' : 'Deshabilitar'}
         </button>
       </div>
+      {modalProduct && (
+        <ModalProduct
+          product={product}
+          cart={cart}
+          onClose={() => setModalProduct(false)}
+        />
+      )}
     </div>
   );
 };
