@@ -135,7 +135,7 @@ const Landing = () => {
 
         <div className={styles.landingButtonWrapper}>
           <Link to="/SearchItem">
-            <button className={styles.landingBuyButton}>¡Compre Ahora!</button>
+            <button className={styles.landingBuyButton}>Todos los productos</button>
           </Link>
         </div>
 
