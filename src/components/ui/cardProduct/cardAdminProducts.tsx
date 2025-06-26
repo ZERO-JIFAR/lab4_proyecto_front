@@ -132,9 +132,9 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
         <div>
           {discount > 0 ? (
             <div>
-              <span className={styles.desc}>
+              {/* <span className={styles.desc}>
                 Descuento activo: {discount}%
-              </span>
+              </span> */}
               <button
                 className={styles.delete}
                 onClick={handleRemoveDiscount}
