@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './modalRegister.module.css';
 import { registerUser, loginUser } from '../../../../http/userRequest';
+import { useAuth } from '../../../../context/AuthContext';
 
 interface RegisterModalProps {
   show: boolean;
@@ -13,10 +14,11 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const [error, setError] = useState('');
+  const { login } = useAuth();
 
   if (!show) return null;
 
-   const handleRegister = async () => {
+  const handleRegister = async () => {
     setError('');
 
     if (!username || !email || !password || !repeatPassword) {
@@ -33,13 +35,13 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ show, onClose }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('rol');
     localStorage.removeItem('email');
+    localStorage.removeItem('user');
 
     try {
       await registerUser({ nombre: username, email, password });
       const data = await loginUser({ email, password });
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('rol', data.rol);
-      localStorage.setItem('email', data.email);
+      // Usa el contexto para guardar el usuario completo
+      login(data.rol, data.token, { id: data.id, email: data.email, rol: data.rol });
       alert('Usuario registrado correctamente');
       onClose();
     } catch (err: any) {
