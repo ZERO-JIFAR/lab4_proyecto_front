@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from './modalProduct.module.css';
 import { useCart } from '../../../../context/CartContext';
+import { useAuth } from '../../../../context/AuthContext';
 import { IProduct } from '../../../../types/IProduct';
 
 interface ProductModalProps {
@@ -17,6 +18,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
     const [imageIndex, setImageIndex] = useState(0);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const { addToCart } = useCart();
+    const { isLoggedIn } = useAuth();
 
     // Calcula el stock disponible por talle considerando el carrito
     const getStockDisponible = (talleValor: string) => {
@@ -53,6 +55,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
         : product.precio;
 
     const handleAddToCart = () => {
+        if (!isLoggedIn) {
+            alert("Debes iniciar sesión para agregar productos al carrito.");
+            return;
+        }
         if (!selectedSize) return alert("Selecciona un talle");
         if (getStockDisponible(selectedSize) <= 0) {
             alert("No hay stock disponible para ese talle");
