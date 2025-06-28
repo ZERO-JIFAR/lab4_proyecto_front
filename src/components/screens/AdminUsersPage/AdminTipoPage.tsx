@@ -34,13 +34,13 @@ const AdminTipoPage: React.FC = () => {
             const token = localStorage.getItem("token");
             if (editId) {
                 await axios.put(
-                    `${APIURL}/tipos/${editId}`,
+                    `${APIURL}/tiposTalle/${editId}`,
                     { nombre },
                     { headers: token ? { Authorization: `Bearer ${token}` } : {} }
                 );
             } else {
                 await axios.post(
-                    `${APIURL}/tipos`,
+                    `${APIURL}/tiposTalle`,
                     { nombre },
                     { headers: token ? { Authorization: `Bearer ${token}` } : {} }
                 );
