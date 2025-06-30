@@ -6,6 +6,10 @@ import AdminUsersPage from '../components/screens/AdminUsersPage/AdminUsersPage'
 import { useAuth } from '../context/AuthContext';
 import PaymentFailure from '../components/mp/Payment/PaymentFailure';
 import { PaymentSuccess } from '../components/mp/Payment/PaymentSuccess';
+import AdminTipoPage from '../components/screens/AdminUsersPage/AdminTipoPage';
+import AdminCategoriaPage from '../components/screens/AdminUsersPage/AdminCategoriaPage';
+import AdminTipoTallePage from '../components/screens/AdminUsersPage/AdminTipoTallePage';
+import AdminTallePage from '../components/screens/AdminUsersPage/AdminTallePage';
 
 
 // ...rest of your code...
@@ -24,6 +28,10 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/SearchItem" element={<SearchItem />} />
+      <Route path="/admin/tipos" element={<AdminTipoPage />} />
+      <Route path="/admin/categorias" element={<AdminCategoriaPage />} />
+      <Route path="/admin/tipo-talles" element={<AdminTipoTallePage />} />
+      <Route path="/admin/talles" element={<AdminTallePage />} />
       <Route
         path="/admin-usuarios"
         element={
