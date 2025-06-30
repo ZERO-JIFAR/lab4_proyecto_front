@@ -1,3 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  overflow-y: auto;
+}
+
 .landingContainer {
   display: flex;
   flex-direction: column;
@@ -13,16 +27,42 @@
   align-items: center;
   padding: 2rem;
   text-align: center;
+  color: white;
+  background-image: url('/images/fondoNike.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.landingMain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: -1;
+  transition: background-color 0.4s ease;
+}
+
+body.dark .landingMain::before {
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .landingTitle {
-  font-size: 3.5rem;
-  margin-bottom: 0.5rem;
+  font-family: 'Anton', sans-serif;
+  font-size: 4rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .landingSubtitle {
-  color: #555;
+  color: #dedede;
   font-size: 1.2rem;
+  -webkit-text-stroke: 0.5px black;
 }
 
 .landingDivider {
@@ -34,7 +74,8 @@
 .landingSectionTitle {
   margin-bottom: 1rem;
   font-size: 1.5rem;
-  color: #333;
+  color: #d4d4d4;
+  -webkit-text-stroke: 0.5px black;
   font-weight: bold;
 }
 
@@ -42,9 +83,11 @@
 .landingProducts {
   display: flex;
   gap: 10px;
-  overflow-x: auto;
+  overflow: hidden;
   padding-bottom: 1rem;
   justify-content: center;
+  flex-wrap: wrap;
+  transition: transform 0.3s ease-in-out;
   max-width: 100%;
 }
 
@@ -52,6 +95,16 @@
   height: 250px;
   width: 250px;
   border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.landingProductImage:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Botón principal */
@@ -134,59 +187,18 @@
   border-radius: 4px;
 }
 
-.landingMore{
-  text-align: center;
-}
-
-.landingMoreText{
-text-align: center;
-font-size: 1.5rem
-}
-
-.landingProductImage:hover {
-  transform: scale(1.01);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-
-
-
-.landingContainer {
-  overflow-x: hidden; 
-  overflow-y: auto;   
-}
-
-.landingContainer {
-  overflow: hidden;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-.landingProducts {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap; 
-  overflow: hidden; 
-}
-
-
 .cardPriceWrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 12px; /* Agrega más espacio entre el texto y el botón */
-  gap: 20px;         /* Espacio entre el precio y el botón */
+  margin-top: 12px;
+  gap: 20px;
 }
 
 .cardPrice {
-  font-weight: bold;      /* Más resaltado */
-  font-size: 1.2rem;      /* Un poco más grande */
-  color: #333;            /* Puedes usar otro color si deseas destacarlo más */
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #333;
 }
 
 .carouselContainer {
@@ -200,29 +212,8 @@ html, body {
   overflow: hidden;
 }
 
-.landingProducts {
-  display: flex;
-  gap: 10px;
-  transition: transform 0.3s ease-in-out;
-  overflow: hidden;
-}
-
-.landingProductImage {
-  width: 250px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
-  flex-shrink: 0;
-}
-
-/* Elimina el contorno del boton del caroucel*/
-button:focus, button:focus-visible {
-  outline: -webkit-focus-ring-color auto 0px;
-}
-
 .carouselButton {
-  background-color: #a4a4a4;
+  background-color: transparent;
   border: none;
   border-radius: 10px;
   width: 50px;
@@ -237,5 +228,19 @@ button:focus, button:focus-visible {
 }
 
 .carouselButton:hover {
-  background-color: #8a8a8a;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+.landingMore {
+  text-align: center;
+}
+
+.landingMoreText {
+  text-align: center;
+  font-size: 1.5rem;
 }

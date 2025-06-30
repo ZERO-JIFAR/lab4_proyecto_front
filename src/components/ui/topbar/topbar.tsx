@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import styles from './topbar.module.css';
 import { FaBars, FaShoppingCart } from 'react-icons/fa';
 import ModalCarrito from './modals/modalShop';
-import ModalSignIn from './modals/modalSignIn';
+import ModalSignIn from './modals/ModalSignIn';
 import RegisterModal from './modals/modalRegister';
 import AdminMenu from './modals/adminMenu';
 import { AiOutlineSun, AiFillMoon } from "react-icons/ai";
@@ -62,7 +62,7 @@ const Topbar: React.FC = () => {
         <div className={styles.topbarCenter}>
           <Link to="/">
             <img
-              src="/logo/LogoNikeBlanco.png"
+              src="/logo/lala.png"
               alt="Logo"
               className={styles.topbarLogo}
               style={{ cursor: 'pointer' }}
@@ -92,7 +92,7 @@ const Topbar: React.FC = () => {
 
         {isLoggedIn && (
           <>
-            {isAdmin && <span className={styles.topbarSignin}>Modo Admin</span>}
+            {isAdmin && <span className={styles.topbarAdmin}>Modo Admin</span>}
             <button className={styles.topbarSignin} onClick={() => setShowLogoutConfirm(true)}>
               Logout
             </button>
