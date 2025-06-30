@@ -62,7 +62,7 @@ const Topbar: React.FC = () => {
         <div className={styles.topbarCenter}>
           <Link to="/">
             <img
-              src="/logo/LogoNikeBlanco.png"
+              src="/logo/lala.png"
               alt="Logo"
               className={styles.topbarLogo}
               style={{ cursor: 'pointer' }}

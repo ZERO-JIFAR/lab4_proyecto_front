@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Topbar from '../../ui/topbar/topbar';
 import Footer from '../../ui/footer/footer';
 import styles from './landing.module.css';
-import { FaChevronRight } from "react-icons/fa6";
+import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
 import { getProductos } from '../../../http/productRequest';
 import { IProduct } from '../../../types/IProduct';
 import ProductModal from '../../ui/topbar/modals/modalProduct';
@@ -90,6 +90,14 @@ const Landing = () => {
     );
   };
 
+    const handlePrev = () => {
+    setCarouselIndex((prev) =>
+      featured.length <= NUM_FEATURED_VISIBLE
+        ? 0
+        : (prev - 1 + featured.length) % featured.length
+    );
+  };
+
   const visibleFeatured =
     featured.length > 0
       ? Array.from({ length: Math.min(NUM_FEATURED_VISIBLE, featured.length) }, (_, i) =>
@@ -108,14 +116,19 @@ const Landing = () => {
       <Topbar />
 
       <div className={styles.landingMain}>
-        <h1 className={styles.landingTitle}><strong>Nike</strong></h1>
-        <p className={styles.landingSubtitle}>Just do it!</p>
+        <h1 className={styles.landingTitle}><strong>Strike</strong></h1>
+        <p className={styles.landingSubtitle}><strong>Alcanza tus sueños</strong></p>
 
         <hr className={styles.landingDivider} />
 
         <div className={styles.landingSectionTitle}>Productos Destacados</div>
 
         <div className={styles.carouselContainer}>
+          {featured.length > NUM_FEATURED_VISIBLE && (
+            <button className={styles.carouselButton} onClick={handlePrev}>
+              <h1><FaChevronLeft /></h1>
+            </button>
+          )}
           <div className={styles.landingProducts}>
             {visibleFeatured.map((prod, idx) => (
               <img
@@ -184,14 +197,13 @@ const Landing = () => {
             </div>
           ))}
         </div>
+        <h1 className={styles.landingMore}><strong>¿Quiénes somos?</strong></h1>
+        <p className={styles.landingMoreText}>
+          Somos una tienda de zapatillas y ropa deportiva con más de 10 años de experiencia en el mercado. 
+          Nos especializamos en ofrecer productos de alta calidad y las últimas tendencias en moda deportiva. 
+          Nuestro objetivo es brindar a nuestros clientes una experiencia de compra excepcional, con un servicio al cliente amigable y eficiente.
+        </p>
       </div>
-
-      <h1 className={styles.landingMore}><strong>¿Quiénes somos?</strong></h1>
-      <p className={styles.landingMoreText}>
-        Somos una tienda de zapatillas y ropa deportiva con más de 10 años de experiencia en el mercado. 
-        Nos especializamos en ofrecer productos de alta calidad y las últimas tendencias en moda deportiva. 
-        Nuestro objetivo es brindar a nuestros clientes una experiencia de compra excepcional, con un servicio al cliente amigable y eficiente.
-      </p>
 
       <Footer />
 
