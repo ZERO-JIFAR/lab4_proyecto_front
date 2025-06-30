@@ -5,7 +5,7 @@ import { loginUser } from '../../../../http/userRequest';
 interface ModalSignInProps {
   show: boolean;
   onClose: () => void;
-  onLogin: (role: string, token: string) => void;
+  onLogin: (role: string, token: string, user: { id: number; email: string; rol: string }) => void;
 }
 
 const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => {
@@ -16,17 +16,17 @@ const ModalSignIn: React.FC<ModalSignInProps> = ({ show, onClose, onLogin }) => 
   if (!show) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError(null);
+    e.preventDefault();
+    setError(null);
 
-  try {
-    const data = await loginUser({ email, password });
-    onLogin(data.rol, data.token);
-    onClose();
-  } catch (err: any) {
-    setError(err.message || 'Usuario o contraseña incorrectos. Por favor verifica tus datos.');
-  }
-};
+    try {
+      const data = await loginUser({ email, password });
+      onLogin(data.rol, data.token, { id: data.id, email: data.email, rol: data.rol });
+      onClose();
+    } catch (err: any) {
+      setError(err.message || 'Usuario o contraseña incorrectos. Por favor verifica tus datos.');
+    }
+  };
 
   return (
     <div className={styles.modalContainer}>

@@ -4,31 +4,61 @@ import { IProduct } from "../types/IProduct";
 const APIURL = import.meta.env.VITE_API_URL;
 const productosURL = `${APIURL}/productos`;
 
+export interface IProductRequest {
+  nombre: string;
+  precio: number;
+  precioOriginal?: number;
+  descripcion?: string;
+  marca?: string;
+  imagenUrl?: string;
+  categoriaId: number;
+  colores: {
+    color: string;
+    imagenUrl: string;
+    imagenesAdicionales: string[];
+    talles: {
+      talleId: number;
+      stock: number;
+    }[];
+  }[];
+}
+
+// Obtener todos los productos (DTO estructurado)
 export const getProductos = async (): Promise<IProduct[]> => {
   const token = localStorage.getItem('token');
-  const response = await axios.get<IProduct[]>(productosURL, {
+  const response = await axios.get<IProduct[]>(`${productosURL}/dto`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   return response.data;
 };
 
+// Obtener producto por ID (DTO estructurado)
 export const getProductoById = async (id: number): Promise<IProduct | null> => {
   const token = localStorage.getItem('token');
-  const response = await axios.get<IProduct>(`${productosURL}/${id}`, {
+  const response = await axios.get<IProduct>(`${productosURL}/dto/${id}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   return response.data;
 };
 
-export const createProducto = async (producto: Omit<IProduct, "id">): Promise<IProduct> => {
+// Crear producto con colores y talles
+export const createProducto = async (producto: IProductRequest): Promise<IProduct> => {
   const token = localStorage.getItem('token');
-  const response = await axios.post<IProduct>(productosURL, producto, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
+  const response = await axios.post<IProduct>(
+    `${productosURL}/con-colores`,
+    producto,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }
+  );
   return response.data;
 };
 
-export const updateProducto = async (id: number, producto: Omit<IProduct, "id">): Promise<IProduct> => {
+// Actualizar producto (solo campos simples)
+export const updateProducto = async (id: number, producto: Partial<IProduct>): Promise<IProduct> => {
   const token = localStorage.getItem('token');
   const response = await axios.put<IProduct>(`${productosURL}/${id}`, producto, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -36,6 +66,7 @@ export const updateProducto = async (id: number, producto: Omit<IProduct, "id">)
   return response.data;
 };
 
+// Eliminar producto
 export const deleteProducto = async (id: number): Promise<void> => {
   const token = localStorage.getItem('token');
   await axios.delete(`${productosURL}/${id}`, {
@@ -43,23 +74,19 @@ export const deleteProducto = async (id: number): Promise<void> => {
   });
 };
 
+// Aplicar descuento a un producto (solo campos de precio, usando PATCH)
 export const applyDiscount = async (id: number, discount: number): Promise<IProduct> => {
   const token = localStorage.getItem('token');
-  // Obtén el producto actual para saber el precio original
   const producto = await getProductoById(id);
   if (!producto) throw new Error("Producto no encontrado");
 
-  // Si ya tiene precioOriginal, úsalo, si no, guarda el precio actual como original
   const precioOriginal = producto.precioOriginal ?? producto.precio;
-
-  // Calcula el nuevo precio con descuento
   const nuevoPrecio = Math.round(precioOriginal * (1 - discount / 100));
 
-  // Actualiza el producto
-  const response = await axios.put<IProduct>(
-    `${productosURL}/${id}`,
+  // PATCH al endpoint correcto
+  const response = await axios.patch<IProduct>(
+    `${productosURL}/${id}/descuento`,
     {
-      ...producto,
       precio: nuevoPrecio,
       precioOriginal: precioOriginal,
     },
@@ -70,21 +97,19 @@ export const applyDiscount = async (id: number, discount: number): Promise<IProd
   return response.data;
 };
 
+// Quitar descuento (restaurar precio original, usando PATCH)
 export const removeDiscount = async (id: number): Promise<IProduct> => {
   const token = localStorage.getItem('token');
   const producto = await getProductoById(id);
   if (!producto) throw new Error("Producto no encontrado");
 
-  // Si no hay precioOriginal, no hay nada que restaurar
   if (!producto.precioOriginal) return producto;
 
-  // Restaurar el precio original
-  const response = await axios.put<IProduct>(
-    `${productosURL}/${id}`,
+  const response = await axios.patch<IProduct>(
+    `${productosURL}/${id}/descuento`,
     {
-      ...producto,
       precio: producto.precioOriginal,
-      precioOriginal: undefined, // Limpia el campo si quieres
+      precioOriginal: null,
     },
     {
       headers: token ? { Authorization: `Bearer ${token}` } : {},

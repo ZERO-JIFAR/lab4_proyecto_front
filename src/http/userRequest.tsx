@@ -13,11 +13,13 @@ interface LoginPayload {
     email: string;
     password: string;
 }
+
 // Define la estructura de la respuesta del inicio de sesión
 interface LoginResponse {
     token: string;
     rol: string;
     email: string;
+    id: number; // <-- AGREGA ESTA LÍNEA
 }
 
 // Registra un nuevo usuario
@@ -57,7 +59,7 @@ export const loginUser = async ({ email, password }: LoginPayload): Promise<Logi
         throw new Error(errorMsg);
     }
 
-    return await response.json(); // Devuelve { token, rol, email }
+    return await response.json(); // Devuelve { token, rol, email, id }
 };
 
 // --- NUEVAS FUNCIONES PARA ADMIN USUARIOS ---
