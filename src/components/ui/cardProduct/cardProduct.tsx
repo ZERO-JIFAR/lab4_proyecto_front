@@ -14,6 +14,10 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
 
     if (!product) return null;
 
+    // Imagen principal: la del primer color, o la del producto
+    const mainColor = product.colores && product.colores.length > 0 ? product.colores[0] : null;
+    const mainImage = mainColor?.imagenUrl || product.imagenUrl || '/images/zapatillas/default.png';
+
     // Descuento real desde backend
     const hasDiscount = !!product.precioOriginal && product.precioOriginal > product.precio;
     const discount = hasDiscount
@@ -23,18 +27,11 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
         ? Math.round(product.precio)
         : product.precio;
 
-    // Extraer talles disponibles (solo los que tiene stock > 0)
-    const tallesDisponibles = product.talles
-        ? product.talles
-            .filter(tp => tp.stock > 0 && tp.talle && (tp.talle.valor || tp.talle.nombre))
-            .map(tp => tp.talle.valor ? tp.talle.valor : tp.talle.nombre)
-        : [];
-
     return (
         <>
             <div className={styles.card} onClick={() => setShowModal(true)}>
                 <div className={styles.imageContainer}>
-                    <img src={product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'} alt={product.nombre} className={styles.image} />
+                    <img src={mainImage} alt={product.nombre} className={styles.image} />
                     {hasDiscount && (
                         <span className={styles.offerBadge}>-{discount}%</span>
                     )}

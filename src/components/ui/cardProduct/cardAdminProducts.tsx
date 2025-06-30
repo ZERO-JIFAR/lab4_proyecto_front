@@ -6,12 +6,14 @@ import { IProduct } from '../../../types/IProduct';
 import { applyDiscount, removeDiscount } from '../../../http/productRequest';
 import { useAuth } from '../../../context/AuthContext';
 import { useCart } from '../../../context/CartContext';
+import axios from "axios";
 
 interface CardAdminProductProps {
   product: IProduct;
+  onUpdate?: () => void; // <-- Agregado para refrescar productos
 }
 
-const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
+const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }) => {
   const [modalEdit, setModalEdit] = useState(false);
   const [modalProduct, setModalProduct] = useState(false);
   const [eliminado, setEliminado] = useState(product.eliminado);
@@ -21,7 +23,6 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
   const { isAdmin } = useAuth();
   const { cart } = useCart();
 
-  // Refresca el descuento desde el producto (precioOriginal)
   useEffect(() => {
     if (product.precioOriginal && product.precioOriginal > product.precio) {
       const realDiscount = Math.round(100 - (product.precio / product.precioOriginal) * 100);
@@ -31,12 +32,12 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
     }
   }, [product.precio, product.precioOriginal]);
 
-  // Calcular precio con descuento
   const getDiscountedPrice = () => {
     if (!discount || discount <= 0) return product.precio;
     return Math.round(product.precioOriginal ? product.precioOriginal * (1 - discount / 100) : product.precio);
   };
 
+  // Solo actualiza el campo eliminado usando PATCH
   const handleToggleActivo = async () => {
     const confirm = window.confirm(
       `¿Estás seguro de que querés ${eliminado ? 'habilitar' : 'deshabilitar'} el producto "${product.nombre}"?`
@@ -50,23 +51,18 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       };
-      await fetch(`${APIURL}/productos/${product.id}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({
-          ...product,
-          eliminado: !eliminado,
-        }),
-      });
+      await axios.patch(`${APIURL}/productos/${product.id}`, {
+        eliminado: !eliminado,
+      }, { headers });
 
       setEliminado(!eliminado);
+      if (onUpdate) onUpdate(); // <-- Refresca la lista de productos
     } catch (error) {
       console.error('Error al actualizar producto:', error);
       alert('Hubo un error al intentar actualizar el producto.');
     }
   };
 
-  // Aplicar descuento usando backend
   const handleApplyDiscount = async () => {
     const value = Number(discountInput);
     if (!isAdmin) return alert("Solo un admin puede aplicar descuentos");
@@ -86,7 +82,6 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
     setLoading(false);
   };
 
-  // Quitar descuento usando backend
   const handleRemoveDiscount = async () => {
     if (!isAdmin) return alert("Solo un admin puede quitar descuentos");
     setLoading(true);
@@ -128,13 +123,9 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
         </p>
       </div>
       <div className={styles.actions}>
-        {/* Sección de descuento */}
         <div>
           {discount > 0 ? (
             <div>
-              {/* <span className={styles.desc}>
-                Descuento activo: {discount}%
-              </span> */}
               <button
                 className={styles.delete}
                 onClick={handleRemoveDiscount}
@@ -150,7 +141,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product }) => {
                 min={1}
                 max={90}
                 placeholder="Descuento %"
-                value={discountInput}
+                value={discountInput ?? ''}
                 onChange={e => setDiscountInput(e.target.value)}
                 className={styles.cuadroDesc}
                 disabled={eliminado || loading}

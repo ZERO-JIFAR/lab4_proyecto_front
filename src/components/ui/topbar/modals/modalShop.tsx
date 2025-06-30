@@ -104,26 +104,54 @@ const ModalCarrito: React.FC<ModalCarritoProps> = ({ show, onClose }) => {
   if (!show) return null;
 
   // --- NUEVO: Verifica stock antes de iniciar el pago ---
-  const verifyStock = async () => {
-    setError(null);
-    try {
-      for (const item of groupedCart) {
-        const response = await axios.get<IProduct>(`${import.meta.env.VITE_API_URL}/productos/${item.id}`);
-        const product = response.data;
-        const talles = product.talles || product.tallesProducto || [];
-        const talleProducto = talles.find(tp => (tp.talle.valor || tp.talle.nombre) === item.size);
-        if (!talleProducto || talleProducto.stock < item.quantity) {
-          setError(`Stock insuficiente para el producto ${product.nombre} talle ${item.size}`);
-          return false;
-        }
+ // --- NUEVO: Verifica stock antes de iniciar el pago ---
+const verifyStock = async () => {
+  setError(null);
+  try {
+    for (const item of groupedCart) {
+      const response = await axios.get<IProduct>(`${import.meta.env.VITE_API_URL}/productos/dto/${item.id}`);
+      const product = response.data;
+      // Busca el color correcto (ignora mayúsculas/minúsculas y espacios)
+      const colorObj = product.colores.find(
+        c => c.color.trim().toLowerCase() === item.color.trim().toLowerCase()
+      );
+      if (!colorObj) {
+        setError(`No se encontró el color ${item.color} para el producto ${product.nombre}`);
+        return false;
       }
-      return true;
-    } catch (e) {
-      console.error("Error al verificar stock:", e);
-      setError("Error al verificar stock. Intenta de nuevo.");
-      return false;
+      // Busca el talle correcto dentro de ese color
+      // Compara por talleValor (nombre, ej: "L") y por talleId (por si el size es el id)
+      let talleObj = colorObj.talles.find(
+        t =>
+          (t.talleValor && t.talleValor.trim().toLowerCase() === item.size.trim().toLowerCase()) ||
+          (t.talleId && String(t.talleId) === String(item.size.trim()))
+      );
+      // Si no se encuentra por talleValor, intenta buscar por talleId numérico (por si el size es el id)
+      if (!talleObj && !isNaN(Number(item.size))) {
+        talleObj = colorObj.talles.find(t => String(t.talleId) === String(item.size));
+      }
+      if (!talleObj) {
+        setError(
+          `No se encontró el talle ${item.size} para el color ${item.color} del producto ${product.nombre}`
+        );
+        return false;
+      }
+      if (talleObj.stock < item.quantity) {
+        setError(
+          `Stock insuficiente para el producto ${product.nombre} color ${item.color} talle ${item.size}`
+        );
+        return false;
+      }
     }
-  };
+    return true;
+  } catch (e) {
+    console.error("Error al verificar stock:", e);
+    setError("Error al verificar stock. Intenta de nuevo.");
+    return false;
+  }
+};
+
+  
 
   // Maneja el pago con Mercado Pago (modal de datos)
   const handlePay = async (

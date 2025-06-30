@@ -18,13 +18,12 @@ interface ModalEditProdProps {
     product?: IProduct;
 }
 
-
 interface TalleConStock {
     talle: ITalle;
     stock: number;
 }
 
-const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product }) => {
+const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product }) => {
     const [tipos, setTipos] = useState<ITipo[]>([]);
     const [categorias, setCategorias] = useState<ICategory[]>([]);
     const [selectedTipoId, setSelectedTipoId] = useState<number | "">("");
@@ -55,16 +54,15 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
 
     useEffect(() => {
         if (isOpen && product) {
-            // setear datos del formulario
             setForm({
-                nombre: product.nombre,
+                nombre: product.nombre || '',
                 precio: String(product.precio),
                 descripcion: product.descripcion || '',
-                color: product.color || '',
+                color: product.colores?.[0]?.color || '',
                 marca: product.marca || '',
-                categoria: '', // todavía no lo seteamos
+                categoria: product.categoria?.id ? String(product.categoria.id) : '',
                 image: product.imagenUrl || '',
-                imageAdicional: product.imagenesAdicionales?.[0] || ''
+                imageAdicional: product.colores?.[0]?.imagenesAdicionales?.[0] || ''
             });
 
             getTipos().then(setTipos).catch(console.error);
@@ -74,37 +72,35 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
                     setCategorias(cats);
                     const tipoId = product.categoria?.tipo?.id || '';
                     const categoriaId = product.categoria?.id || '';
-
-                    setSelectedTipoId(tipoId); // Esto disparará el filtro
-
-                    // Esperamos a que setFilteredCategorias se complete en el siguiente efecto
-                    // pero guardamos la categoría para setearla después
+                    setSelectedTipoId(tipoId);
                     setTimeout(() => {
                         setForm(prev => ({ ...prev, categoria: String(categoriaId) }));
-                    }, 100); // pequeño delay para esperar el filtro
+                    }, 100);
                 })
                 .catch(console.error);
 
             getWaistTypes()
                 .then((wt) => {
                     setWaistTypes(wt);
-                    const waistTypeId = product.talles?.[0]?.talle?.tipoTalle?.id || '';
-                    const exists = wt.some(w => w.id === Number(waistTypeId));
-                    if (exists) {
-                        setSelectedWaistTypeId(Number(waistTypeId));
-                    }
+                    const waistTypeId = product.colores?.[0]?.talles?.[0]?.tipoTalle?.id || '';
+                    if (waistTypeId) setSelectedWaistTypeId(Number(waistTypeId));
                 })
                 .catch(console.error);
 
-            setTallesConStock(
-                (product.talles || []).map(tp => ({
-                    talle: tp.talle,
-                    stock: tp.stock
-                }))
-            );
+            // Toma los talles del primer color (si hay varios colores, puedes adaptar esto)
+          setTallesConStock(
+  product.colores?.[0]?.talles?.map(tp => ({
+    talle: {
+      id: tp.talleId,
+      valor: tp.talleValor ?? "",
+      nombre: tp.talleValor ?? ""
+    },
+    stock: tp.stock
+  })) || []
+);
 
             if (product.imagenUrl) setImagePreview(product.imagenUrl);
-            if (product.imagenesAdicionales?.[0]) setImageAdicionalPreview(product.imagenesAdicionales[0]);
+            if (product.colores?.[0]?.imagenesAdicionales?.[0]) setImageAdicionalPreview(product.colores[0].imagenesAdicionales[0]);
         }
     }, [isOpen, product]);
 
@@ -178,121 +174,112 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    setLoading(true);
+        setLoading(true);
 
-    let imageUrl = form.image;
-    let imageAdicionalUrl = form.imageAdicional;
+        let imageUrl = form.image;
+        let imageAdicionalUrl = form.imageAdicional;
 
-    // Subir imagen si hay una nueva
-    if (imageFile) {
-        try {
-            imageUrl = await uploadToCloudinary(imageFile);
-        } catch (err) {
-            alert('Error al subir la imagen principal');
+        if (imageFile) {
+            try {
+                imageUrl = await uploadToCloudinary(imageFile);
+            } catch (err) {
+                alert('Error al subir la imagen principal');
+                setLoading(false);
+                return;
+            }
+        }
+
+        if (imageAdicionalFile) {
+            try {
+                imageAdicionalUrl = await uploadToCloudinary(imageAdicionalFile);
+            } catch (err) {
+                alert('Error al subir la imagen adicional');
+                setLoading(false);
+                return;
+            }
+        }
+
+        if (!imageAdicionalFile && form.imageAdicional && !form.imageAdicional.startsWith('http')) {
+            imageAdicionalUrl = '';
+        }
+
+        const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
+        if (!categoriaObj) {
+            alert('Selecciona una categoría válida');
             setLoading(false);
             return;
         }
-    }
 
-    if (imageAdicionalFile) {
-        try {
-            imageAdicionalUrl = await uploadToCloudinary(imageAdicionalFile);
-        } catch (err) {
-            alert('Error al subir la imagen adicional');
+        if (tallesConStock.length === 0) {
+            alert('Debes agregar al menos un talle con stock');
             setLoading(false);
             return;
         }
-    }
 
-    // Esto evita enviar un "nombre de archivo" si no hay URL válida
-    if (!imageAdicionalFile && !form.imageAdicional.startsWith('http')) {
-        imageAdicionalUrl = '';
-    }
+        // Construir el DTO para el backend
+        const productoConColoresDTO = {
+            nombre: form.nombre,
+            precio: Number(form.precio),
+            descripcion: form.descripcion,
+            marca: form.marca,
+            imagenUrl: imageUrl,
+            categoriaId: categoriaObj.id,
+            colores: [
+                {
+                    color: form.color,
+                    imagenUrl: imageUrl,
+                    imagenesAdicionales: imageAdicionalUrl ? [imageAdicionalUrl] : [],
+                    talles: tallesConStock.map(ts => ({
+                        talleId: ts.talle.id,
+                        stock: ts.stock
+                    }))
+                }
+            ]
+        };
 
-    const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
-    if (!categoriaObj) {
-        alert('Selecciona una categoría válida');
-        setLoading(false);
-        return;
-    }
-
-    if (tallesConStock.length === 0) {
-        alert('Debes agregar al menos un talle con stock');
-        setLoading(false);
-        return;
-    }
-
-    const producto = {
-        id: product?.id,
-        nombre: form.nombre,
-        cantidad: 0,
-        precio: Number(form.precio),
-        descripcion: form.descripcion,
-        color: form.color,
-        marca: form.marca,
-        imagenUrl: imageUrl,
-        imagenesAdicionales: imageAdicionalUrl ? [imageAdicionalUrl] : [],
-        categoria: { id: categoriaObj.id }
-    };
-
-    // Crear un objeto para tallesConStock (no un array)
-    const tallesConStockObj: Record<number, number> = {};
-    tallesConStock.forEach(ts => {
-        tallesConStockObj[ts.talle.id] = ts.stock;
-    });
-
-    const productoConTallesDTO = {
-        producto,
-        tallesConStock: tallesConStockObj
-    };
-
-    try {
-        const APIURL = import.meta.env.VITE_API_URL;
-
-        if (product?.id) {
-            // PUT para editar
-            await axios.put(`${APIURL}/productos/con-talles/${product.id}`, productoConTallesDTO, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('token')
-                        ? `Bearer ${localStorage.getItem('token')}`
-                        : undefined,
-                },
-            });
-            alert('Producto actualizado!');
-        } else {
-            // POST para agregar
-            await axios.post(`${APIURL}/productos/con-talles`, productoConTallesDTO, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: localStorage.getItem('token')
-                        ? `Bearer ${localStorage.getItem('token')}`
-                        : undefined,
-                },
-            });
-            alert('Producto agregado!');
+        try {
+            const APIURL = import.meta.env.VITE_API_URL;
+            if (product?.id) {
+                // PUT para editar producto con colores y talles
+                await axios.put(`${APIURL}/productos/con-colores/${product.id}`, productoConColoresDTO, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: localStorage.getItem('token')
+                            ? `Bearer ${localStorage.getItem('token')}`
+                            : undefined,
+                    },
+                });
+                alert('Producto actualizado!');
+            } else {
+                await axios.post(`${APIURL}/productos/con-colores`, productoConColoresDTO, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: localStorage.getItem('token')
+                            ? `Bearer ${localStorage.getItem('token')}`
+                            : undefined,
+                    },
+                });
+                alert('Producto agregado!');
+            }
+            onClose();
+        } catch (err: any) {
+            console.error('Error completo:', err);
+            if (axios.isAxiosError(err)) {
+                const message = err.response?.data?.message || err.message;
+                alert(`Error al guardar producto: ${message}`);
+            } else {
+                alert(`Error inesperado: ${err.message}`);
+            }
+        } finally {
+            setLoading(false);
         }
-
-        onClose();
-    } catch (err: any) {
-        console.error('Error completo:', err);
-        if (axios.isAxiosError(err)) {
-            const message = err.response?.data?.message || err.message;
-            alert(`Error al guardar producto: ${message}`);
-        } else {
-            alert(`Error inesperado: ${err.message}`);
-        }
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     return (
         <div className={styles.overlay}>
             <div className={styles.modal}>
                 <button className={styles.closeButton} onClick={onClose}>✖</button>
                 <h2>Editar Producto</h2>
-
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.inputGrid}>
                         <div className={styles.inputColumn}>
@@ -375,9 +362,9 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
                                 required
                             >
                                 <option value="">Seleccionar</option>
-                                    {waistTypes.map(wt => (
-                                        <option key={wt.id} value={wt.id}>{wt.nombre}</option>
-                                    ))}
+                                {waistTypes.map(wt => (
+                                    <option key={wt.id} value={wt.id}>{wt.nombre}</option>
+                                ))}
                             </select>
 
                             {selectedWaistTypeId && (
@@ -387,10 +374,10 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
                                         value={selectedTalleId}
                                         onChange={e => setSelectedTalleId(e.target.value ? Number(e.target.value) : "")}
                                     >
-                                    <option value="">Seleccionar</option>
-                                    {talles.map(t => (
-                                        <option key={t.id} value={t.id}>{t.valor}</option>
-                                    ))}
+                                        <option value="">Seleccionar</option>
+                                        {talles.map(t => (
+                                            <option key={t.id} value={t.id}>{t.valor}</option>
+                                        ))}
                                     </select>
                                     <label>Stock para este talle:</label>
                                     <input
@@ -413,7 +400,7 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
                                             <li key={ts.talle.id}>
                                                 {ts.talle.valor} - Stock: {ts.stock}
                                                 <button type="button" style={{ marginLeft: 8 }} onClick={() => handleRemoveTalleStock(ts.talle.id)}>
-                                                Quitar
+                                                    Quitar
                                                 </button>
                                             </li>
                                         ))}
@@ -436,4 +423,4 @@ const ModalEditProd : React.FC<ModalEditProdProps> = ({ isOpen, onClose, product
     );
 };
 
-export default ModalEditProd ;
+export default ModalEditProd;

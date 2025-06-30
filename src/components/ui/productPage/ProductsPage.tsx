@@ -32,22 +32,27 @@ const ProductsPage = () => {
     const [selectedWaistType, setSelectedWaistType] = useState<number | "">("");
     const [showEliminados, setShowEliminados] = useState(false);
 
-    // Extiende el tipo para aceptar tallesProducto temporalmente
-    type ProductWithTallesProducto = IProduct & { tallesProducto?: any[] };
-
     const fetchProducts = async () => {
-        const data = await getProductos();
-        const normalizados = (data as ProductWithTallesProducto[])
-            .map(prod => ({
-                ...prod,
-                talles: prod.talles ?? prod.tallesProducto ?? []
-            }));
-        setProducts(normalizados);
+        try {
+            const productos = await getProductos();
+            setProducts(Array.isArray(productos) ? productos : []);
+        } catch (err) {
+            console.error("Error al obtener productos:", err);
+            setProducts([]);
+        }
     };
 
     const fetchTiposCategorias = async () => {
-        setTipos(await getTipos());
-        setCategorias(await getCategorias());
+        try {
+            const tiposData = await getTipos();
+            const categoriasData = await getCategorias();
+            setTipos(tiposData);
+            setCategorias(categoriasData);
+        } catch (error) {
+            console.error("Error al cargar tipos o categorías:", error);
+            setTipos([]);
+            setCategorias([]);
+        }
     };
 
     useEffect(() => {
@@ -55,53 +60,72 @@ const ProductsPage = () => {
         fetchTiposCategorias();
     }, []);
 
-    // Filtrar productos por texto, tipo, categoría, talle, color, marca y eliminado
-    const filteredProducts = products.filter((prod) => {
-        if (isAdmin && !showEliminados && prod.eliminado) return false;
+    const filteredProducts = Array.isArray(products)
+        ? products.filter((prod) => {
+            // DEBUG LOG para depuración de productos eliminados
+            if (prod.eliminado) {
+                console.log(
+                    `[DEBUG] Producto eliminado:`,
+                    prod.nombre,
+                    '| eliminado:', prod.eliminado,
+                    '| isAdmin:', isAdmin,
+                    '| showEliminados:', showEliminados
+                );
+            }
 
-        const matchesSearch = prod.nombre.toLowerCase().includes(search.toLowerCase());
-        const matchesTipo = selectedTipo === "" || (prod.categoria && prod.categoria.tipo && prod.categoria.tipo.id === selectedTipo);
-        const matchesCategoria = selectedCategoria === "" || (prod.categoria && prod.categoria.id === selectedCategoria);
+            if ((!isAdmin && prod.eliminado) || (isAdmin && !showEliminados && prod.eliminado)) {
+                // DEBUG LOG
+                console.log(`[DEBUG] Ocultando producto:`, prod.nombre);
+                return false;
+            }
 
-        // FILTRO CORRECTO POR TALLE: compara por nombre y valor, y solo muestra productos que tengan ese talle
-        const matchesTalle =
-            selectedTalle === "" ||
-            (
-                prod.talles &&
-                prod.talles.some(tp =>
-                    (tp.talle.nombre === selectedTalle || tp.talle.valor === selectedTalle)
-                    && tp.stock > 0 // Solo si tiene stock
-                )
+            // Evita error si prod.nombre es null o undefined
+            const nombre = prod.nombre ? prod.nombre.toLowerCase() : "";
+            const matchesSearch = nombre.includes(search.toLowerCase());
+
+            const matchesTipo = selectedTipo === "" || (prod.categoria?.tipo?.id === selectedTipo);
+            const matchesCategoria = selectedCategoria === "" || (prod.categoria?.id === selectedCategoria);
+
+            const matchesTalle =
+                selectedTalle === "" ||
+                prod.colores?.some(color =>
+                    color.talles?.some(tp =>
+                        tp.talleValor === selectedTalle && tp.stock > 0
+                    )
+                );
+
+            const matchesColor =
+                selectedColor === "" ||
+                prod.colores?.some(c =>
+                    c.color && c.color.toLowerCase() === selectedColor.toLowerCase()
+                );
+
+            const matchesMarca = selectedMarca === "" || (prod.marca?.toLowerCase() === selectedMarca.toLowerCase());
+            const matchesMinPrice = minPrice === '' || prod.precio >= Number(minPrice);
+            const matchesMaxPrice = maxPrice === '' || prod.precio <= Number(maxPrice);
+
+            return (
+                matchesSearch &&
+                matchesTipo &&
+                matchesCategoria &&
+                matchesTalle &&
+                matchesColor &&
+                matchesMarca &&
+                matchesMinPrice &&
+                matchesMaxPrice
             );
+        })
+        : [];
 
-        const matchesColor = selectedColor === "" || (prod.color && prod.color.toLowerCase() === selectedColor.toLowerCase());
-        const matchesMarca = selectedMarca === "" || (prod.marca && prod.marca.toLowerCase() === selectedMarca.toLowerCase());
-        const matchesMinPrice = minPrice === '' || prod.precio >= Number(minPrice);
-        const matchesMaxPrice = maxPrice === '' || prod.precio <= Number(maxPrice);
-
-        return (
-            matchesSearch &&
-            matchesTipo &&
-            matchesCategoria &&
-            matchesTalle &&
-            matchesColor &&
-            matchesMarca &&
-            matchesMinPrice &&
-            matchesMaxPrice
-        );
-    });
-
-    // Ordenar productos según el filtro seleccionado
     const sortedProducts = [...filteredProducts].sort((a, b) => {
         if (sort === 'precioAsc') return a.precio - b.precio;
         if (sort === 'precioDesc') return b.precio - a.precio;
-        return 0; // "relevantes" o cualquier otro valor, no ordenar
+        return 0;
     });
 
-    // Categorías filtradas por tipo seleccionado
     const categoriasFiltradas = selectedTipo === ""
         ? categorias
-        : categorias.filter(cat => cat.tipo && cat.tipo.id === selectedTipo);
+        : categorias.filter(cat => cat.tipo?.id === selectedTipo);
 
     return (
         <div className={styles.page}>
@@ -135,8 +159,6 @@ const ProductsPage = () => {
                     onSearchChange={setSearch}
                 />
                 <div className={isAdmin ? styles.adminList : styles.productsGrid}>
-
-                    {/* Filtro solo visible para admin */}
                     {isAdmin && (
                         <div className={styles.filtElim}>
                             <label style={{ marginLeft: '10px' }}>
@@ -149,7 +171,6 @@ const ProductsPage = () => {
                             </label>
                         </div>
                     )}
-
                     {sortedProducts.length === 0 ? (
                         <div className={styles.noEncontrado}>
                             Ningún producto encontrado
@@ -157,7 +178,11 @@ const ProductsPage = () => {
                     ) : (
                         sortedProducts.map((prod, idx) =>
                             isAdmin ? (
-                                <CardAdminProduct key={prod.id || idx} product={prod} />
+                                <CardAdminProduct
+                                    key={prod.id || idx}
+                                    product={prod}
+                                    onUpdate={fetchProducts}
+                                />
                             ) : (
                                 <CardProduct key={prod.id || idx} product={prod} />
                             )
