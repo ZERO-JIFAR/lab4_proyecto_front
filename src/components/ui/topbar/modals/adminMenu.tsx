@@ -18,8 +18,17 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ visible }) => {
       <button className={styles.menuButton} onClick={() => setModalAdd(true)}>
         Agregar Producto
       </button>
-      <button className={styles.menuButton} onClick={() => navigate('/SearchItem')}>
-        Productos
+      <button className={styles.menuButton} onClick={() => navigate('/admin/tipos')}>
+        Tipos
+      </button>
+      <button className={styles.menuButton} onClick={() => navigate('/admin/categorias')}>
+        Categorías
+      </button>
+      <button className={styles.menuButton} onClick={() => navigate('/admin/tipo-talles')}>
+        Tipo Talles
+      </button>
+      <button className={styles.menuButton} onClick={() => navigate('/admin/talles')}>
+        Talles
       </button>
       <button className={styles.menuButton} onClick={() => navigate('/admin-usuarios')}>
         Administrar Usuarios

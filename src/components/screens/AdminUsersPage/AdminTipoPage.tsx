@@ -10,6 +10,7 @@ const AdminTipoPage: React.FC = () => {
     const [nombre, setNombre] = useState("");
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showEliminados, setShowEliminados] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -34,13 +35,13 @@ const AdminTipoPage: React.FC = () => {
             const token = localStorage.getItem("token");
             if (editId) {
                 await axios.put(
-                    `${APIURL}/tiposTalle/${editId}`,
+                    `${APIURL}/tipos/${editId}`,
                     { nombre },
                     { headers: token ? { Authorization: `Bearer ${token}` } : {} }
                 );
             } else {
                 await axios.post(
-                    `${APIURL}/tiposTalle`,
+                    `${APIURL}/tipos`,
                     { nombre },
                     { headers: token ? { Authorization: `Bearer ${token}` } : {} }
                 );
@@ -58,16 +59,23 @@ const AdminTipoPage: React.FC = () => {
         setNombre(tipo.nombre);
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm("¿Seguro que deseas eliminar este tipo?")) return;
+    // Soft delete/habilitar
+    const handleToggleActivo = async (tipo: ITipo) => {
+        if (!window.confirm(
+            tipo.eliminado
+                ? "¿Seguro que deseas habilitar este tipo?"
+                : "¿Seguro que deseas deshabilitar este tipo?"
+        )) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`${APIURL}/tipos/${id}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+            await axios.patch(
+                `${APIURL}/tipos/${tipo.id}`,
+                { eliminado: !tipo.eliminado },
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+            );
             fetchData();
         } catch {
-            setError("Error al eliminar");
+            setError("Error al actualizar el tipo");
         }
     };
 
@@ -76,6 +84,8 @@ const AdminTipoPage: React.FC = () => {
         setNombre("");
         setError(null);
     };
+
+    const tiposFiltrados = tipos.filter(t => showEliminados ? true : !t.eliminado);
 
     return (
         <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
@@ -94,23 +104,41 @@ const AdminTipoPage: React.FC = () => {
                 {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
                 {error && <div style={{ color: "red" }}>{error}</div>}
             </form>
-            <table border={1} cellPadding={8} style={{ width: "100%" }}>
+            <label>
+                <input
+                    type="checkbox"
+                    checked={showEliminados}
+                    onChange={e => setShowEliminados(e.target.checked)}
+                    style={{ marginRight: 8 }}
+                />
+                Mostrar tipos deshabilitados
+            </label>
+            <table border={1} cellPadding={8} style={{ width: "100%", marginTop: 12 }}>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {tipos.map(tipo => (
-                        <tr key={tipo.id}>
+                    {tiposFiltrados.map(tipo => (
+                        <tr key={tipo.id} style={tipo.eliminado ? { opacity: 0.5 } : {}}>
                             <td>{tipo.id}</td>
                             <td>{tipo.nombre}</td>
+                            <td>{tipo.eliminado ? "Deshabilitado" : "Activo"}</td>
                             <td>
-                                <button onClick={() => handleEdit(tipo)}>Editar</button>
-                                <button onClick={() => handleDelete(tipo.id)}>
-                                    Eliminar
+                                <button onClick={() => handleEdit(tipo)} disabled={tipo.eliminado}>Editar</button>
+                                <button
+                                    onClick={() => handleToggleActivo(tipo)}
+                                    style={{
+                                        background: tipo.eliminado ? "#4caf50" : "#f44336",
+                                        color: "#fff",
+                                        marginLeft: 8
+                                    }}
+                                >
+                                    {tipo.eliminado ? "Habilitar" : "Deshabilitar"}
                                 </button>
                             </td>
                         </tr>

@@ -3,14 +3,14 @@ import styles from './cardAdminProducts.module.css';
 import ModalEditProd from '../topbar/modals/modalEditProd';
 import ModalProduct from '../topbar/modals/modalProduct';
 import { IProduct } from '../../../types/IProduct';
-import { applyDiscount, removeDiscount } from '../../../http/productRequest';
+import { applyDiscount, removeDiscount, getProductoById } from '../../../http/productRequest';
 import { useAuth } from '../../../context/AuthContext';
 import { useCart } from '../../../context/CartContext';
 import axios from "axios";
 
 interface CardAdminProductProps {
   product: IProduct;
-  onUpdate?: () => void; // <-- Agregado para refrescar productos
+  onUpdate?: () => void;
 }
 
 const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }) => {
@@ -20,6 +20,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
   const [loading, setLoading] = useState(false);
   const [discountInput, setDiscountInput] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
+  const [editProduct, setEditProduct] = useState<IProduct | null>(null);
   const { isAdmin } = useAuth();
   const { cart } = useCart();
 
@@ -30,20 +31,22 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
     } else {
       setDiscount(0);
     }
-  }, [product.precio, product.precioOriginal]);
+    setEliminado(product.eliminado);
+  }, [product.precio, product.precioOriginal, product.eliminado]);
 
   const getDiscountedPrice = () => {
     if (!discount || discount <= 0) return product.precio;
     return Math.round(product.precioOriginal ? product.precioOriginal * (1 - discount / 100) : product.precio);
   };
 
-  // Solo actualiza el campo eliminado usando PATCH
+  // PATCH para habilitar/deshabilitar producto y refrescar lista
   const handleToggleActivo = async () => {
-    const confirm = window.confirm(
-      `¿Estás seguro de que querés ${eliminado ? 'habilitar' : 'deshabilitar'} el producto "${product.nombre}"?`
-    );
-    if (!confirm) return;
+    const confirmMsg = eliminado
+      ? `¿Estás seguro de que querés habilitar el producto "${product.nombre}"?`
+      : `¿Estás seguro de que querés deshabilitar el producto "${product.nombre}"?`;
+    if (!window.confirm(confirmMsg)) return;
 
+    setLoading(true);
     try {
       const APIURL = import.meta.env.VITE_API_URL;
       const token = localStorage.getItem('token');
@@ -51,16 +54,22 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       };
-      await axios.patch(`${APIURL}/productos/${product.id}`, {
+      const response = await axios.patch(`${APIURL}/productos/${product.id}`, {
         eliminado: !eliminado,
       }, { headers });
 
-      setEliminado(!eliminado);
-      if (onUpdate) onUpdate(); // <-- Refresca la lista de productos
+      if (response.data && typeof response.data.eliminado === "boolean") {
+        setEliminado(response.data.eliminado);
+      } else {
+        setEliminado(!eliminado);
+      }
+
+      if (onUpdate) onUpdate();
     } catch (error) {
       console.error('Error al actualizar producto:', error);
       alert('Hubo un error al intentar actualizar el producto.');
     }
+    setLoading(false);
   };
 
   const handleApplyDiscount = async () => {
@@ -75,7 +84,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
       await applyDiscount(product.id, value);
       setDiscount(value);
       setDiscountInput('');
-      window.location.reload();
+      if (onUpdate) onUpdate();
     } catch (e) {
       alert("Error al aplicar descuento");
     }
@@ -88,9 +97,21 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
     try {
       await removeDiscount(product.id);
       setDiscount(0);
-      window.location.reload();
+      if (onUpdate) onUpdate();
     } catch (e) {
       alert("Error al quitar descuento");
+    }
+    setLoading(false);
+  };
+
+  const openEditModal = async () => {
+    setLoading(true);
+    try {
+      const prod = await getProductoById(product.id);
+      setEditProduct(prod);
+      setModalEdit(true);
+    } catch (e) {
+      alert("Error al cargar datos completos del producto");
     }
     setLoading(false);
   };
@@ -158,7 +179,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
         </div>
         <button
           className={styles.edit}
-          onClick={() => setModalEdit(true)}
+          onClick={openEditModal}
           disabled={eliminado}
         >
           Editar
@@ -166,11 +187,12 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
         <ModalEditProd
           isOpen={modalEdit}
           onClose={() => setModalEdit(false)}
-          product={product}
+          product={editProduct || product}
         />
         <button
           className={`${styles.delete} ${eliminado ? styles.enable : ''}`}
           onClick={handleToggleActivo}
+          disabled={loading}
         >
           {eliminado ? 'Habilitar' : 'Deshabilitar'}
         </button>

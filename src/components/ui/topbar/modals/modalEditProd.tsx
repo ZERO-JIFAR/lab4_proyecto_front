@@ -11,6 +11,7 @@ import { ITalle } from '../../../../types/ITalle';
 import { uploadToCloudinary } from '../../../../utils/UploadToCloudinary';
 import axios from "axios";
 import { IProduct } from '../../../../types/IProduct';
+import { useAuth } from '../../../../context/AuthContext';
 
 interface ModalEditProdProps {
     isOpen: boolean;
@@ -23,6 +24,20 @@ interface TalleConStock {
     stock: number;
 }
 
+interface ColorForm {
+    color: string;
+    imagenUrl: string;
+    imagenesAdicionales: string[];
+    talles: TalleConStock[];
+    imageFile: File | null;
+    imagePreview: string;
+    imageAdicionalFiles: File[];
+    imageAdicionalPreviews: string[];
+}
+
+const coloresDisponibles = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Gris', 'Otros'];
+const marcasDisponibles = ['Nike', 'Adidas', 'Puma', 'Reebok', 'Vans', 'Fila', 'Otros'];
+
 const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product }) => {
     const [tipos, setTipos] = useState<ITipo[]>([]);
     const [categorias, setCategorias] = useState<ICategory[]>([]);
@@ -31,78 +46,93 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
     const [waistTypes, setWaistTypes] = useState<IWaistType[]>([]);
     const [selectedWaistTypeId, setSelectedWaistTypeId] = useState<number | "">("");
     const [talles, setTalles] = useState<ITalle[]>([]);
-    const [selectedTalleId, setSelectedTalleId] = useState<number | "">("");
-    const [talleStock, setTalleStock] = useState<string>("");
-    const [tallesConStock, setTallesConStock] = useState<TalleConStock[]>([]);
+    const { token } = useAuth();
     const [form, setForm] = useState({
         nombre: '',
         precio: '',
         descripcion: '',
-        color: '',
         marca: '',
         categoria: '',
-        image: '',
-        imageAdicional: '',
     });
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string>('');
-    const [imageAdicionalFile, setImageAdicionalFile] = useState<File | null>(null);
-    const [imageAdicionalPreview, setImageAdicionalPreview] = useState<string>('');
+    const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+    const [mainImagePreview, setMainImagePreview] = useState<string>('');
     const [loading, setLoading] = useState(false);
-    const coloresDisponibles = ['Negro', 'Blanco', 'Rojo', 'Azul', 'Verde', 'Gris', 'Otros'];
-    const marcasDisponibles = ['Nike', 'Adidas', 'Puma', 'Reebok', 'Vans', 'Fila', 'Otros'];
 
+    // Colores
+    const [colores, setColores] = useState<ColorForm[]>([]);
+    const [colorForm, setColorForm] = useState<Omit<ColorForm, 'imageFile' | 'imagePreview' | 'imageAdicionalFiles' | 'imageAdicionalPreviews'> & {
+        imageFile: File | null;
+        imagePreview: string;
+        imageAdicionalFiles: File[];
+        imageAdicionalPreviews: string[];
+    }>({
+        color: '',
+        imagenUrl: '',
+        imagenesAdicionales: [],
+        talles: [],
+        imageFile: null,
+        imagePreview: '',
+        imageAdicionalFiles: [],
+        imageAdicionalPreviews: [],
+    });
+    const [selectedTalleId, setSelectedTalleId] = useState<number | "">("");
+    const [talleStock, setTalleStock] = useState<string>("");
+
+    // Inicializa el formulario con los datos del producto
     useEffect(() => {
         if (isOpen && product) {
             setForm({
                 nombre: product.nombre || '',
                 precio: String(product.precio),
                 descripcion: product.descripcion || '',
-                color: product.colores?.[0]?.color || '',
                 marca: product.marca || '',
                 categoria: product.categoria?.id ? String(product.categoria.id) : '',
-                image: product.imagenUrl || '',
-                imageAdicional: product.colores?.[0]?.imagenesAdicionales?.[0] || ''
             });
+            setMainImagePreview(product.imagenUrl || '');
+            setMainImageFile(null);
 
-            getTipos().then(setTipos).catch(console.error);
-
-            getCategorias()
-                .then((cats) => {
-                    setCategorias(cats);
-                    const tipoId = product.categoria?.tipo?.id || '';
-                    const categoriaId = product.categoria?.id || '';
-                    setSelectedTipoId(tipoId);
-                    setTimeout(() => {
-                        setForm(prev => ({ ...prev, categoria: String(categoriaId) }));
-                    }, 100);
-                })
-                .catch(console.error);
-
-            getWaistTypes()
-                .then((wt) => {
-                    setWaistTypes(wt);
-                    const waistTypeId = product.colores?.[0]?.talles?.[0]?.tipoTalle?.id || '';
-                    if (waistTypeId) setSelectedWaistTypeId(Number(waistTypeId));
-                })
-                .catch(console.error);
-
-            // Toma los talles del primer color (si hay varios colores, puedes adaptar esto)
-          setTallesConStock(
-  product.colores?.[0]?.talles?.map(tp => ({
-    talle: {
-      id: tp.talleId,
-      valor: tp.talleValor ?? "",
-      nombre: tp.talleValor ?? ""
-    },
-    stock: tp.stock
-  })) || []
-);
-
-            if (product.imagenUrl) setImagePreview(product.imagenUrl);
-            if (product.colores?.[0]?.imagenesAdicionales?.[0]) setImageAdicionalPreview(product.colores[0].imagenesAdicionales[0]);
+            // Colores
+            setColores(
+                (product.colores || []).map(c => ({
+                    color: c.color,
+                    imagenUrl: c.imagenUrl || '',
+                    imagenesAdicionales: c.imagenesAdicionales || [],
+                    talles: (c.talles || []).map(ts => ({
+                        talle: {
+                            id: ts.talleId,
+                            valor: ts.talleValor ?? "",
+                            nombre: ts.talleValor ?? ""
+                        },
+                        stock: ts.stock
+                    })),
+                    imageFile: null,
+                    imagePreview: c.imagenUrl || '',
+                    imageAdicionalFiles: [],
+                    imageAdicionalPreviews: (c.imagenesAdicionales || []).map(url => url),
+                }))
+            );
+            setColorForm({
+                color: '',
+                imagenUrl: '',
+                imagenesAdicionales: [],
+                talles: [],
+                imageFile: null,
+                imagePreview: '',
+                imageAdicionalFiles: [],
+                imageAdicionalPreviews: [],
+            });
+            setSelectedTalleId("");
+            setTalleStock("");
         }
     }, [isOpen, product]);
+
+    useEffect(() => {
+        if (isOpen) {
+            getTipos().then(setTipos).catch(() => setTipos([]));
+            getCategorias().then(setCategorias).catch(() => setCategorias([]));
+            getWaistTypes().then(setWaistTypes).catch(() => setWaistTypes([]));
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (selectedTipoId === "") {
@@ -127,80 +157,163 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
         }
     }, [selectedWaistTypeId]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !product) return null;
 
-    const handleTipoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const value = e.target.value;
-        setSelectedTipoId(value ? Number(value) : "");
+    // --- Color handlers ---
+    const handleColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setColorForm(prev => ({
+            ...prev,
+            color: e.target.value
+        }));
     };
 
+    const handleColorImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setColorForm(prev => ({
+                ...prev,
+                imageFile: file,
+                imagePreview: URL.createObjectURL(file)
+            }));
+        }
+    };
+
+    const handleColorImageAdicionalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files ? Array.from(e.target.files) : [];
+        if (files.length > 0) {
+            setColorForm(prev => ({
+                ...prev,
+                imageAdicionalFiles: [...prev.imageAdicionalFiles, ...files],
+                imageAdicionalPreviews: [
+                    ...prev.imageAdicionalPreviews,
+                    ...files.map(f => URL.createObjectURL(f))
+                ]
+            }));
+        }
+    };
+
+    const handleAddTalleStockToColor = () => {
+        if (!selectedTalleId || talleStock === "" || Number(talleStock) < 0) return;
+        const talleObj = talles.find(t => t.id === Number(selectedTalleId));
+        if (!talleObj) return;
+        if (colorForm.talles.some(ts => ts.talle.id === talleObj.id)) {
+            alert("Ya agregaste ese talle para este color.");
+            return;
+        }
+        setColorForm(prev => ({
+            ...prev,
+            talles: [...prev.talles, { talle: talleObj, stock: Number(talleStock) }]
+        }));
+        setSelectedTalleId("");
+        setTalleStock("");
+    };
+
+    const handleRemoveTalleStockFromColor = (id: number) => {
+        setColorForm(prev => ({
+            ...prev,
+            talles: prev.talles.filter(ts => ts.talle.id !== id)
+        }));
+    };
+
+    const handleAddColor = async () => {
+        if (!colorForm.color) {
+            alert('Selecciona un color');
+            return;
+        }
+        if (!colorForm.imageFile && !colorForm.imagePreview) {
+            alert('Selecciona una imagen principal para el color');
+            return;
+        }
+        if (colorForm.talles.length === 0) {
+            alert('Agrega al menos un talle con stock para este color');
+            return;
+        }
+
+        // Subir imagen principal del color si es nueva
+        let colorImageUrl = colorForm.imagenUrl;
+        if (colorForm.imageFile) {
+            try {
+                colorImageUrl = await uploadToCloudinary(colorForm.imageFile);
+            } catch (err) {
+                alert('Error al subir la imagen principal del color');
+                return;
+            }
+        } else if (colorForm.imagePreview) {
+            colorImageUrl = colorForm.imagePreview;
+        }
+
+        // Subir imágenes adicionales del color si son nuevas
+        let imagenesAdicionales: string[] = colorForm.imagenesAdicionales || [];
+        if (colorForm.imageAdicionalFiles.length > 0) {
+            try {
+                const nuevas = await Promise.all(
+                    colorForm.imageAdicionalFiles.map(f => uploadToCloudinary(f))
+                );
+                imagenesAdicionales = [...imagenesAdicionales, ...nuevas];
+            } catch (err) {
+                alert('Error al subir imágenes adicionales');
+                return;
+            }
+        }
+
+        setColores([
+            ...colores,
+            {
+                color: colorForm.color,
+                imagenUrl: colorImageUrl,
+                imagenesAdicionales,
+                talles: colorForm.talles,
+                imageFile: null,
+                imagePreview: '',
+                imageAdicionalFiles: [],
+                imageAdicionalPreviews: [],
+            }
+        ]);
+        // Reset color form
+        setColorForm({
+            color: '',
+            imagenUrl: '',
+            imagenesAdicionales: [],
+            talles: [],
+            imageFile: null,
+            imagePreview: '',
+            imageAdicionalFiles: [],
+            imageAdicionalPreviews: [],
+        });
+    };
+
+    const handleRemoveColor = (colorIdx: number) => {
+        setColores(colores.filter((_, idx) => idx !== colorIdx));
+    };
+
+    // --- Producto principal ---
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setForm({ ...form, [name]: value });
     };
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setImageFile(e.target.files[0]);
-            setForm({ ...form, image: e.target.files[0].name });
-            setImagePreview(URL.createObjectURL(e.target.files[0]));
+    const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setMainImageFile(file);
+            setMainImagePreview(URL.createObjectURL(file));
         }
     };
 
-    const handleImageAdicionalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setImageAdicionalFile(e.target.files[0]);
-            setForm({ ...form, imageAdicional: e.target.files[0].name });
-            setImageAdicionalPreview(URL.createObjectURL(e.target.files[0]));
-        }
-    };
-
-    const handleAddTalleStock = () => {
-        if (!selectedTalleId || talleStock === "" || Number(talleStock) < 0) return;
-        const talleObj = talles.find(t => t.id === Number(selectedTalleId));
-        if (!talleObj) return;
-        if (tallesConStock.some(ts => ts.talle.id === talleObj.id)) {
-            alert("Ya agregaste ese talle.");
-            return;
-        }
-        setTallesConStock([...tallesConStock, { talle: talleObj, stock: Number(talleStock) }]);
-        setSelectedTalleId("");
-        setTalleStock("");
-    };
-
-    const handleRemoveTalleStock = (id: number) => {
-        setTallesConStock(tallesConStock.filter(ts => ts.talle.id !== id));
-    };
-
+    // --- Submit ---
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
-        let imageUrl = form.image;
-        let imageAdicionalUrl = form.imageAdicional;
-
-        if (imageFile) {
+        let mainImageUrl = mainImagePreview;
+        if (mainImageFile) {
             try {
-                imageUrl = await uploadToCloudinary(imageFile);
+                mainImageUrl = await uploadToCloudinary(mainImageFile);
             } catch (err) {
-                alert('Error al subir la imagen principal');
+                alert('Error al subir la imagen principal del producto');
                 setLoading(false);
                 return;
             }
-        }
-
-        if (imageAdicionalFile) {
-            try {
-                imageAdicionalUrl = await uploadToCloudinary(imageAdicionalFile);
-            } catch (err) {
-                alert('Error al subir la imagen adicional');
-                setLoading(false);
-                return;
-            }
-        }
-
-        if (!imageAdicionalFile && form.imageAdicional && !form.imageAdicional.startsWith('http')) {
-            imageAdicionalUrl = '';
         }
 
         const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
@@ -210,8 +323,12 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             return;
         }
 
-        if (tallesConStock.length === 0) {
-            alert('Debes agregar al menos un talle con stock');
+        // --- CAMBIO: Solo obligar colores/talles si el producto no tiene ninguno ---
+        const productoYaTieneColoresYtalles = (product.colores && product.colores.length > 0 && product.colores.some(c => c.talles && c.talles.length > 0));
+        const nuevosColoresIngresados = colores.length > 0;
+
+        if (!productoYaTieneColoresYtalles && !nuevosColoresIngresados) {
+            alert('Debes agregar al menos un color con talles');
             setLoading(false);
             return;
         }
@@ -222,19 +339,17 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             precio: Number(form.precio),
             descripcion: form.descripcion,
             marca: form.marca,
-            imagenUrl: imageUrl,
+            imagenUrl: mainImageUrl,
             categoriaId: categoriaObj.id,
-            colores: [
-                {
-                    color: form.color,
-                    imagenUrl: imageUrl,
-                    imagenesAdicionales: imageAdicionalUrl ? [imageAdicionalUrl] : [],
-                    talles: tallesConStock.map(ts => ({
-                        talleId: ts.talle.id,
-                        stock: ts.stock
-                    }))
-                }
-            ]
+            colores: nuevosColoresIngresados ? colores.map(c => ({
+                color: c.color,
+                imagenUrl: c.imagenUrl,
+                imagenesAdicionales: c.imagenesAdicionales,
+                talles: c.talles.map(ts => ({
+                    talleId: ts.talle.id,
+                    stock: ts.stock
+                }))
+            })) : product.colores // Si no hay nuevos colores, manda los existentes
         };
 
         try {
@@ -244,22 +359,10 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
                 await axios.put(`${APIURL}/productos/con-colores/${product.id}`, productoConColoresDTO, {
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: localStorage.getItem('token')
-                            ? `Bearer ${localStorage.getItem('token')}`
-                            : undefined,
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
                 });
                 alert('Producto actualizado!');
-            } else {
-                await axios.post(`${APIURL}/productos/con-colores`, productoConColoresDTO, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: localStorage.getItem('token')
-                            ? `Bearer ${localStorage.getItem('token')}`
-                            : undefined,
-                    },
-                });
-                alert('Producto agregado!');
             }
             onClose();
         } catch (err: any) {
@@ -292,16 +395,10 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
                             <label>Descripción:</label>
                             <input type="text" name="descripcion" value={form.descripcion} onChange={handleInputChange} />
 
-                            <label>Subir imagen principal:</label>
-                            <input type="file" name="imagen" accept="image/*" onChange={handleImageChange} />
-                            {imagePreview && (
-                                <img src={imagePreview} alt="preview" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
-                            )}
-
-                            <label>Subir imagen adicional:</label>
-                            <input type="file" name="imagenAdicional" accept="image/*" onChange={handleImageAdicionalChange} />
-                            {imageAdicionalPreview && (
-                                <img src={imageAdicionalPreview} alt="preview adicional" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
+                            <label>Subir imagen principal del producto:</label>
+                            <input type="file" name="imagen" accept="image/*" onChange={handleMainImageChange} />
+                            {mainImagePreview && (
+                                <img src={mainImagePreview} alt="preview" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
                             )}
                         </div>
 
@@ -311,7 +408,7 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
                                 name="tipo"
                                 required
                                 value={selectedTipoId}
-                                onChange={handleTipoChange}
+                                onChange={e => setSelectedTipoId(e.target.value ? Number(e.target.value) : "")}
                             >
                                 <option value="">Seleccionar</option>
                                 {tipos.map((tipo) => (
@@ -344,17 +441,35 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
                                     <option key={marca} value={marca}>{marca}</option>
                                 ))}
                             </select>
+                        </div>
 
+                        {/* Colores */}
+                        <div className={styles.inputColumn}>
+                            <h4>Agregar Color</h4>
                             <label>Color:</label>
-                            <select name="color" value={form.color} onChange={handleInputChange} required>
+                            <select name="color" value={colorForm.color} onChange={handleColorChange}>
                                 <option value="">Seleccionar</option>
                                 {coloresDisponibles.map((color) => (
                                     <option key={color} value={color}>{color}</option>
                                 ))}
                             </select>
-                        </div>
 
-                        <div className={styles.inputColumn}>
+                            <label>Imagen principal del color:</label>
+                            <input type="file" accept="image/*" onChange={handleColorImageChange} />
+                            {colorForm.imagePreview && (
+                                <img src={colorForm.imagePreview} alt="preview color" style={{ marginTop: 8, maxWidth: 120, borderRadius: 8 }} />
+                            )}
+
+                            <label>Imágenes adicionales del color:</label>
+                            <input type="file" accept="image/*" multiple onChange={handleColorImageAdicionalChange} />
+                            {colorForm.imageAdicionalPreviews.length > 0 && (
+                                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                    {colorForm.imageAdicionalPreviews.map((url, idx) => (
+                                        <img key={idx} src={url} alt={`adicional-${idx}`} style={{ maxWidth: 60, borderRadius: 8 }} />
+                                    ))}
+                                </div>
+                            )}
+
                             <label>Tipo de Talle:</label>
                             <select
                                 value={selectedWaistTypeId}
@@ -386,20 +501,40 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
                                         value={talleStock}
                                         onChange={e => setTalleStock(e.target.value)}
                                     />
-                                    <button type="button" onClick={handleAddTalleStock} disabled={!selectedTalleId || !talleStock}>
+                                    <button type="button" onClick={handleAddTalleStockToColor} disabled={!selectedTalleId || !talleStock}>
                                         Agregar Talle
                                     </button>
                                 </>
                             )}
 
-                            {tallesConStock.length > 0 && (
+                            {colorForm.talles.length > 0 && (
                                 <div style={{ marginTop: 10 }}>
-                                    <strong>Talles agregados:</strong>
+                                    <strong>Talles agregados para este color:</strong>
                                     <ul>
-                                        {tallesConStock.map(ts => (
+                                        {colorForm.talles.map(ts => (
                                             <li key={ts.talle.id}>
                                                 {ts.talle.valor} - Stock: {ts.stock}
-                                                <button type="button" style={{ marginLeft: 8 }} onClick={() => handleRemoveTalleStock(ts.talle.id)}>
+                                                <button type="button" style={{ marginLeft: 8 }} onClick={() => handleRemoveTalleStockFromColor(ts.talle.id)}>
+                                                    Quitar
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            <button type="button" className={styles.yesButton} style={{ marginTop: 12 }} onClick={handleAddColor}>
+                                Agregar Color
+                            </button>
+
+                            {colores.length > 0 && (
+                                <div style={{ marginTop: 16 }}>
+                                    <strong>Colores agregados:</strong>
+                                    <ul>
+                                        {colores.map((c, idx) => (
+                                            <li key={idx}>
+                                                <span style={{ fontWeight: 600 }}>{c.color}</span> - {c.talles.length} talles
+                                                <button type="button" style={{ marginLeft: 8 }} onClick={() => handleRemoveColor(idx)}>
                                                     Quitar
                                                 </button>
                                             </li>

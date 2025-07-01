@@ -79,9 +79,18 @@ const ModalAddProd: React.FC<ModalAddProdProps> = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      getTipos().then(setTipos).catch(() => setTipos([]));
-      getCategorias().then(setCategorias).catch(() => setCategorias([]));
-      getWaistTypes().then(setWaistTypes).catch(() => setWaistTypes([]));
+      getTipos().then(data => {
+        // Filtrar tipos que no estén eliminados
+        setTipos(Array.isArray(data) ? data.filter(t => !t.eliminado) : []);
+      }).catch(() => setTipos([]));
+      getCategorias().then(data => {
+        // Filtrar categorías que no estén eliminadas
+        setCategorias(Array.isArray(data) ? data.filter(c => !c.eliminado) : []);
+      }).catch(() => setCategorias([]));
+      getWaistTypes().then(data => {
+        // Filtrar tipos de talle que no estén eliminados
+        setWaistTypes(Array.isArray(data) ? data.filter(wt => !wt.eliminado) : []);
+      }).catch(() => setWaistTypes([]));
       setSelectedTipoId("");
       setSelectedWaistTypeId("");
       setTalles([]);

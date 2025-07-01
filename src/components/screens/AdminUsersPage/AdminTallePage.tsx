@@ -15,6 +15,7 @@ const AdminTallePage: React.FC = () => {
     const [waistTypeId, setWaistTypeId] = useState<number | "">("");
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showEliminados, setShowEliminados] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -68,16 +69,23 @@ const AdminTallePage: React.FC = () => {
         setWaistTypeId(talle.tipoTalle?.id || "");
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm("¿Seguro que deseas eliminar este talle?")) return;
+    // Soft delete/habilitar
+    const handleToggleActivo = async (talle: ITalle) => {
+        if (!window.confirm(
+            talle.eliminado
+                ? "¿Seguro que deseas habilitar este talle?"
+                : "¿Seguro que deseas deshabilitar este talle?"
+        )) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`${APIURL}/talles/${id}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+            await axios.patch(
+                `${APIURL}/talles/${talle.id}`,
+                { eliminado: !talle.eliminado },
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+            );
             fetchData();
         } catch {
-            setError("Error al eliminar");
+            setError("Error al actualizar el talle");
         }
     };
 
@@ -88,6 +96,8 @@ const AdminTallePage: React.FC = () => {
         setWaistTypeId("");
         setError(null);
     };
+
+    const tallesFiltrados = talles.filter(t => showEliminados ? true : !t.eliminado);
 
     return (
         <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
@@ -130,27 +140,45 @@ const AdminTallePage: React.FC = () => {
                 {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
                 {error && <div style={{ color: "red" }}>{error}</div>}
             </form>
-            <table border={1} cellPadding={8} style={{ width: "100%" }}>
+            <label>
+                <input
+                    type="checkbox"
+                    checked={showEliminados}
+                    onChange={e => setShowEliminados(e.target.checked)}
+                    style={{ marginRight: 8 }}
+                />
+                Mostrar talles deshabilitados
+            </label>
+            <table border={1} cellPadding={8} style={{ width: "100%", marginTop: 12 }}>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
                         <th>Valor</th>
                         <th>Tipo de Talle</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {talles.map(talle => (
-                        <tr key={talle.id}>
+                    {tallesFiltrados.map(talle => (
+                        <tr key={talle.id} style={talle.eliminado ? { opacity: 0.5 } : {}}>
                             <td>{talle.id}</td>
                             <td>{talle.nombre}</td>
                             <td>{talle.valor}</td>
                             <td>{talle.tipoTalle?.nombre || "-"}</td>
+                            <td>{talle.eliminado ? "Deshabilitado" : "Activo"}</td>
                             <td>
-                                <button onClick={() => handleEdit(talle)}>Editar</button>
-                                <button onClick={() => handleDelete(talle.id)}>
-                                    Eliminar
+                                <button onClick={() => handleEdit(talle)} disabled={talle.eliminado}>Editar</button>
+                                <button
+                                    onClick={() => handleToggleActivo(talle)}
+                                    style={{
+                                        background: talle.eliminado ? "#4caf50" : "#f44336",
+                                        color: "#fff",
+                                        marginLeft: 8
+                                    }}
+                                >
+                                    {talle.eliminado ? "Habilitar" : "Deshabilitar"}
                                 </button>
                             </td>
                         </tr>
