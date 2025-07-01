@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { getWaistTypes } from "../../../http/waistTypeRequest";
+import { getTipos } from "../../../http/typeRequest";
 import axios from "axios";
-import { IWaistType } from "../../../types/IWaistType";
-import styles from "./AdminTipoTallePage.module.css";
+import { ITipo } from "../../../types/IType";
+import styles from "./AdminTipoPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
-const AdminTipoTallePage: React.FC = () => {
-    const [waistTypes, setWaistTypes] = useState<IWaistType[]>([]);
+const AdminTipoPage: React.FC = () => {
+    const [tipos, setTipos] = useState<ITipo[]>([]);
     const [nombre, setNombre] = useState("");
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [showEliminados, setShowEliminados] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
 
     const fetchData = async () => {
         try {
-            setWaistTypes(await getWaistTypes());
+            setTipos(await getTipos());
         } catch {
             setError("Error al cargar datos");
         }
@@ -36,47 +37,49 @@ const AdminTipoTallePage: React.FC = () => {
             const token = localStorage.getItem("token");
             if (editId) {
                 await axios.put(
-                    `${APIURL}/tiposTalle/${editId}`,
+                    `${APIURL}/tipos/${editId}`,
                     { nombre },
                     { headers: token ? { Authorization: `Bearer ${token}` } : {} }
                 );
             } else {
                 await axios.post(
-                    `${APIURL}/tiposTalle`,
+                    `${APIURL}/tipos`,
                     { nombre },
                     { headers: token ? { Authorization: `Bearer ${token}` } : {} }
                 );
             }
             setNombre("");
             setEditId(null);
+            setModalOpen(false);
             fetchData();
         } catch {
-            setError("Error al guardar el tipo de talle");
+            setError("Error al guardar el tipo");
         }
     };
 
-    const handleEdit = (wt: IWaistType) => {
-        setEditId(wt.id);
-        setNombre(wt.nombre);
+    const handleEdit = (tipo: ITipo) => {
+        setEditId(tipo.id);
+        setNombre(tipo.nombre);
+        setModalOpen(true);
     };
 
     // Soft delete/habilitar
-    const handleToggleActivo = async (wt: IWaistType) => {
+    const handleToggleActivo = async (tipo: ITipo) => {
         if (!window.confirm(
-            wt.eliminado
-                ? "¿Seguro que deseas habilitar este tipo de talle?"
-                : "¿Seguro que deseas deshabilitar este tipo de talle?"
+            tipo.eliminado
+                ? "¿Seguro que deseas habilitar este tipo?"
+                : "¿Seguro que deseas deshabilitar este tipo?"
         )) return;
         try {
             const token = localStorage.getItem("token");
             await axios.patch(
-                `${APIURL}/tiposTalle/${wt.id}`,
-                { eliminado: !wt.eliminado },
+                `${APIURL}/tipos/${tipo.id}`,
+                { eliminado: !tipo.eliminado },
                 { headers: token ? { Authorization: `Bearer ${token}` } : {} }
             );
             fetchData();
         } catch {
-            setError("Error al actualizar el tipo de talle");
+            setError("Error al actualizar el tipo");
         }
     };
 
@@ -84,35 +87,69 @@ const AdminTipoTallePage: React.FC = () => {
         setEditId(null);
         setNombre("");
         setError(null);
+        setModalOpen(false);
     };
 
-    const waistTypesFiltrados = waistTypes.filter(wt => showEliminados ? true : !wt.eliminado);
+    const tiposFiltrados = tipos.filter(t => showEliminados ? true : !t.eliminado);
+
+    // Modal centrado y con fondo oscuro
+    const Modal = ({ children }: { children: React.ReactNode }) => (
+        <div className={styles.tipoModalOverlayUnico}>
+            <div className={styles.tipoModalUnico}>
+                {children}
+            </div>
+        </div>
+    );
 
     return (
-        <div className={styles.container}>
-            <h2 className={styles.title}>Administrar Tipos de Talle</h2>
-            <form onSubmit={handleSubmit} className={styles.form}>
-                <label>Nombre:</label>
-                <input
-                    type="text"
-                    value={nombre}
-                    onChange={e => setNombre(e.target.value)}
-                    required
-                />
-                <button type="submit">{editId ? "Actualizar" : "Agregar"}</button>
-                {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
-                {error && <div style={{ color: "red" }}>{error}</div>}
-            </form>
-            <label>
+        <div className={styles.tipoContainerUnico}>
+            <h2 className={styles.tipoTitleUnico}>Administrar Tipos</h2>
+            <button
+                className={styles.tipoBtnAgregarUnico}
+                onClick={() => {
+                    setEditId(null);
+                    setNombre("");
+                    setError(null);
+                    setModalOpen(true);
+                }}
+            >
+                + Agregar Tipo
+            </button>
+            {modalOpen && (
+                <Modal>
+                    <form onSubmit={handleSubmit} className={styles.tipoFormUnico}>
+                        <label htmlFor="tipoNombreUnico">Nombre del tipo:</label>
+                        <input
+                            id="tipoNombreUnico"
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
+                            required
+                            placeholder="Ej: Calzado, Indumentaria, Accesorios..."
+                            className={styles.tipoInputUnico}
+                        />
+                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                            <button type="submit" className={styles.tipoBtnUnico}>
+                                {editId ? "Actualizar" : "Agregar"}
+                            </button>
+                            <button type="button" className={styles.tipoBtnCancelUnico} onClick={handleCancel}>
+                                Cancelar
+                            </button>
+                        </div>
+                        {error && <div className={styles.tipoErrorUnico}>{error}</div>}
+                    </form>
+                </Modal>
+            )}
+            <label className={styles.tipoShowEliminadosLabel}>
                 <input
                     type="checkbox"
                     checked={showEliminados}
                     onChange={e => setShowEliminados(e.target.checked)}
                     style={{ marginRight: 8 }}
                 />
-                Mostrar tipos de talle deshabilitados
+                Mostrar tipos deshabilitados
             </label>
-            <table className={styles.table}>
+            <table className={styles.tipoTableUnico}>
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -122,24 +159,24 @@ const AdminTipoTallePage: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {waistTypesFiltrados.map(wt => (
-                        <tr key={wt.id} style={wt.eliminado ? { opacity: 0.5 } : {}}>
-                            <td>{wt.id}</td>
-                            <td>{wt.nombre}</td>
-                            <td>{wt.eliminado ? "Deshabilitado" : "Activo"}</td>
+                    {tiposFiltrados.map(tipo => (
+                        <tr key={tipo.id} style={tipo.eliminado ? { opacity: 0.5 } : {}}>
+                            <td>{tipo.id}</td>
+                            <td>{tipo.nombre}</td>
+                            <td>{tipo.eliminado ? "Deshabilitado" : "Activo"}</td>
                             <td>
                                 <button
                                     className={styles.actionBtn}
-                                    onClick={() => handleEdit(wt)}
-                                    disabled={wt.eliminado}
+                                    onClick={() => handleEdit(tipo)}
+                                    disabled={tipo.eliminado}
                                 >
                                     Editar
                                 </button>
                                 <button
-                                    className={`${styles.actionBtn} ${wt.eliminado ? styles.enable : styles.disable}`}
-                                    onClick={() => handleToggleActivo(wt)}
+                                    className={`${styles.actionBtn} ${tipo.eliminado ? styles.enable : styles.disable}`}
+                                    onClick={() => handleToggleActivo(tipo)}
                                 >
-                                    {wt.eliminado ? "Habilitar" : "Deshabilitar"}
+                                    {tipo.eliminado ? "Habilitar" : "Deshabilitar"}
                                 </button>
                             </td>
                         </tr>
@@ -150,4 +187,4 @@ const AdminTipoTallePage: React.FC = () => {
     );
 };
 
-export default AdminTipoTallePage;
+export default AdminTipoPage;

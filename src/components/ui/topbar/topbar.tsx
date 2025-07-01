@@ -17,21 +17,13 @@ const Topbar: React.FC = () => {
   const [showRegister, setShowRegister] = useState(false);
   const [showAdminMenu, setShowAdminMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [showOrderHistory, setShowOrderHistory] = useState(false); // <-- NUEVO
+  const [showOrderHistory, setShowOrderHistory] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const { isLoggedIn, isAdmin, logout, login } = useAuth();
 
-  const toggleCart = () => {
-    setShowCart(!showCart);
-  };
-
-  const toggleAdminMenu = () => {
-    setShowAdminMenu(!showAdminMenu);
-  };
-
-  const toggleSignInModal = () => {
-    setShowSignIn(!showSignIn);
-  };
+  const toggleCart = () => setShowCart(!showCart);
+  const toggleAdminMenu = () => setShowAdminMenu(!showAdminMenu);
+  const toggleSignInModal = () => setShowSignIn(!showSignIn);
 
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode") === "true";
@@ -45,52 +37,51 @@ const Topbar: React.FC = () => {
 
   return (
     <>
-      <div className={styles.topbarContainer}>
-        <div className={styles.topbarLeft}>
+      <div className={styles.topbarContainerUnico}>
+        <div className={styles.topbarLeftUnico}>
           {isAdmin && (
             <FaBars
-              className={styles.adminIcon}
+              className={styles.topbarAdminIconUnico}
               onClick={toggleAdminMenu}
-              style={{ cursor: 'pointer' }}
+              title="Menú Admin"
             />
           )}
-          <button className={styles.topbarIcon} onClick={() => setDarkMode((prev) => !prev)}>
+          <button className={styles.topbarIconUnico} onClick={() => setDarkMode((prev) => !prev)}>
             {darkMode ? <AiOutlineSun /> : <AiFillMoon />}
           </button>
         </div>
 
-        <div className={styles.topbarCenter}>
+        <div className={styles.topbarCenterUnico}>
           <Link to="/">
             <img
               src="/logo/lala.png"
               alt="Logo"
-              className={styles.topbarLogo}
+              className={styles.topbarLogoUnico}
               style={{ cursor: 'pointer' }}
             />
           </Link>
         </div>
 
-        <div className={styles.topbarRight}>
-          <FaShoppingCart className={styles.topbarIcon} onClick={toggleCart} />
+        <div className={styles.topbarRightUnico}>
+          <FaShoppingCart className={styles.topbarIconUnico} onClick={toggleCart} title="Carrito" />
           {isLoggedIn && (
             <FaHistory
-              className={styles.topbarIcon}
+              className={styles.topbarIconUnico}
               title="Historial de compras"
               onClick={() => setShowOrderHistory(true)}
-              style={{ marginLeft: 12, cursor: "pointer" }}
             />
           )}
 
           {!isLoggedIn && (
             <>
               <button
-                className={styles.topbarSignin}
+                className={styles.topbarSigninUnico}
                 onClick={toggleSignInModal}
               >
                 Sign in
               </button>
               <button
-                className={styles.topbarRegister}
+                className={styles.topbarRegisterUnico}
                 onClick={() => setShowRegister(true)}
               >
                 Register
@@ -100,8 +91,8 @@ const Topbar: React.FC = () => {
 
           {isLoggedIn && (
             <>
-              {isAdmin && <span className={styles.topbarSignin}>Modo Admin</span>}
-              <button className={styles.topbarSignin} onClick={() => setShowLogoutConfirm(true)}>
+              {isAdmin && <span className={styles.topbarAdminTextUnico}>Modo Admin</span>}
+              <button className={styles.topbarSigninUnico} onClick={() => setShowLogoutConfirm(true)}>
                 Logout
               </button>
             </>
@@ -125,14 +116,14 @@ const Topbar: React.FC = () => {
 
       {/* Modals */}
       <ModalCarrito show={showCart} onClose={toggleCart} />
-   <ModalSignIn
-  show={showSignIn}
-  onClose={() => setShowSignIn(false)}
-  onLogin={(role: string, token: string, user: { id: number, email: string, rol: string }) => {
-    login(role, token, user);
-    setShowSignIn(false);
-  }}
-/>
+      <ModalSignIn
+        show={showSignIn}
+        onClose={() => setShowSignIn(false)}
+        onLogin={(role: string, token: string, user: { id: number, email: string, rol: string }) => {
+          login(role, token, user);
+          setShowSignIn(false);
+        }}
+      />
       <RegisterModal
         show={showRegister}
         onClose={() => setShowRegister(false)}

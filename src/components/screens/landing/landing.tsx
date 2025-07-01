@@ -90,7 +90,7 @@ const Landing = () => {
     );
   };
 
-    const handlePrev = () => {
+  const handlePrev = () => {
     setCarouselIndex((prev) =>
       featured.length <= NUM_FEATURED_VISIBLE
         ? 0
@@ -112,30 +112,30 @@ const Landing = () => {
   };
 
   return (
-    <div className={styles.landingContainer}>
+    <div className={styles.landingContainerUnico}>
       <Topbar />
 
-      <div className={styles.landingMain}>
-        <h1 className={styles.landingTitle}><strong>Strike</strong></h1>
-        <p className={styles.landingSubtitle}><strong>Alcanza tus sueños</strong></p>
+      <div className={styles.landingMainUnico}>
+        <h1 className={styles.landingTitleUnico}><strong>Strike</strong></h1>
+        <p className={styles.landingSubtitleUnico}><strong>Alcanza tus sueños</strong></p>
 
-        <hr className={styles.landingDivider} />
+        <hr className={styles.landingDividerUnico} />
 
-        <div className={styles.landingSectionTitle}>Productos Destacados</div>
+        <div className={styles.landingSectionTitleUnico}>Productos Destacados</div>
 
-        <div className={styles.carouselContainer}>
+        <div className={styles.carouselContainerUnico}>
           {featured.length > NUM_FEATURED_VISIBLE && (
-            <button className={styles.carouselButton} onClick={handlePrev}>
+            <button className={styles.carouselButtonUnico} onClick={handlePrev}>
               <h1><FaChevronLeft /></h1>
             </button>
           )}
-          <div className={styles.landingProducts}>
+          <div className={styles.landingProductsUnico}>
             {visibleFeatured.map((prod, idx) => (
               <img
                 key={prod.id || idx}
                 src={prod.imagenUrl || (prod.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'}
                 alt={prod.nombre}
-                className={styles.landingProductImage}
+                className={styles.landingProductImageUnico}
                 title={prod.nombre}
                 style={{ cursor: 'pointer' }}
                 onClick={() => handleOpenModal(prod)}
@@ -143,49 +143,49 @@ const Landing = () => {
             ))}
           </div>
           {featured.length > NUM_FEATURED_VISIBLE && (
-            <button className={styles.carouselButton} onClick={handleNext}>
+            <button className={styles.carouselButtonUnico} onClick={handleNext}>
               <h1><FaChevronRight /></h1>
             </button>
           )}
         </div>
 
-        <div className={styles.landingButtonWrapper}>
+        <div className={styles.landingButtonWrapperUnico}>
           <Link to="/SearchItem">
-            <button className={styles.landingBuyButton}>Todos los productos</button>
+            <button className={styles.landingBuyButtonUnico}>Todos los productos</button>
           </Link>
         </div>
 
-        <hr className={styles.landingDivider} />
+        <hr className={styles.landingDividerUnico} />
 
-        <div className={styles.landingCategoryGrid}>
+        <div className={styles.landingCategoryGridUnico}>
           {randomCategories.length === 0 && (
-            <div className={styles.landingCategoryColumn}>
+            <div className={styles.landingCategoryColumnUnico}>
               <h3>Sin categorías disponibles</h3>
               <p>No hay productos con categorías cargadas en la base de datos.</p>
             </div>
           )}
           {randomCategories.map(category => (
-            <div key={category} className={styles.landingCategoryColumn}>
+            <div key={category} className={styles.landingCategoryColumnUnico}>
               <h3>{category}</h3>
               {(!productsByCategory[category] || productsByCategory[category].length === 0) && (
                 <p>No hay productos de esta categoría.</p>
               )}
               {productsByCategory[category]?.map((product, index) => (
-                <div key={product.id || index} className={styles.landingProductCard}>
+                <div key={product.id || index} className={styles.landingProductCardUnico}>
                   <img
                     src={product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'}
                     alt={product.nombre}
-                    className={styles.cardImage}
+                    className={styles.cardImageUnico}
                     style={{ cursor: 'pointer' }}
                     onClick={() => handleOpenModal(product)}
                   />
-                  <div className={styles.cardContent}>
+                  <div className={styles.cardContentUnico}>
                     <h4>{product.nombre}</h4>
                     <p>{product.descripcion || 'Sin descripción.'}</p>
-                    <div className={styles.cardPriceWrapper}>
-                      <span className={styles.cardPrice}>${product.precio}</span>
+                    <div className={styles.cardPriceWrapperUnico}>
+                      <span className={styles.cardPriceUnico}>${product.precio}</span>
                       <button
-                        className={styles.cardButton}
+                        className={styles.cardButtonUnico}
                         onClick={() => handleOpenModal(product)}
                       >
                         Comprar
@@ -197,8 +197,8 @@ const Landing = () => {
             </div>
           ))}
         </div>
-        <h1 className={styles.landingMore}><strong>¿Quiénes somos?</strong></h1>
-        <p className={styles.landingMoreText}>
+        <h1 className={styles.landingMoreUnico}><strong>¿Quiénes somos?</strong></h1>
+        <p className={styles.landingMoreTextUnico}>
           Somos una tienda de zapatillas y ropa deportiva con más de 10 años de experiencia en el mercado. 
           Nos especializamos en ofrecer productos de alta calidad y las últimas tendencias en moda deportiva. 
           Nuestro objetivo es brindar a nuestros clientes una experiencia de compra excepcional, con un servicio al cliente amigable y eficiente.

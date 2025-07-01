@@ -12,6 +12,7 @@ const AdminTipoPage: React.FC = () => {
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [showEliminados, setShowEliminados] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -49,6 +50,7 @@ const AdminTipoPage: React.FC = () => {
             }
             setNombre("");
             setEditId(null);
+            setModalOpen(false);
             fetchData();
         } catch {
             setError("Error al guardar el tipo");
@@ -58,6 +60,7 @@ const AdminTipoPage: React.FC = () => {
     const handleEdit = (tipo: ITipo) => {
         setEditId(tipo.id);
         setNombre(tipo.nombre);
+        setModalOpen(true);
     };
 
     // Soft delete/habilitar
@@ -84,26 +87,60 @@ const AdminTipoPage: React.FC = () => {
         setEditId(null);
         setNombre("");
         setError(null);
+        setModalOpen(false);
     };
 
     const tiposFiltrados = tipos.filter(t => showEliminados ? true : !t.eliminado);
 
+    // Modal centrado y con fondo oscuro
+    const Modal = ({ children }: { children: React.ReactNode }) => (
+        <div className={styles.tipoModalOverlayUnico}>
+            <div className={styles.tipoModalUnico}>
+                {children}
+            </div>
+        </div>
+    );
+
     return (
-        <div className={styles.container}>
-            <h2 className={styles.title}>Administrar Tipos</h2>
-            <form onSubmit={handleSubmit} className={styles.form}>
-                <label>Nombre:</label>
-                <input
-                    type="text"
-                    value={nombre}
-                    onChange={e => setNombre(e.target.value)}
-                    required
-                />
-                <button type="submit">{editId ? "Actualizar" : "Agregar"}</button>
-                {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
-                {error && <div style={{ color: "red" }}>{error}</div>}
-            </form>
-            <label>
+        <div className={styles.tipoContainerUnico}>
+            <h2 className={styles.tipoTitleUnico}>Administrar Tipos</h2>
+            <button
+                className={styles.tipoBtnAgregarUnico}
+                onClick={() => {
+                    setEditId(null);
+                    setNombre("");
+                    setError(null);
+                    setModalOpen(true);
+                }}
+            >
+                + Agregar Tipo
+            </button>
+            {modalOpen && (
+                <Modal>
+                    <form onSubmit={handleSubmit} className={styles.tipoFormUnico}>
+                        <label htmlFor="tipoNombreUnico">Nombre del tipo:</label>
+                        <input
+                            id="tipoNombreUnico"
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
+                            required
+                            placeholder="Ej: Calzado, Indumentaria, Accesorios..."
+                            className={styles.tipoInputUnico}
+                        />
+                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                            <button type="submit" className={styles.tipoBtnUnico}>
+                                {editId ? "Actualizar" : "Agregar"}
+                            </button>
+                            <button type="button" className={styles.tipoBtnCancelUnico} onClick={handleCancel}>
+                                Cancelar
+                            </button>
+                        </div>
+                        {error && <div className={styles.tipoErrorUnico}>{error}</div>}
+                    </form>
+                </Modal>
+            )}
+            <label className={styles.tipoShowEliminadosLabel}>
                 <input
                     type="checkbox"
                     checked={showEliminados}
@@ -112,7 +149,7 @@ const AdminTipoPage: React.FC = () => {
                 />
                 Mostrar tipos deshabilitados
             </label>
-            <table className={styles.table}>
+            <table className={styles.tipoTableUnico}>
                 <thead>
                     <tr>
                         <th>ID</th>
