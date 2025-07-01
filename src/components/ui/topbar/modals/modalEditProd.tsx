@@ -10,7 +10,7 @@ import { IWaistType } from '../../../../types/IWaistType';
 import { ITalle } from '../../../../types/ITalle';
 import { uploadToCloudinary } from '../../../../utils/UploadToCloudinary';
 import axios from "axios";
-import { IProduct } from '../../../../types/IProduct';
+import { IProduct, IColorProducto } from '../../../../types/IProduct';
 import { useAuth } from '../../../../context/AuthContext';
 
 interface ModalEditProdProps {
@@ -224,10 +224,6 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             alert('Selecciona una imagen principal para el color');
             return;
         }
-        if (colorForm.talles.length === 0) {
-            alert('Agrega al menos un talle con stock para este color');
-            return;
-        }
 
         // Subir imagen principal del color si es nueva
         let colorImageUrl = colorForm.imagenUrl;
@@ -323,56 +319,30 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             return;
         }
 
-        // --- CAMBIO: Solo obligar colores/talles si el producto no tiene ninguno ---
-        const productoYaTieneColoresYtalles = (product.colores && product.colores.length > 0 && product.colores.some(c => c.talles && c.talles.length > 0));
-        const nuevosColoresIngresados = colores.length > 0;
+        // PATCH solo los campos principales (no colores ni talles)
+        const APIURL = import.meta.env.VITE_API_URL;
+        const token = localStorage.getItem("token");
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+        };
 
-        if (!productoYaTieneColoresYtalles && !nuevosColoresIngresados) {
-            alert('Debes agregar al menos un color con talles');
-            setLoading(false);
-            return;
-        }
-
-        // Construir el DTO para el backend
-        const productoConColoresDTO = {
+        const updateDTO: any = {
             nombre: form.nombre,
             precio: Number(form.precio),
             descripcion: form.descripcion,
             marca: form.marca,
             imagenUrl: mainImageUrl,
             categoriaId: categoriaObj.id,
-            colores: nuevosColoresIngresados ? colores.map(c => ({
-                color: c.color,
-                imagenUrl: c.imagenUrl,
-                imagenesAdicionales: c.imagenesAdicionales,
-                talles: c.talles.map(ts => ({
-                    talleId: ts.talle.id,
-                    stock: ts.stock
-                }))
-            })) : product.colores // Si no hay nuevos colores, manda los existentes
+            // Solo agrega los campos que quieras actualizar
         };
 
         try {
-            const APIURL = import.meta.env.VITE_API_URL;
-            if (product?.id) {
-                // PUT para editar producto con colores y talles
-                await axios.put(`${APIURL}/productos/con-colores/${product.id}`, productoConColoresDTO, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                    },
-                });
-                alert('Producto actualizado!');
-            }
+            await axios.patch(`${APIURL}/productos/${product.id}`, updateDTO, { headers });
+            alert('Producto actualizado!');
             onClose();
-        } catch (err: any) {
-            console.error('Error completo:', err);
-            if (axios.isAxiosError(err)) {
-                const message = err.response?.data?.message || err.message;
-                alert(`Error al guardar producto: ${message}`);
-            } else {
-                alert(`Error inesperado: ${err.message}`);
-            }
+        } catch (err) {
+            alert('Error al actualizar producto');
         } finally {
             setLoading(false);
         }
@@ -474,7 +444,6 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
                             <select
                                 value={selectedWaistTypeId}
                                 onChange={e => setSelectedWaistTypeId(e.target.value ? Number(e.target.value) : "")}
-                                required
                             >
                                 <option value="">Seleccionar</option>
                                 {waistTypes.map(wt => (
