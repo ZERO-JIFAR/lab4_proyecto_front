@@ -28,19 +28,19 @@ const infoMap: Record<string, { title: string; content: string }> = {
     title: 'Salud y Bienestar',
     content: 'Creemos que la moda también es sentirse bien. Por eso, te acercamos contenidos sobre hábitos saludables, autocuidado y bienestar emocional.'
   },
-    Promociones: {
+  Promociones: {
     title: 'Promociones',
     content: 'Aprovechá nuestras ofertas especiales y descuentos exclusivos. Suscribite a nuestro newsletter para enterarte antes que nadie de las próximas promos.'
   },
-    Explorá: {
+  Explorá: {
     title: 'Encontrá tus artículos',
     content: 'Explorá nuestras categorías y descubrí la prenda perfecta para vos. Usá los filtros para buscar por talle, color o tipo de producto y hacé tu compra en minutos.'
   },
-    Nosotros: {
+  Nosotros: {
     title: '¿Quiénes somos?',
     content: 'Somos una marca argentina dedicada a la moda urbana y actual. Trabajamos con pasión para ofrecerte calidad, estilo y comodidad en cada prenda.'
   },
-    Noticias: {
+  Noticias: {
     title: 'Noticias',
     content: 'Enterate de nuestras novedades, lanzamientos, colaboraciones y eventos. Seguinos en redes para estar siempre actualizado con lo último de nuestra marca.'
   },
@@ -60,10 +60,10 @@ const Footer = () => {
 
   return (
     <>
-      <footer className={styles.footerContainer}>
-        <div className={styles.footerGrid}>
-          <div className={styles.footerColumn}>
-            <div className={styles.footerSocialIcons}>
+      <footer className={styles.footerContainerUnico}>
+        <div className={styles.footerGridUnico}>
+          <div className={styles.footerColumnUnico}>
+            <div className={styles.footerSocialIconsUnico}>
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><FaTwitter /></a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><FaInstagram /></a>
               <a href="https://youtube.com" target="_blank" rel="noopener noreferrer"><FaYoutube /></a>
@@ -71,31 +71,31 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className={styles.footerColumn}>
-            <h4 className={styles.footerTitle}>AYUDA</h4>
-            <ul className={styles.footerList}>
+          <div className={styles.footerColumnUnico}>
+            <h4 className={styles.footerTitleUnico}>AYUDA</h4>
+            <ul className={styles.footerListUnico}>
               {Object.keys(infoMap).filter(key =>
                 ['Envíos', 'Devoluciones', 'Cambios', 'Contacto'].includes(key)
               ).map((key) => (
-                <li key={key} className={styles.footerListItem} onClick={() => handleOpenModal(key)}>{key}</li>
+                <li key={key} className={styles.footerListItemUnico} onClick={() => handleOpenModal(key)}>{key}</li>
               ))}
             </ul>
           </div>
 
-          <div className={styles.footerColumn}>
-            <h4 className={styles.footerTitle}>ACERCA DE</h4>
-            <ul className={styles.footerList}>
+          <div className={styles.footerColumnUnico}>
+            <h4 className={styles.footerTitleUnico}>ACERCA DE</h4>
+            <ul className={styles.footerListUnico}>
               {['Nosotros','Noticias'].map((key) => (
-                <li key={key} className={styles.footerListItem} onClick={() => handleOpenModal(key)}>{key}</li>
+                <li key={key} className={styles.footerListItemUnico} onClick={() => handleOpenModal(key)}>{key}</li>
               ))}
             </ul>
           </div>
 
-          <div className={styles.footerColumn}>
-            <h4 className={styles.footerTitle}>Novedades</h4>
-            <ul className={styles.footerList}>
+          <div className={styles.footerColumnUnico}>
+            <h4 className={styles.footerTitleUnico}>Novedades</h4>
+            <ul className={styles.footerListUnico}>
               {['Promociones','Explorá','Tips', 'Salud'].map((key) => (
-                <li key={key} className={styles.footerListItem} onClick={() => handleOpenModal(key)}>{key}</li>
+                <li key={key} className={styles.footerListItemUnico} onClick={() => handleOpenModal(key)}>{key}</li>
               ))}
             </ul>
           </div>

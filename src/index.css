@@ -1,3 +1,13 @@
+/* Oculta scrollbars pero permite scroll en toda la página */
+body, html {
+  scrollbar-width: none;         /* Firefox */
+  -ms-overflow-style: none;      /* IE y Edge */
+}
+
+body::-webkit-scrollbar, html::-webkit-scrollbar {
+  display: none;                 /* Chrome, Safari y Opera */
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
