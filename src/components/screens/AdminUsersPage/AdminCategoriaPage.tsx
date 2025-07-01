@@ -8,7 +8,7 @@ import styles from "./AdminCategoriaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
-// --- Mueve Modal FUERA del componente principal ---
+// --- Modal fuera del componente principal ---
 const Modal = ({
     children,
     isOpen,
@@ -37,6 +37,7 @@ const AdminCategoriaPage: React.FC = () => {
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [showEliminadas, setShowEliminadas] = useState(false);
 
     // Referencia para el input, para mantener el foco
     const inputRef = React.useRef<HTMLInputElement>(null);
@@ -102,16 +103,23 @@ const AdminCategoriaPage: React.FC = () => {
         setModalOpen(true);
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm("¿Seguro que deseas eliminar esta categoría?")) return;
+    // PATCH para deshabilitar/habilitar (soft delete/restore)
+    const handleToggleActivo = async (cat: ICategory) => {
+        if (!window.confirm(
+            cat.eliminado
+                ? "¿Seguro que deseas habilitar esta categoría?"
+                : "¿Seguro que deseas deshabilitar esta categoría?"
+        )) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`${APIURL}/categorias/${id}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+            await axios.patch(
+                `${APIURL}/categorias/${cat.id}`,
+                { eliminado: !cat.eliminado },
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+            );
             fetchData();
         } catch {
-            setError("Error al eliminar");
+            setError("Error al actualizar la categoría");
         }
     };
 
@@ -123,6 +131,9 @@ const AdminCategoriaPage: React.FC = () => {
         setError(null);
         setModalOpen(false);
     };
+
+    // Filtrado según el checkbox
+    const categoriasFiltradas = categorias.filter(c => showEliminadas || !c.eliminado);
 
     return (
         <div className={styles.categoriaContainerUnico}>
@@ -188,6 +199,17 @@ const AdminCategoriaPage: React.FC = () => {
                     {error && <div className={styles.categoriaErrorUnico}>{error}</div>}
                 </form>
             </Modal>
+
+            <label className={styles.categoriaShowEliminadasLabel}>
+                <input
+                    type="checkbox"
+                    checked={showEliminadas}
+                    onChange={e => setShowEliminadas(e.target.checked)}
+                    style={{ marginRight: 8 }}
+                />
+                Mostrar categorías deshabilitadas
+            </label>
+
             <table className={styles.categoriaTableUnico}>
                 <thead>
                     <tr>
@@ -200,13 +222,13 @@ const AdminCategoriaPage: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {categorias.map(cat => (
+                    {categoriasFiltradas.map(cat => (
                         <tr key={cat.id} style={{ opacity: cat.eliminado ? 0.5 : 1 }}>
                             <td>{cat.id}</td>
                             <td>{cat.nombre || <span className={styles.categoriaPlaceholderUnico}>Nombre de la categoría</span>}</td>
                             <td>{cat.tipo?.nombre || <span className={styles.categoriaPlaceholderUnico}>Tipo</span>}</td>
                             <td>{cat.descripcion || <span className={styles.categoriaPlaceholderUnico}>Descripción</span>}</td>
-                            <td>{cat.eliminado ? "Eliminada" : "Activa"}</td>
+                            <td>{cat.eliminado ? "Deshabilitada" : "Activa"}</td>
                             <td>
                                 <button
                                     className={styles.categoriaActionBtnUnico}
@@ -217,9 +239,9 @@ const AdminCategoriaPage: React.FC = () => {
                                 </button>
                                 <button
                                     className={`${styles.categoriaActionBtnUnico} ${cat.eliminado ? styles.categoriaEnableUnico : styles.categoriaDisableUnico}`}
-                                    onClick={() => handleDelete(cat.id)}
+                                    onClick={() => handleToggleActivo(cat)}
                                 >
-                                    {cat.eliminado ? "Restaurar" : "Eliminar"}
+                                    {cat.eliminado ? "Habilitar" : "Deshabilitar"}
                                 </button>
                             </td>
                         </tr>
