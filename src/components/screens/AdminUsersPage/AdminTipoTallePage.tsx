@@ -10,6 +10,7 @@ const AdminTipoTallePage: React.FC = () => {
     const [nombre, setNombre] = useState("");
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showEliminados, setShowEliminados] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -34,13 +35,13 @@ const AdminTipoTallePage: React.FC = () => {
             const token = localStorage.getItem("token");
             if (editId) {
                 await axios.put(
-                    `${APIURL}/tipo-talles/${editId}`,
+                    `${APIURL}/tiposTalle/${editId}`,
                     { nombre },
                     { headers: token ? { Authorization: `Bearer ${token}` } : {} }
                 );
             } else {
                 await axios.post(
-                    `${APIURL}/tipo-talles`,
+                    `${APIURL}/tiposTalle`,
                     { nombre },
                     { headers: token ? { Authorization: `Bearer ${token}` } : {} }
                 );
@@ -58,16 +59,23 @@ const AdminTipoTallePage: React.FC = () => {
         setNombre(wt.nombre);
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm("¿Seguro que deseas eliminar este tipo de talle?")) return;
+    // Soft delete/habilitar
+    const handleToggleActivo = async (wt: IWaistType) => {
+        if (!window.confirm(
+            wt.eliminado
+                ? "¿Seguro que deseas habilitar este tipo de talle?"
+                : "¿Seguro que deseas deshabilitar este tipo de talle?"
+        )) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`${APIURL}/tipo-talles/${id}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+            await axios.patch(
+                `${APIURL}/tiposTalle/${wt.id}`,
+                { eliminado: !wt.eliminado },
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+            );
             fetchData();
         } catch {
-            setError("Error al eliminar");
+            setError("Error al actualizar el tipo de talle");
         }
     };
 
@@ -76,6 +84,8 @@ const AdminTipoTallePage: React.FC = () => {
         setNombre("");
         setError(null);
     };
+
+    const waistTypesFiltrados = waistTypes.filter(wt => showEliminados ? true : !wt.eliminado);
 
     return (
         <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
@@ -94,23 +104,41 @@ const AdminTipoTallePage: React.FC = () => {
                 {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
                 {error && <div style={{ color: "red" }}>{error}</div>}
             </form>
-            <table border={1} cellPadding={8} style={{ width: "100%" }}>
+            <label>
+                <input
+                    type="checkbox"
+                    checked={showEliminados}
+                    onChange={e => setShowEliminados(e.target.checked)}
+                    style={{ marginRight: 8 }}
+                />
+                Mostrar tipos de talle deshabilitados
+            </label>
+            <table border={1} cellPadding={8} style={{ width: "100%", marginTop: 12 }}>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {waistTypes.map(wt => (
-                        <tr key={wt.id}>
+                    {waistTypesFiltrados.map(wt => (
+                        <tr key={wt.id} style={wt.eliminado ? { opacity: 0.5 } : {}}>
                             <td>{wt.id}</td>
                             <td>{wt.nombre}</td>
+                            <td>{wt.eliminado ? "Deshabilitado" : "Activo"}</td>
                             <td>
-                                <button onClick={() => handleEdit(wt)}>Editar</button>
-                                <button onClick={() => handleDelete(wt.id)}>
-                                    Eliminar
+                                <button onClick={() => handleEdit(wt)} disabled={wt.eliminado}>Editar</button>
+                                <button
+                                    onClick={() => handleToggleActivo(wt)}
+                                    style={{
+                                        background: wt.eliminado ? "#4caf50" : "#f44336",
+                                        color: "#fff",
+                                        marginLeft: 8
+                                    }}
+                                >
+                                    {wt.eliminado ? "Habilitar" : "Deshabilitar"}
                                 </button>
                             </td>
                         </tr>

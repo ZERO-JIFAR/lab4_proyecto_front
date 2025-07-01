@@ -32,9 +32,11 @@ const ProductsPage = () => {
     const [selectedWaistType, setSelectedWaistType] = useState<number | "">("");
     const [showEliminados, setShowEliminados] = useState(false);
 
+    // Refresca productos después de editar/deshabilitar
     const fetchProducts = async () => {
         try {
             const productos = await getProductos();
+            console.log('Productos recibidos:', productos); // DEPURACIÓN
             setProducts(Array.isArray(productos) ? productos : []);
         } catch (err) {
             console.error("Error al obtener productos:", err);
@@ -62,20 +64,10 @@ const ProductsPage = () => {
 
     const filteredProducts = Array.isArray(products)
         ? products.filter((prod) => {
-            // DEBUG LOG para depuración de productos eliminados
-            if (prod.eliminado) {
-                console.log(
-                    `[DEBUG] Producto eliminado:`,
-                    prod.nombre,
-                    '| eliminado:', prod.eliminado,
-                    '| isAdmin:', isAdmin,
-                    '| showEliminados:', showEliminados
-                );
-            }
-
+            // DEPURACIÓN: log de cada producto y su estado eliminado
+            console.log(`Producto: ${prod.nombre}, eliminado: ${prod.eliminado}`);
+            // Solo mostrar productos eliminados si el admin marca el checkbox
             if ((!isAdmin && prod.eliminado) || (isAdmin && !showEliminados && prod.eliminado)) {
-                // DEBUG LOG
-                console.log(`[DEBUG] Ocultando producto:`, prod.nombre);
                 return false;
             }
 
