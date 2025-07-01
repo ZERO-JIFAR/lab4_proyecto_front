@@ -4,6 +4,7 @@ import { getWaistTypes } from "../../../http/waistTypeRequest";
 import axios from "axios";
 import { ITalle } from "../../../types/ITalle";
 import { IWaistType } from "../../../types/IWaistType";
+import styles from "./AdminCaTaTiTitaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -69,7 +70,6 @@ const AdminTallePage: React.FC = () => {
         setWaistTypeId(talle.tipoTalle?.id || "");
     };
 
-    // Soft delete/habilitar
     const handleToggleActivo = async (talle: ITalle) => {
         if (!window.confirm(
             talle.eliminado
@@ -100,91 +100,109 @@ const AdminTallePage: React.FC = () => {
     const tallesFiltrados = talles.filter(t => showEliminados ? true : !t.eliminado);
 
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
-            <h2>Administrar Talles</h2>
-            <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-                <div>
-                    <label>Nombre:</label>
+        <div className={styles.pageWrapper}>
+            <div className={styles.container}>
+                <h2 className={styles.title}>Administrar Talles</h2>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formRow}>
+                        <label>Nombre:</label>
+                        <input
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className={styles.formRow}>
+                        <label>Valor:</label>
+                        <input
+                            type="text"
+                            value={valor}
+                            onChange={e => setValor(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className={styles.formRow}>
+                        <label>Tipo de Talle:</label>
+                        <select
+                            value={waistTypeId}
+                            onChange={e => setWaistTypeId(Number(e.target.value))}
+                            required
+                        >
+                            <option value="">Seleccionar</option>
+                            {waistTypes.map(wt => (
+                                <option key={wt.id} value={wt.id}>
+                                    {wt.nombre}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className={styles.buttonGroup}>
+                        <button type="submit" className={styles.button}>
+                            {editId ? "Actualizar" : "Agregar"}
+                        </button>
+                        {editId && (
+                            <button
+                                type="button"
+                                className={styles.cancelButton}
+                                onClick={handleCancel}
+                            >
+                                Cancelar
+                            </button>
+                        )}
+                    </div>
+                    {error && <div className={styles.error}>{error}</div>}
+                </form>
+                <label style={{ marginBottom: 15, color: "#222"}}>
                     <input
-                        type="text"
-                        value={nombre}
-                        onChange={e => setNombre(e.target.value)}
-                        required
+                        type="checkbox"
+                        checked={showEliminados}
+                        onChange={e => setShowEliminados(e.target.checked)}
+                        style={{ marginRight: 8 }}
                     />
+                    Mostrar talles deshabilitados
+                </label>
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Valor</th>
+                                <th>Tipo de Talle</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tallesFiltrados.map(talle => (
+                                <tr key={talle.id} className={talle.eliminado ? styles.eliminado : ""}>
+                                    <td>{talle.id}</td>
+                                    <td>{talle.nombre}</td>
+                                    <td>{talle.valor}</td>
+                                    <td>{talle.tipoTalle?.nombre || "-"}</td>
+                                    <td>{talle.eliminado ? "Deshabilitado" : "Activo"}</td>
+                                    <td>
+                                        <button
+                                            className={styles.editBtn}
+                                            onClick={() => handleEdit(talle)}
+                                            disabled={talle.eliminado}
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            onClick={() => handleToggleActivo(talle)}
+                                        >
+                                            {talle.eliminado ? "Habilitar" : "Deshabilitar"}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-                <div>
-                    <label>Valor:</label>
-                    <input
-                        type="text"
-                        value={valor}
-                        onChange={e => setValor(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Tipo de Talle:</label>
-                    <select
-                        value={waistTypeId}
-                        onChange={e => setWaistTypeId(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">Seleccionar</option>
-                        {waistTypes.map(wt => (
-                            <option key={wt.id} value={wt.id}>
-                                {wt.nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <button type="submit">{editId ? "Actualizar" : "Agregar"}</button>
-                {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
-                {error && <div style={{ color: "red" }}>{error}</div>}
-            </form>
-            <label>
-                <input
-                    type="checkbox"
-                    checked={showEliminados}
-                    onChange={e => setShowEliminados(e.target.checked)}
-                    style={{ marginRight: 8 }}
-                />
-                Mostrar talles deshabilitados
-            </label>
-            <table border={1} cellPadding={8} style={{ width: "100%", marginTop: 12 }}>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Valor</th>
-                        <th>Tipo de Talle</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tallesFiltrados.map(talle => (
-                        <tr key={talle.id} style={talle.eliminado ? { opacity: 0.5 } : {}}>
-                            <td>{talle.id}</td>
-                            <td>{talle.nombre}</td>
-                            <td>{talle.valor}</td>
-                            <td>{talle.tipoTalle?.nombre || "-"}</td>
-                            <td>{talle.eliminado ? "Deshabilitado" : "Activo"}</td>
-                            <td>
-                                <button onClick={() => handleEdit(talle)} disabled={talle.eliminado}>Editar</button>
-                                <button
-                                    onClick={() => handleToggleActivo(talle)}
-                                    style={{
-                                        background: talle.eliminado ? "#4caf50" : "#f44336",
-                                        color: "#fff",
-                                        marginLeft: 8
-                                    }}
-                                >
-                                    {talle.eliminado ? "Habilitar" : "Deshabilitar"}
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            </div>
         </div>
     );
 };

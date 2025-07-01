@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getWaistTypes } from "../../../http/waistTypeRequest";
 import axios from "axios";
 import { IWaistType } from "../../../types/IWaistType";
+import styles from "./AdminCaTaTiTitaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -59,7 +60,6 @@ const AdminTipoTallePage: React.FC = () => {
         setNombre(wt.nombre);
     };
 
-    // Soft delete/habilitar
     const handleToggleActivo = async (wt: IWaistType) => {
         if (!window.confirm(
             wt.eliminado
@@ -88,63 +88,81 @@ const AdminTipoTallePage: React.FC = () => {
     const waistTypesFiltrados = waistTypes.filter(wt => showEliminados ? true : !wt.eliminado);
 
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
-            <h2>Administrar Tipos de Talle</h2>
-            <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-                <div>
-                    <label>Nombre:</label>
+        <div className={styles.pageWrapper}>
+            <div className={styles.container}>
+                <h2 className={styles.title}>Administrar Tipos de Talle</h2>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formRow}>
+                        <label>Nombre:</label>
+                        <input
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className={styles.buttonGroup}>
+                        <button type="submit" className={styles.button}>
+                            {editId ? "Actualizar" : "Agregar"}
+                        </button>
+                        {editId && (
+                            <button
+                                type="button"
+                                className={styles.cancelButton}
+                                onClick={handleCancel}
+                            >
+                                Cancelar
+                            </button>
+                        )}
+                    </div>
+                    {error && <div className={styles.error}>{error}</div>}
+                </form>
+                <label style={{ marginBottom: 15, color: "#222" }}>
                     <input
-                        type="text"
-                        value={nombre}
-                        onChange={e => setNombre(e.target.value)}
-                        required
+                        type="checkbox"
+                        checked={showEliminados}
+                        onChange={e => setShowEliminados(e.target.checked)}
+                        style={{ marginRight: 8 }}
                     />
+                    Mostrar tipos de talle deshabilitados
+                </label>
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {waistTypesFiltrados.map(wt => (
+                                <tr key={wt.id} className={wt.eliminado ? styles.eliminado : ""}>
+                                    <td>{wt.id}</td>
+                                    <td>{wt.nombre}</td>
+                                    <td>{wt.eliminado ? "Deshabilitado" : "Activo"}</td>
+                                    <td>
+                                        <button
+                                            className={styles.editBtn}
+                                            onClick={() => handleEdit(wt)}
+                                            disabled={wt.eliminado}
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            onClick={() => handleToggleActivo(wt)}
+                                        >
+                                            {wt.eliminado ? "Habilitar" : "Deshabilitar"}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-                <button type="submit">{editId ? "Actualizar" : "Agregar"}</button>
-                {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
-                {error && <div style={{ color: "red" }}>{error}</div>}
-            </form>
-            <label>
-                <input
-                    type="checkbox"
-                    checked={showEliminados}
-                    onChange={e => setShowEliminados(e.target.checked)}
-                    style={{ marginRight: 8 }}
-                />
-                Mostrar tipos de talle deshabilitados
-            </label>
-            <table border={1} cellPadding={8} style={{ width: "100%", marginTop: 12 }}>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {waistTypesFiltrados.map(wt => (
-                        <tr key={wt.id} style={wt.eliminado ? { opacity: 0.5 } : {}}>
-                            <td>{wt.id}</td>
-                            <td>{wt.nombre}</td>
-                            <td>{wt.eliminado ? "Deshabilitado" : "Activo"}</td>
-                            <td>
-                                <button onClick={() => handleEdit(wt)} disabled={wt.eliminado}>Editar</button>
-                                <button
-                                    onClick={() => handleToggleActivo(wt)}
-                                    style={{
-                                        background: wt.eliminado ? "#4caf50" : "#f44336",
-                                        color: "#fff",
-                                        marginLeft: 8
-                                    }}
-                                >
-                                    {wt.eliminado ? "Habilitar" : "Deshabilitar"}
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            </div>
         </div>
     );
 };

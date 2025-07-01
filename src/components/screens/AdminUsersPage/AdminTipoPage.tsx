@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getTipos } from "../../../http/typeRequest";
 import axios from "axios";
 import { ITipo } from "../../../types/IType";
+import styles from "./AdminCaTaTiTitaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -59,7 +60,6 @@ const AdminTipoPage: React.FC = () => {
         setNombre(tipo.nombre);
     };
 
-    // Soft delete/habilitar
     const handleToggleActivo = async (tipo: ITipo) => {
         if (!window.confirm(
             tipo.eliminado
@@ -88,63 +88,81 @@ const AdminTipoPage: React.FC = () => {
     const tiposFiltrados = tipos.filter(t => showEliminados ? true : !t.eliminado);
 
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
-            <h2>Administrar Tipos</h2>
-            <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-                <div>
-                    <label>Nombre:</label>
+        <div className={styles.pageWrapper}>
+            <div className={styles.container}>
+                <h2 className={styles.title}>Administrar Tipos</h2>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formRow}>
+                        <label>Nombre:</label>
+                        <input
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className={styles.buttonGroup}>
+                        <button type="submit" className={styles.button}>
+                            {editId ? "Actualizar" : "Agregar"}
+                        </button>
+                        {editId && (
+                            <button
+                                type="button"
+                                className={styles.cancelButton}
+                                onClick={handleCancel}
+                            >
+                                Cancelar
+                            </button>
+                        )}
+                    </div>
+                    {error && <div className={styles.error}>{error}</div>}
+                </form>
+                <label style={{ marginBottom: 15, color: "#222" }}>
                     <input
-                        type="text"
-                        value={nombre}
-                        onChange={e => setNombre(e.target.value)}
-                        required
+                        type="checkbox"
+                        checked={showEliminados}
+                        onChange={e => setShowEliminados(e.target.checked)}
+                        style={{ marginRight: 8 }}
                     />
+                    Mostrar tipos deshabilitados
+                </label>
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tiposFiltrados.map(tipo => (
+                                <tr key={tipo.id} className={tipo.eliminado ? styles.eliminado : ""}>
+                                    <td>{tipo.id}</td>
+                                    <td>{tipo.nombre}</td>
+                                    <td>{tipo.eliminado ? "Deshabilitado" : "Activo"}</td>
+                                    <td>
+                                        <button
+                                            className={styles.editBtn}
+                                            onClick={() => handleEdit(tipo)}
+                                            disabled={tipo.eliminado}
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            onClick={() => handleToggleActivo(tipo)}
+                                        >
+                                            {tipo.eliminado ? "Habilitar" : "Deshabilitar"}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-                <button type="submit">{editId ? "Actualizar" : "Agregar"}</button>
-                {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
-                {error && <div style={{ color: "red" }}>{error}</div>}
-            </form>
-            <label>
-                <input
-                    type="checkbox"
-                    checked={showEliminados}
-                    onChange={e => setShowEliminados(e.target.checked)}
-                    style={{ marginRight: 8 }}
-                />
-                Mostrar tipos deshabilitados
-            </label>
-            <table border={1} cellPadding={8} style={{ width: "100%", marginTop: 12 }}>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tiposFiltrados.map(tipo => (
-                        <tr key={tipo.id} style={tipo.eliminado ? { opacity: 0.5 } : {}}>
-                            <td>{tipo.id}</td>
-                            <td>{tipo.nombre}</td>
-                            <td>{tipo.eliminado ? "Deshabilitado" : "Activo"}</td>
-                            <td>
-                                <button onClick={() => handleEdit(tipo)} disabled={tipo.eliminado}>Editar</button>
-                                <button
-                                    onClick={() => handleToggleActivo(tipo)}
-                                    style={{
-                                        background: tipo.eliminado ? "#4caf50" : "#f44336",
-                                        color: "#fff",
-                                        marginLeft: 8
-                                    }}
-                                >
-                                    {tipo.eliminado ? "Habilitar" : "Deshabilitar"}
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            </div>
         </div>
     );
 };

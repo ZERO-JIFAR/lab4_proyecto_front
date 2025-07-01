@@ -1,0 +1,215 @@
+.pageWrapper {
+    min-height: 100vh;
+    min-width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #232323;
+}
+
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 32px 28px 24px 28px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 24px;
+    text-align: center;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 12px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.formRow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.form input,
+.form select {
+    padding: 10px 12px;
+    border-radius: 7px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    background: #fafbfc;
+    color: #222;
+    transition: border 0.2s;
+}
+
+.form input:focus,
+.form select:focus {
+    border: 1.5px solid #007bff;
+    outline: none;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.button {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+}
+
+.button:disabled {
+    background: #bdbdbd;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.cancelButton {
+    background: #f5f5f5;
+    color: #222;
+    border: 1px solid #bbb;
+}
+
+.cancelButton:hover {
+    background: #e0e0e0;
+}
+
+.button:hover:not(:disabled) {
+    background: #0056b3;
+}
+
+.error {
+    color: #d8000c;
+    background: #ffd2d2;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 6px;
+    font-size: 0.97rem;
+    text-align: center;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fafbfc;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.table th,
+.table td {
+    padding: 14px 10px;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.table th {
+    background: #f0f0f0;
+    color: #333;
+    font-weight: 600;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table tr {
+    transition: background 0.2s;
+}
+
+.table tr:hover {
+    background: #f5f7fa;
+}
+
+.table tr.eliminado {
+    opacity: 0.5;
+    background: #fbe9e7 !important;
+    color: #b71c1c;
+}
+
+.table td {
+    border-bottom: 1px solid #f0f0f0;
+    color: #222;
+}
+
+.table td:last-child {
+    display: flex;
+    gap: 8px;
+}
+
+.editBtn {
+    background: #10b981;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.editBtn:disabled {
+    background: #bdbdbd;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.editBtn:hover:not(:disabled) {
+    background: #059669;
+}
+
+.deleteBtn {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.deleteBtn:hover {
+    background: #dc2626;
+}
+
+@media (max-width: 700px) {
+    .container {
+        padding: 12px 4vw;
+    }
+    .form input,
+    .form select {
+        font-size: 0.95rem;
+        padding: 8px 8px;
+    }
+    .table th,
+    .table td {
+        font-size: 0.92rem;
+        padding: 8px 4px;
+    }
+}

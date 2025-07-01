@@ -4,6 +4,7 @@ import { getTipos } from "../../../http/typeRequest";
 import axios from "axios";
 import { ICategory } from "../../../types/ICategory";
 import { ITipo } from "../../../types/IType";
+import styles from "./AdminCaTaTiTitaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -90,74 +91,99 @@ const AdminCategoriaPage: React.FC = () => {
     };
 
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
-            <h2>Administrar Categorías</h2>
-            <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-                <div>
-                    <label>Nombre:</label>
-                    <input
-                        type="text"
-                        value={nombre}
-                        onChange={e => setNombre(e.target.value)}
-                        required
-                    />
+        <div className={styles.pageWrapper}>
+            <div className={styles.container}>
+                <h2 className={styles.title}>Administrar Categorías</h2>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formRow}>
+                        <label>Nombre:</label>
+                        <input
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className={styles.formRow}>
+                        <label>Descripción:</label>
+                        <input
+                            type="text"
+                            value={descripcion}
+                            onChange={e => setDescripcion(e.target.value)}
+                        />
+                    </div>
+                    <div className={styles.formRow}>
+                        <label>Tipo:</label>
+                        <select
+                            value={tipoId}
+                            onChange={e => setTipoId(Number(e.target.value))}
+                            required
+                        >
+                            <option value="">Seleccionar</option>
+                            {tipos.map(tipo => (
+                                <option key={tipo.id} value={tipo.id}>
+                                    {tipo.nombre}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className={styles.buttonGroup}>
+                        <button type="submit" className={styles.button}>
+                            {editId ? "Actualizar" : "Agregar"}
+                        </button>
+                        {editId && (
+                            <button
+                                type="button"
+                                className={styles.cancelButton}
+                                onClick={handleCancel}
+                            >
+                                Cancelar
+                            </button>
+                        )}
+                    </div>
+                    {error && <div className={styles.error}>{error}</div>}
+                </form>
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {categorias.map(cat => (
+                                <tr key={cat.id} className={cat.eliminado ? styles.eliminado : ""}>
+                                    <td>{cat.id}</td>
+                                    <td>{cat.nombre}</td>
+                                    <td>{cat.tipo?.nombre}</td>
+                                    <td>{cat.descripcion}</td>
+                                    <td>{cat.eliminado ? "Eliminada" : "Activa"}</td>
+                                    <td>
+                                        <button
+                                            className={styles.editBtn}
+                                            onClick={() => handleEdit(cat)}
+                                            disabled={cat.eliminado}
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            onClick={() => handleDelete(cat.id)}
+                                        >
+                                            {cat.eliminado ? "Restaurar" : "Eliminar"}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-                <div>
-                    <label>Descripción:</label>
-                    <input
-                        type="text"
-                        value={descripcion}
-                        onChange={e => setDescripcion(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>Tipo:</label>
-                    <select
-                        value={tipoId}
-                        onChange={e => setTipoId(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">Seleccionar</option>
-                        {tipos.map(tipo => (
-                            <option key={tipo.id} value={tipo.id}>
-                                {tipo.nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <button type="submit">{editId ? "Actualizar" : "Agregar"}</button>
-                {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
-                {error && <div style={{ color: "red" }}>{error}</div>}
-            </form>
-            <table border={1} cellPadding={8} style={{ width: "100%" }}>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Tipo</th>
-                        <th>Descripción</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {categorias.map(cat => (
-                        <tr key={cat.id} style={{ opacity: cat.eliminado ? 0.5 : 1 }}>
-                            <td>{cat.id}</td>
-                            <td>{cat.nombre}</td>
-                            <td>{cat.tipo?.nombre}</td>
-                            <td>{cat.descripcion}</td>
-                            <td>{cat.eliminado ? "Eliminada" : "Activa"}</td>
-                            <td>
-                                <button onClick={() => handleEdit(cat)} disabled={cat.eliminado}>Editar</button>
-                                <button onClick={() => handleDelete(cat.id)}>
-                                    {cat.eliminado ? "Restaurar" : "Eliminar"}
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            </div>
         </div>
     );
 };
