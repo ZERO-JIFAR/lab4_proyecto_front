@@ -8,6 +8,26 @@ import styles from "./AdminCategoriaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
+// --- Mueve Modal FUERA del componente principal ---
+const Modal = ({
+    children,
+    isOpen,
+}: {
+    children: React.ReactNode;
+    isOpen: boolean;
+}) => {
+    return (
+        <div
+            className={styles.categoriaModalOverlayUnico}
+            style={{ display: isOpen ? "flex" : "none" }}
+        >
+            <div className={styles.categoriaModalUnico}>
+                {children}
+            </div>
+        </div>
+    );
+};
+
 const AdminCategoriaPage: React.FC = () => {
     const [categorias, setCategorias] = useState<ICategory[]>([]);
     const [tipos, setTipos] = useState<ITipo[]>([]);
@@ -17,6 +37,9 @@ const AdminCategoriaPage: React.FC = () => {
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
+
+    // Referencia para el input, para mantener el foco
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
     const fetchData = async () => {
         try {
@@ -31,6 +54,12 @@ const AdminCategoriaPage: React.FC = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (modalOpen && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [modalOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -95,15 +124,6 @@ const AdminCategoriaPage: React.FC = () => {
         setModalOpen(false);
     };
 
-    // Modal centrado y con fondo oscuro
-    const Modal = ({ children }: { children: React.ReactNode }) => (
-        <div className={styles.categoriaModalOverlayUnico}>
-            <div className={styles.categoriaModalUnico}>
-                {children}
-            </div>
-        </div>
-    );
-
     return (
         <div className={styles.categoriaContainerUnico}>
             <h2 className={styles.categoriaTitleUnico}>Administrar Categorías</h2>
@@ -120,55 +140,54 @@ const AdminCategoriaPage: React.FC = () => {
             >
                 + Agregar Categoría
             </button>
-            {modalOpen && (
-                <Modal>
-                    <form onSubmit={handleSubmit} className={styles.categoriaFormUnico}>
-                        <label htmlFor="categoriaNombreUnico">Nombre de la categoría:</label>
-                        <input
-                            id="categoriaNombreUnico"
-                            type="text"
-                            value={nombre}
-                            onChange={e => setNombre(e.target.value)}
-                            required
-                            placeholder="Ej: Zapatillas, Remeras, Accesorios..."
-                            className={styles.categoriaInputUnico}
-                        />
-                        <label htmlFor="categoriaDescripcionUnico">Descripción de la categoría:</label>
-                        <input
-                            id="categoriaDescripcionUnico"
-                            type="text"
-                            value={descripcion}
-                            onChange={e => setDescripcion(e.target.value)}
-                            placeholder="Describe brevemente la categoría"
-                            className={styles.categoriaInputUnico}
-                        />
-                        <label htmlFor="categoriaTipoUnico">Tipo de producto:</label>
-                        <select
-                            id="categoriaTipoUnico"
-                            value={tipoId}
-                            onChange={e => setTipoId(Number(e.target.value))}
-                            required
-                            className={styles.categoriaSelectUnico}
-                        >
-                            <option value="">Selecciona el tipo de producto</option>
-                            {tipos.map(tipo => (
-                                <option key={tipo.id} value={tipo.id}>
-                                    {tipo.nombre}
-                                </option>
-                            ))}
-                        </select>
-                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-                            <button type="submit" className={styles.categoriaBtnUnico}>
-                                {editId ? "Actualizar" : "Agregar"}
-                            </button>
-                            <button type="button" className={styles.categoriaBtnCancelUnico} onClick={handleCancel}>
-                                Cancelar
-                            </button>
-                        </div>
-                        {error && <div className={styles.categoriaErrorUnico}>{error}</div>}
-                    </form>
-                </Modal>
-            )}
+            <Modal isOpen={modalOpen}>
+                <form onSubmit={handleSubmit} className={styles.categoriaFormUnico}>
+                    <label htmlFor="categoriaNombreUnico">Nombre de la categoría:</label>
+                    <input
+                        id="categoriaNombreUnico"
+                        type="text"
+                        ref={inputRef}
+                        value={nombre}
+                        onChange={e => setNombre(e.target.value)}
+                        required
+                        placeholder="Ej: Zapatillas, Remeras, Accesorios..."
+                        className={styles.categoriaInputUnico}
+                    />
+                    <label htmlFor="categoriaDescripcionUnico">Descripción de la categoría:</label>
+                    <input
+                        id="categoriaDescripcionUnico"
+                        type="text"
+                        value={descripcion}
+                        onChange={e => setDescripcion(e.target.value)}
+                        placeholder="Describe brevemente la categoría"
+                        className={styles.categoriaInputUnico}
+                    />
+                    <label htmlFor="categoriaTipoUnico">Tipo de producto:</label>
+                    <select
+                        id="categoriaTipoUnico"
+                        value={tipoId}
+                        onChange={e => setTipoId(Number(e.target.value))}
+                        required
+                        className={styles.categoriaSelectUnico}
+                    >
+                        <option value="">Selecciona el tipo de producto</option>
+                        {tipos.map(tipo => (
+                            <option key={tipo.id} value={tipo.id}>
+                                {tipo.nombre}
+                            </option>
+                        ))}
+                    </select>
+                    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                        <button type="submit" className={styles.categoriaBtnUnico}>
+                            {editId ? "Actualizar" : "Agregar"}
+                        </button>
+                        <button type="button" className={styles.categoriaBtnCancelUnico} onClick={handleCancel}>
+                            Cancelar
+                        </button>
+                    </div>
+                    {error && <div className={styles.categoriaErrorUnico}>{error}</div>}
+                </form>
+            </Modal>
             <table className={styles.categoriaTableUnico}>
                 <thead>
                     <tr>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { getTipos } from "../../../http/typeRequest";
 import axios from "axios";
 import { ITipo } from "../../../types/IType";
@@ -6,17 +6,40 @@ import styles from "./AdminTipoPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
+// --- Mueve Modal FUERA del componente principal ---
+const Modal = ({
+    children,
+    isOpen,
+}: {
+    children: React.ReactNode;
+    isOpen: boolean;
+}) => {
+    return (
+        <div
+            className={styles.tipoModalOverlayUnico}
+            style={{ display: isOpen ? "flex" : "none" }}
+        >
+            <div className={styles.tipoModalUnico}>
+                {children}
+            </div>
+        </div>
+    );
+};
+
 const AdminTipoPage: React.FC = () => {
     const [tipos, setTipos] = useState<ITipo[]>([]);
-    const [nombre, setNombre] = useState("");
+    const [inputNombre, setInputNombre] = useState<string>("");
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [showEliminados, setShowEliminados] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
 
+    const inputRef = useRef<HTMLInputElement>(null);
+
     const fetchData = async () => {
         try {
-            setTipos(await getTipos());
+            const data = await getTipos();
+            setTipos(data);
         } catch {
             setError("Error al cargar datos");
         }
@@ -26,58 +49,67 @@ const AdminTipoPage: React.FC = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        if (modalOpen && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [modalOpen]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!nombre) {
+        if (!inputNombre.trim()) {
             setError("El nombre es obligatorio");
             return;
         }
+
         setError(null);
+
         try {
             const token = localStorage.getItem("token");
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
             if (editId) {
-                await axios.put(
-                    `${APIURL}/tipos/${editId}`,
-                    { nombre },
-                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-                );
+                await axios.put(`${APIURL}/tipos/${editId}`, { nombre: inputNombre }, { headers });
             } else {
-                await axios.post(
-                    `${APIURL}/tipos`,
-                    { nombre },
-                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-                );
+                await axios.post(`${APIURL}/tipos`, { nombre: inputNombre }, { headers });
             }
-            setNombre("");
+
+            setInputNombre("");
             setEditId(null);
             setModalOpen(false);
-            fetchData();
-        } catch {
+
+            await fetchData();
+        } catch (err) {
             setError("Error al guardar el tipo");
         }
     };
 
     const handleEdit = (tipo: ITipo) => {
         setEditId(tipo.id);
-        setNombre(tipo.nombre);
+        setInputNombre(typeof tipo.nombre === "string" ? tipo.nombre : "");
+        setError(null);
         setModalOpen(true);
     };
 
-    // Soft delete/habilitar
+    const handleAgregar = () => {
+        setEditId(null);
+        setInputNombre("");
+        setError(null);
+        setModalOpen(true);
+    };
+
     const handleToggleActivo = async (tipo: ITipo) => {
-        if (!window.confirm(
-            tipo.eliminado
-                ? "¿Seguro que deseas habilitar este tipo?"
-                : "¿Seguro que deseas deshabilitar este tipo?"
-        )) return;
+        const confirmMessage = tipo.eliminado
+            ? "¿Seguro que deseas habilitar este tipo?"
+            : "¿Seguro que deseas deshabilitar este tipo?";
+        if (!window.confirm(confirmMessage)) return;
+
         try {
             const token = localStorage.getItem("token");
-            await axios.patch(
-                `${APIURL}/tipos/${tipo.id}`,
-                { eliminado: !tipo.eliminado },
-                { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-            );
-            fetchData();
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+            await axios.patch(`${APIURL}/tipos/${tipo.id}`, { eliminado: !tipo.eliminado }, { headers });
+            await fetchData();
         } catch {
             setError("Error al actualizar el tipo");
         }
@@ -85,61 +117,50 @@ const AdminTipoPage: React.FC = () => {
 
     const handleCancel = () => {
         setEditId(null);
-        setNombre("");
+        setInputNombre("");
         setError(null);
         setModalOpen(false);
     };
 
-    const tiposFiltrados = tipos.filter(t => showEliminados ? true : !t.eliminado);
-
-    // Modal centrado y con fondo oscuro
-    const Modal = ({ children }: { children: React.ReactNode }) => (
-        <div className={styles.tipoModalOverlayUnico}>
-            <div className={styles.tipoModalUnico}>
-                {children}
-            </div>
-        </div>
-    );
+    const tiposFiltrados = tipos.filter(t => showEliminados || !t.eliminado);
 
     return (
         <div className={styles.tipoContainerUnico}>
             <h2 className={styles.tipoTitleUnico}>Administrar Tipos</h2>
+
             <button
                 className={styles.tipoBtnAgregarUnico}
-                onClick={() => {
-                    setEditId(null);
-                    setNombre("");
-                    setError(null);
-                    setModalOpen(true);
-                }}
+                onClick={handleAgregar}
             >
                 + Agregar Tipo
             </button>
-            {modalOpen && (
-                <Modal>
-                    <form onSubmit={handleSubmit} className={styles.tipoFormUnico}>
-                        <label htmlFor="tipoNombreUnico">Nombre del tipo:</label>
-                        <input
-                            id="tipoNombreUnico"
-                            type="text"
-                            value={nombre}
-                            onChange={e => setNombre(e.target.value)}
-                            required
-                            placeholder="Ej: Calzado, Indumentaria, Accesorios..."
-                            className={styles.tipoInputUnico}
-                        />
-                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-                            <button type="submit" className={styles.tipoBtnUnico}>
-                                {editId ? "Actualizar" : "Agregar"}
-                            </button>
-                            <button type="button" className={styles.tipoBtnCancelUnico} onClick={handleCancel}>
-                                Cancelar
-                            </button>
-                        </div>
-                        {error && <div className={styles.tipoErrorUnico}>{error}</div>}
-                    </form>
-                </Modal>
-            )}
+
+            <Modal isOpen={modalOpen}>
+                <form onSubmit={handleSubmit} className={styles.tipoFormUnico}>
+                    <label htmlFor="tipoNombreUnico">Nombre del tipo:</label>
+                    <input
+                        id="tipoNombreUnico"
+                        type="text"
+                        ref={inputRef}
+                        value={inputNombre}
+                        onChange={e => setInputNombre(e.target.value)}
+                        required
+                        placeholder="Ej: Calzado, Indumentaria, Accesorios..."
+                        className={styles.tipoInputUnico}
+                        autoComplete="off"
+                    />
+                    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
+                        <button type="submit" className={styles.tipoBtnUnico}>
+                            {editId ? "Actualizar" : "Agregar"}
+                        </button>
+                        <button type="button" className={styles.tipoBtnCancelUnico} onClick={handleCancel}>
+                            Cancelar
+                        </button>
+                    </div>
+                    {error && <div className={styles.tipoErrorUnico}>{error}</div>}
+                </form>
+            </Modal>
+
             <label className={styles.tipoShowEliminadosLabel}>
                 <input
                     type="checkbox"
@@ -149,6 +170,7 @@ const AdminTipoPage: React.FC = () => {
                 />
                 Mostrar tipos deshabilitados
             </label>
+
             <table className={styles.tipoTableUnico}>
                 <thead>
                     <tr>
