@@ -4,6 +4,7 @@ import { getTipos } from "../../../http/typeRequest";
 import axios from "axios";
 import { ICategory } from "../../../types/ICategory";
 import { ITipo } from "../../../types/IType";
+import styles from "./AdminCategoriaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -90,46 +91,40 @@ const AdminCategoriaPage: React.FC = () => {
     };
 
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
-            <h2>Administrar Categorías</h2>
-            <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-                <div>
-                    <label>Nombre:</label>
-                    <input
-                        type="text"
-                        value={nombre}
-                        onChange={e => setNombre(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Descripción:</label>
-                    <input
-                        type="text"
-                        value={descripcion}
-                        onChange={e => setDescripcion(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>Tipo:</label>
-                    <select
-                        value={tipoId}
-                        onChange={e => setTipoId(Number(e.target.value))}
-                        required
-                    >
-                        <option value="">Seleccionar</option>
-                        {tipos.map(tipo => (
-                            <option key={tipo.id} value={tipo.id}>
-                                {tipo.nombre}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+        <div className={styles.container}>
+            <h2 className={styles.title}>Administrar Categorías</h2>
+            <form onSubmit={handleSubmit} className={styles.form}>
+                <label>Nombre:</label>
+                <input
+                    type="text"
+                    value={nombre}
+                    onChange={e => setNombre(e.target.value)}
+                    required
+                />
+                <label>Descripción:</label>
+                <input
+                    type="text"
+                    value={descripcion}
+                    onChange={e => setDescripcion(e.target.value)}
+                />
+                <label>Tipo:</label>
+                <select
+                    value={tipoId}
+                    onChange={e => setTipoId(Number(e.target.value))}
+                    required
+                >
+                    <option value="">Seleccionar</option>
+                    {tipos.map(tipo => (
+                        <option key={tipo.id} value={tipo.id}>
+                            {tipo.nombre}
+                        </option>
+                    ))}
+                </select>
                 <button type="submit">{editId ? "Actualizar" : "Agregar"}</button>
                 {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
                 {error && <div style={{ color: "red" }}>{error}</div>}
             </form>
-            <table border={1} cellPadding={8} style={{ width: "100%" }}>
+            <table className={styles.table}>
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -149,8 +144,17 @@ const AdminCategoriaPage: React.FC = () => {
                             <td>{cat.descripcion}</td>
                             <td>{cat.eliminado ? "Eliminada" : "Activa"}</td>
                             <td>
-                                <button onClick={() => handleEdit(cat)} disabled={cat.eliminado}>Editar</button>
-                                <button onClick={() => handleDelete(cat.id)}>
+                                <button
+                                    className={styles.actionBtn}
+                                    onClick={() => handleEdit(cat)}
+                                    disabled={cat.eliminado}
+                                >
+                                    Editar
+                                </button>
+                                <button
+                                    className={`${styles.actionBtn} ${cat.eliminado ? styles.enable : styles.disable}`}
+                                    onClick={() => handleDelete(cat.id)}
+                                >
                                     {cat.eliminado ? "Restaurar" : "Eliminar"}
                                 </button>
                             </td>

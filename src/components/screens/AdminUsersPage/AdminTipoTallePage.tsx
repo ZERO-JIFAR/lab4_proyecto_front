@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getWaistTypes } from "../../../http/waistTypeRequest";
 import axios from "axios";
 import { IWaistType } from "../../../types/IWaistType";
+import styles from "./AdminTipoTallePage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -88,18 +89,16 @@ const AdminTipoTallePage: React.FC = () => {
     const waistTypesFiltrados = waistTypes.filter(wt => showEliminados ? true : !wt.eliminado);
 
     return (
-        <div style={{ maxWidth: 600, margin: "0 auto", padding: 24 }}>
-            <h2>Administrar Tipos de Talle</h2>
-            <form onSubmit={handleSubmit} style={{ marginBottom: 24 }}>
-                <div>
-                    <label>Nombre:</label>
-                    <input
-                        type="text"
-                        value={nombre}
-                        onChange={e => setNombre(e.target.value)}
-                        required
-                    />
-                </div>
+        <div className={styles.container}>
+            <h2 className={styles.title}>Administrar Tipos de Talle</h2>
+            <form onSubmit={handleSubmit} className={styles.form}>
+                <label>Nombre:</label>
+                <input
+                    type="text"
+                    value={nombre}
+                    onChange={e => setNombre(e.target.value)}
+                    required
+                />
                 <button type="submit">{editId ? "Actualizar" : "Agregar"}</button>
                 {editId && <button type="button" onClick={handleCancel}>Cancelar</button>}
                 {error && <div style={{ color: "red" }}>{error}</div>}
@@ -113,7 +112,7 @@ const AdminTipoTallePage: React.FC = () => {
                 />
                 Mostrar tipos de talle deshabilitados
             </label>
-            <table border={1} cellPadding={8} style={{ width: "100%", marginTop: 12 }}>
+            <table className={styles.table}>
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -129,14 +128,16 @@ const AdminTipoTallePage: React.FC = () => {
                             <td>{wt.nombre}</td>
                             <td>{wt.eliminado ? "Deshabilitado" : "Activo"}</td>
                             <td>
-                                <button onClick={() => handleEdit(wt)} disabled={wt.eliminado}>Editar</button>
                                 <button
+                                    className={styles.actionBtn}
+                                    onClick={() => handleEdit(wt)}
+                                    disabled={wt.eliminado}
+                                >
+                                    Editar
+                                </button>
+                                <button
+                                    className={`${styles.actionBtn} ${wt.eliminado ? styles.enable : styles.disable}`}
                                     onClick={() => handleToggleActivo(wt)}
-                                    style={{
-                                        background: wt.eliminado ? "#4caf50" : "#f44336",
-                                        color: "#fff",
-                                        marginLeft: 8
-                                    }}
                                 >
                                     {wt.eliminado ? "Habilitar" : "Deshabilitar"}
                                 </button>
