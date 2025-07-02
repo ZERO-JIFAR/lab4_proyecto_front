@@ -11,9 +11,6 @@ import AdminCategoriaPage from '../components/screens/AdminUsersPage/AdminCatego
 import AdminTipoTallePage from '../components/screens/AdminUsersPage/AdminTipoTallePage';
 import AdminTallePage from '../components/screens/AdminUsersPage/AdminTallePage';
 
-
-// ...rest of your code...
-
 // Componente para proteger rutas de admin
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { isLoggedIn, isAdmin } = useAuth();
@@ -28,10 +25,40 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/SearchItem" element={<SearchItem />} />
-      <Route path="/admin/tipos" element={<AdminTipoPage />} />
-      <Route path="/admin/categorias" element={<AdminCategoriaPage />} />
-      <Route path="/admin/tipo-talles" element={<AdminTipoTallePage />} />
-      <Route path="/admin/talles" element={<AdminTallePage />} />
+
+      {/* Todas las rutas que empiezan con /admin están protegidas */}
+      <Route
+        path="/admin/tipos"
+        element={
+          <AdminRoute>
+            <AdminTipoPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/categorias"
+        element={
+          <AdminRoute>
+            <AdminCategoriaPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/tipo-talles"
+        element={
+          <AdminRoute>
+            <AdminTipoTallePage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/talles"
+        element={
+          <AdminRoute>
+            <AdminTallePage />
+          </AdminRoute>
+        }
+      />
       <Route
         path="/admin-usuarios"
         element={
