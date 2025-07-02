@@ -1,238 +1,170 @@
-import React, { useEffect, useState, useRef, memo } from "react";
-import {
-  getWaistTypes,
-  createWaistType,
-} from "../../../http/waistTypeRequest";
+import React, { useEffect, useState } from "react";
+import { getWaistTypes } from "../../../http/waistTypeRequest";
 import axios from "axios";
 import { IWaistType } from "../../../types/IWaistType";
-import styles from "./AdminTipoTallePage.module.css";
+import styles from "./AdminCaTaTiTitaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
-// Modal desacoplado y memoizado
-const Modal = memo(({
-  children,
-  onClose,
-}: {
-  children: React.ReactNode;
-  onClose: () => void;
-}) => {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
-
-  return (
-    <div className={styles.tipoModalOverlayUnico} onClick={onClose}>
-      <div className={styles.tipoModalUnico} onClick={e => e.stopPropagation()}>
-        {children}
-      </div>
-    </div>
-  );
-});
-
 const AdminTipoTallePage: React.FC = () => {
-  const [tiposTalle, setTiposTalle] = useState<IWaistType[]>([]);
-  const [inputNombre, setInputNombre] = useState<string>("");
-  const [inputDescripcion, setInputDescripcion] = useState<string>("");
-  const [editId, setEditId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [showEliminados, setShowEliminados] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+    const [waistTypes, setWaistTypes] = useState<IWaistType[]>([]);
+    const [nombre, setNombre] = useState("");
+    const [editId, setEditId] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [showEliminados, setShowEliminados] = useState(false);
 
-  const inputRef = useRef<HTMLInputElement>(null);
+    const fetchData = async () => {
+        try {
+            setWaistTypes(await getWaistTypes());
+        } catch {
+            setError("Error al cargar datos");
+        }
+    };
 
-  const fetchData = async () => {
-    try {
-      setTiposTalle(await getWaistTypes());
-    } catch {
-      setError("Error al cargar datos");
-    }
-  };
+    useEffect(() => {
+        fetchData();
+    }, []);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!nombre) {
+            setError("El nombre es obligatorio");
+            return;
+        }
+        setError(null);
+        try {
+            const token = localStorage.getItem("token");
+            if (editId) {
+                await axios.put(
+                    `${APIURL}/tiposTalle/${editId}`,
+                    { nombre },
+                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                );
+            } else {
+                await axios.post(
+                    `${APIURL}/tiposTalle`,
+                    { nombre },
+                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                );
+            }
+            setNombre("");
+            setEditId(null);
+            fetchData();
+        } catch {
+            setError("Error al guardar el tipo de talle");
+        }
+    };
 
-  useEffect(() => {
-    if (modalOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [modalOpen]);
+    const handleEdit = (wt: IWaistType) => {
+        setEditId(wt.id);
+        setNombre(wt.nombre);
+    };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputNombre.trim()) {
-      setError("El nombre es obligatorio");
-      return;
-    }
-    setError(null);
-    try {
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const handleToggleActivo = async (wt: IWaistType) => {
+        if (!window.confirm(
+            wt.eliminado
+                ? "¿Seguro que deseas habilitar este tipo de talle?"
+                : "¿Seguro que deseas deshabilitar este tipo de talle?"
+        )) return;
+        try {
+            const token = localStorage.getItem("token");
+            await axios.patch(
+                `${APIURL}/tiposTalle/${wt.id}`,
+                { eliminado: !wt.eliminado },
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+            );
+            fetchData();
+        } catch {
+            setError("Error al actualizar el tipo de talle");
+        }
+    };
 
-      if (editId) {
-        await axios.put(
-          `${APIURL}/tiposTalle/${editId}`,
-          { nombre: inputNombre, descripcion: inputDescripcion },
-          { headers }
-        );
-      } else {
-        await createWaistType({ nombre: inputNombre, descripcion: inputDescripcion });
-      }
+    const handleCancel = () => {
+        setEditId(null);
+        setNombre("");
+        setError(null);
+    };
 
-      setInputNombre("");
-      setInputDescripcion("");
-      setEditId(null);
-      setModalOpen(false);
-      fetchData();
-    } catch {
-      setError("Error al guardar el tipo de talle");
-    }
-  };
+    const waistTypesFiltrados = waistTypes.filter(wt => showEliminados ? true : !wt.eliminado);
 
-  const handleEdit = (tipo: IWaistType) => {
-    setEditId(tipo.id);
-    setInputNombre(tipo.nombre);
-    setInputDescripcion(tipo.descripcion || "");
-    setModalOpen(true);
-  };
-
-  const handleAgregar = () => {
-    setEditId(null);
-    setInputNombre("");
-    setInputDescripcion("");
-    setError(null);
-    setModalOpen(true);
-  };
-
-  const handleToggleActivo = async (tipo: IWaistType) => {
-    if (!window.confirm(
-      tipo.eliminado
-        ? "¿Seguro que deseas habilitar este tipo de talle?"
-        : "¿Seguro que deseas deshabilitar este tipo de talle?"
-    )) return;
-    try {
-      const token = localStorage.getItem("token");
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      await axios.patch(
-        `${APIURL}/tiposTalle/${tipo.id}`,
-        { eliminado: !tipo.eliminado },
-        { headers }
-      );
-      fetchData();
-    } catch {
-      setError("Error al actualizar el tipo de talle");
-    }
-  };
-
-  const handleCancel = () => {
-    setEditId(null);
-    setInputNombre("");
-    setInputDescripcion("");
-    setError(null);
-    setModalOpen(false);
-  };
-
-  const tiposFiltrados = tiposTalle.filter(t => showEliminados || !t.eliminado);
-
-  return (
-    <div className={styles.tipoContainerUnico}>
-      <h2 className={styles.tipoTitleUnico}>Administrar Tipos de Talle</h2>
-      <button
-        className={styles.tipoBtnAgregarUnico}
-        onClick={handleAgregar}
-      >
-        + Agregar Tipo de Talle
-      </button>
-
-      {modalOpen && (
-        <Modal onClose={handleCancel}>
-          <form onSubmit={handleSubmit} className={styles.tipoFormUnico}>
-            <label htmlFor="tipoTalleNombreUnico">Nombre del tipo de talle:</label>
-            <input
-              id="tipoTalleNombreUnico"
-              type="text"
-              ref={inputRef}
-              value={inputNombre}
-              onChange={e => setInputNombre(e.target.value)}
-              required
-              placeholder="Ej: Calzado US, Ropa, etc."
-              className={styles.tipoInputUnico}
-            />
-            <label htmlFor="tipoTalleDescripcionUnico">Descripción:</label>
-            <input
-              id="tipoTalleDescripcionUnico"
-              type="text"
-              value={inputDescripcion}
-              onChange={e => setInputDescripcion(e.target.value)}
-              placeholder="Descripción opcional"
-              className={styles.tipoInputUnico}
-            />
-            <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-              <button type="submit" className={styles.tipoBtnUnico}>
-                {editId ? "Actualizar" : "Agregar"}
-              </button>
-              <button type="button" className={styles.tipoBtnCancelUnico} onClick={handleCancel}>
-                Cancelar
-              </button>
+    return (
+        <div className={styles.pageWrapper}>
+            <div className={styles.container}>
+                <h2 className={styles.title}>Administrar Tipos de Talle</h2>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formRow}>
+                        <label>Nombre:</label>
+                        <input
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className={styles.buttonGroup}>
+                        <button type="submit" className={styles.button}>
+                            {editId ? "Actualizar" : "Agregar"}
+                        </button>
+                        {editId && (
+                            <button
+                                type="button"
+                                className={styles.cancelButton}
+                                onClick={handleCancel}
+                            >
+                                Cancelar
+                            </button>
+                        )}
+                    </div>
+                    {error && <div className={styles.error}>{error}</div>}
+                </form>
+                <label style={{ marginBottom: 15, color: "#222" }}>
+                    <input
+                        type="checkbox"
+                        checked={showEliminados}
+                        onChange={e => setShowEliminados(e.target.checked)}
+                        style={{ marginRight: 8 }}
+                    />
+                    Mostrar tipos de talle deshabilitados
+                </label>
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {waistTypesFiltrados.map(wt => (
+                                <tr key={wt.id} className={wt.eliminado ? styles.eliminado : ""}>
+                                    <td>{wt.id}</td>
+                                    <td>{wt.nombre}</td>
+                                    <td>{wt.eliminado ? "Deshabilitado" : "Activo"}</td>
+                                    <td>
+                                        <button
+                                            className={styles.editBtn}
+                                            onClick={() => handleEdit(wt)}
+                                            disabled={wt.eliminado}
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            onClick={() => handleToggleActivo(wt)}
+                                        >
+                                            {wt.eliminado ? "Habilitar" : "Deshabilitar"}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            {error && <div className={styles.tipoErrorUnico}>{error}</div>}
-          </form>
-        </Modal>
-      )}
-
-      <label className={styles.tipoShowEliminadosLabel}>
-        <input
-          type="checkbox"
-          checked={showEliminados}
-          onChange={e => setShowEliminados(e.target.checked)}
-          style={{ marginRight: 8 }}
-        />
-        Mostrar tipos de talle deshabilitados
-      </label>
-
-      <table className={styles.tipoTableUnico}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tiposFiltrados.map(tipo => (
-            <tr key={tipo.id} style={tipo.eliminado ? { opacity: 0.5 } : {}}>
-              <td>{tipo.id}</td>
-              <td>{tipo.nombre}</td>
-              <td>{tipo.descripcion || <span style={{ color: "#888" }}>Sin descripción</span>}</td>
-              <td>{tipo.eliminado ? "Deshabilitado" : "Activo"}</td>
-              <td>
-                <button
-                  className={styles.actionBtn}
-                  onClick={() => handleEdit(tipo)}
-                  disabled={tipo.eliminado}
-                >
-                  Editar
-                </button>
-                <button
-                  className={`${styles.actionBtn} ${tipo.eliminado ? styles.enable : styles.disable}`}
-                  onClick={() => handleToggleActivo(tipo)}
-                >
-                  {tipo.eliminado ? "Habilitar" : "Deshabilitar"}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+        </div>
+    );
 };
 
 export default AdminTipoTallePage;

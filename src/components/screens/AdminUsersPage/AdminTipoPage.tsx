@@ -1,45 +1,21 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { getTipos } from "../../../http/typeRequest";
 import axios from "axios";
 import { ITipo } from "../../../types/IType";
-import styles from "./AdminTipoPage.module.css";
+import styles from "./AdminCaTaTiTitaPage.module.css";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
-// --- Mueve Modal FUERA del componente principal ---
-const Modal = ({
-    children,
-    isOpen,
-}: {
-    children: React.ReactNode;
-    isOpen: boolean;
-}) => {
-    return (
-        <div
-            className={styles.tipoModalOverlayUnico}
-            style={{ display: isOpen ? "flex" : "none" }}
-        >
-            <div className={styles.tipoModalUnico}>
-                {children}
-            </div>
-        </div>
-    );
-};
-
 const AdminTipoPage: React.FC = () => {
     const [tipos, setTipos] = useState<ITipo[]>([]);
-    const [inputNombre, setInputNombre] = useState<string>("");
+    const [nombre, setNombre] = useState("");
     const [editId, setEditId] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [showEliminados, setShowEliminados] = useState(false);
-    const [modalOpen, setModalOpen] = useState(false);
-
-    const inputRef = useRef<HTMLInputElement>(null);
 
     const fetchData = async () => {
         try {
-            const data = await getTipos();
-            setTipos(data);
+            setTipos(await getTipos());
         } catch {
             setError("Error al cargar datos");
         }
@@ -49,67 +25,55 @@ const AdminTipoPage: React.FC = () => {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        if (modalOpen && inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, [modalOpen]);
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!inputNombre.trim()) {
+        if (!nombre) {
             setError("El nombre es obligatorio");
             return;
         }
-
         setError(null);
-
         try {
             const token = localStorage.getItem("token");
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
             if (editId) {
-                await axios.put(`${APIURL}/tipos/${editId}`, { nombre: inputNombre }, { headers });
+                await axios.put(
+                    `${APIURL}/tipos/${editId}`,
+                    { nombre },
+                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                );
             } else {
-                await axios.post(`${APIURL}/tipos`, { nombre: inputNombre }, { headers });
+                await axios.post(
+                    `${APIURL}/tipos`,
+                    { nombre },
+                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                );
             }
-
-            setInputNombre("");
+            setNombre("");
             setEditId(null);
-            setModalOpen(false);
-
-            await fetchData();
-        } catch (err) {
+            fetchData();
+        } catch {
             setError("Error al guardar el tipo");
         }
     };
 
     const handleEdit = (tipo: ITipo) => {
         setEditId(tipo.id);
-        setInputNombre(typeof tipo.nombre === "string" ? tipo.nombre : "");
-        setError(null);
-        setModalOpen(true);
-    };
-
-    const handleAgregar = () => {
-        setEditId(null);
-        setInputNombre("");
-        setError(null);
-        setModalOpen(true);
+        setNombre(tipo.nombre);
     };
 
     const handleToggleActivo = async (tipo: ITipo) => {
-        const confirmMessage = tipo.eliminado
-            ? "¿Seguro que deseas habilitar este tipo?"
-            : "¿Seguro que deseas deshabilitar este tipo?";
-        if (!window.confirm(confirmMessage)) return;
-
+        if (!window.confirm(
+            tipo.eliminado
+                ? "¿Seguro que deseas habilitar este tipo?"
+                : "¿Seguro que deseas deshabilitar este tipo?"
+        )) return;
         try {
             const token = localStorage.getItem("token");
-            const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-            await axios.patch(`${APIURL}/tipos/${tipo.id}`, { eliminado: !tipo.eliminado }, { headers });
-            await fetchData();
+            await axios.patch(
+                `${APIURL}/tipos/${tipo.id}`,
+                { eliminado: !tipo.eliminado },
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+            );
+            fetchData();
         } catch {
             setError("Error al actualizar el tipo");
         }
@@ -117,94 +81,88 @@ const AdminTipoPage: React.FC = () => {
 
     const handleCancel = () => {
         setEditId(null);
-        setInputNombre("");
+        setNombre("");
         setError(null);
-        setModalOpen(false);
     };
 
-    const tiposFiltrados = tipos.filter(t => showEliminados || !t.eliminado);
+    const tiposFiltrados = tipos.filter(t => showEliminados ? true : !t.eliminado);
 
     return (
-        <div className={styles.tipoContainerUnico}>
-            <h2 className={styles.tipoTitleUnico}>Administrar Tipos</h2>
-
-            <button
-                className={styles.tipoBtnAgregarUnico}
-                onClick={handleAgregar}
-            >
-                + Agregar Tipo
-            </button>
-
-            <Modal isOpen={modalOpen}>
-                <form onSubmit={handleSubmit} className={styles.tipoFormUnico}>
-                    <label htmlFor="tipoNombreUnico">Nombre del tipo:</label>
-                    <input
-                        id="tipoNombreUnico"
-                        type="text"
-                        ref={inputRef}
-                        value={inputNombre}
-                        onChange={e => setInputNombre(e.target.value)}
-                        required
-                        placeholder="Ej: Calzado, Indumentaria, Accesorios..."
-                        className={styles.tipoInputUnico}
-                        autoComplete="off"
-                    />
-                    <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-                        <button type="submit" className={styles.tipoBtnUnico}>
+        <div className={styles.pageWrapper}>
+            <div className={styles.container}>
+                <h2 className={styles.title}>Administrar Tipos</h2>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formRow}>
+                        <label>Nombre:</label>
+                        <input
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className={styles.buttonGroup}>
+                        <button type="submit" className={styles.button}>
                             {editId ? "Actualizar" : "Agregar"}
                         </button>
-                        <button type="button" className={styles.tipoBtnCancelUnico} onClick={handleCancel}>
-                            Cancelar
-                        </button>
+                        {editId && (
+                            <button
+                                type="button"
+                                className={styles.cancelButton}
+                                onClick={handleCancel}
+                            >
+                                Cancelar
+                            </button>
+                        )}
                     </div>
-                    {error && <div className={styles.tipoErrorUnico}>{error}</div>}
+                    {error && <div className={styles.error}>{error}</div>}
                 </form>
-            </Modal>
-
-            <label className={styles.tipoShowEliminadosLabel}>
-                <input
-                    type="checkbox"
-                    checked={showEliminados}
-                    onChange={e => setShowEliminados(e.target.checked)}
-                    style={{ marginRight: 8 }}
-                />
-                Mostrar tipos deshabilitados
-            </label>
-
-            <table className={styles.tipoTableUnico}>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tiposFiltrados.map(tipo => (
-                        <tr key={tipo.id} style={tipo.eliminado ? { opacity: 0.5 } : {}}>
-                            <td>{tipo.id}</td>
-                            <td>{tipo.nombre}</td>
-                            <td>{tipo.eliminado ? "Deshabilitado" : "Activo"}</td>
-                            <td>
-                                <button
-                                    className={styles.actionBtn}
-                                    onClick={() => handleEdit(tipo)}
-                                    disabled={tipo.eliminado}
-                                >
-                                    Editar
-                                </button>
-                                <button
-                                    className={`${styles.actionBtn} ${tipo.eliminado ? styles.enable : styles.disable}`}
-                                    onClick={() => handleToggleActivo(tipo)}
-                                >
-                                    {tipo.eliminado ? "Habilitar" : "Deshabilitar"}
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                <label style={{ marginBottom: 15, color: "#222" }}>
+                    <input
+                        type="checkbox"
+                        checked={showEliminados}
+                        onChange={e => setShowEliminados(e.target.checked)}
+                        style={{ marginRight: 8 }}
+                    />
+                    Mostrar tipos deshabilitados
+                </label>
+                <div className={styles.tableWrapper}>
+                    <table className={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tiposFiltrados.map(tipo => (
+                                <tr key={tipo.id} className={tipo.eliminado ? styles.eliminado : ""}>
+                                    <td>{tipo.id}</td>
+                                    <td>{tipo.nombre}</td>
+                                    <td>{tipo.eliminado ? "Deshabilitado" : "Activo"}</td>
+                                    <td>
+                                        <button
+                                            className={styles.editBtn}
+                                            onClick={() => handleEdit(tipo)}
+                                            disabled={tipo.eliminado}
+                                        >
+                                            Editar
+                                        </button>
+                                        <button
+                                            className={styles.deleteBtn}
+                                            onClick={() => handleToggleActivo(tipo)}
+                                        >
+                                            {tipo.eliminado ? "Habilitar" : "Deshabilitar"}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 };
