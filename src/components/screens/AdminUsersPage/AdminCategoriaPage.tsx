@@ -69,16 +69,31 @@ const AdminCategoriaPage: React.FC = () => {
         setTipoId(cat.tipo.id);
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm("¿Seguro que deseas eliminar esta categoría?")) return;
+    // Cambiado: ahora PATCH para restaurar si está eliminada, DELETE si está activa
+   const handleToggleActivo = async (cat: ICategory) => {
+        const accion = cat.eliminado ? "restaurar" : "eliminar";
+        const confirmMsg = cat.eliminado
+            ? "¿Seguro que deseas restaurar esta categoría?"
+            : "¿Seguro que deseas eliminar esta categoría?";
+        if (!window.confirm(confirmMsg)) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`${APIURL}/categorias/${id}`, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
-            });
+            if (cat.eliminado) {
+                // PATCH para restaurar (eliminado: false)
+                await axios.patch(
+                    `${APIURL}/categorias/${cat.id}/estado`,
+                    { eliminado: false }, // <--- aquí va false para restaurar
+                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                );
+            } else {
+                // DELETE para soft delete (eliminado: true)
+                await axios.delete(`${APIURL}/categorias/${cat.id}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
+            }
             fetchData();
         } catch {
-            setError("Error al eliminar");
+            setError(`Error al intentar ${accion}`);
         }
     };
 
@@ -173,7 +188,7 @@ const AdminCategoriaPage: React.FC = () => {
                                         </button>
                                         <button
                                             className={styles.deleteBtn}
-                                            onClick={() => handleDelete(cat.id)}
+                                            onClick={() => handleToggleActivo(cat)}
                                         >
                                             {cat.eliminado ? "Restaurar" : "Eliminar"}
                                         </button>
