@@ -72,13 +72,14 @@ const Filters: React.FC<FiltersProps> = ({
     }, [selectedWaistType, setSelectedTalle]);
 
     return (
-        <aside className={styles.sidebar}>
-            <h2 className={styles.titulo}>Filtrar</h2>
+        <aside className={styles.filtrosSidebarUnico}>
+            <h2 className={styles.filtrosTituloUnico}>Filtrar</h2>
 
             {/* Filtro por Tipo */}
-            <div className={styles.seccion}>
+            <div className={styles.filtrosSeccionUnico}>
                 <h4>Tipo</h4>
                 <select
+                    className={styles.filtrosSelectUnico}
                     value={selectedTipo}
                     onChange={e => setSelectedTipo(e.target.value === "" ? "" : Number(e.target.value))}
                 >
@@ -90,9 +91,10 @@ const Filters: React.FC<FiltersProps> = ({
             </div>
 
             {/* Filtro por Categoría */}
-            <div className={styles.seccion}>
+            <div className={styles.filtrosSeccionUnico}>
                 <h4>Categoría</h4>
                 <select
+                    className={styles.filtrosSelectUnico}
                     value={selectedCategoria}
                     onChange={e => setSelectedCategoria(e.target.value === "" ? "" : Number(e.target.value))}
                 >
@@ -104,9 +106,10 @@ const Filters: React.FC<FiltersProps> = ({
             </div>
 
             {/* Filtro por Tipo de Talle */}
-            <div className={styles.seccion}>
+            <div className={styles.filtrosSeccionUnico}>
                 <h4>Tipo de Talle</h4>
                 <select
+                    className={styles.filtrosSelectUnico}
                     value={selectedWaistType}
                     onChange={e => setSelectedWaistType(e.target.value === "" ? "" : Number(e.target.value))}
                 >
@@ -118,39 +121,41 @@ const Filters: React.FC<FiltersProps> = ({
             </div>
 
             {/* Filtro por Talle */}
-            <div className={styles.seccion}>
+            <div className={styles.filtrosSeccionUnico}>
                 <h4>Talles</h4>
-                <div className={styles.talles}>
-                   
-{talles.length === 0 ? (
-    <span style={{ color: '#aaa', fontSize: 13 }}>Selecciona un tipo de talle</span>
-) : (
-    talles.map(talle => (
-        <button
-            key={talle.id}
-            className={selectedTalle === talle.valor ? styles.selectedTalle : ''}
-            onClick={() => setSelectedTalle(selectedTalle === talle.valor ? "" : talle.valor)}
-            type="button"
-        >
-            {talle.valor || talle.nombre}
-        </button>
-    ))
-)}
-
+                <div className={styles.filtrosTallesUnico}>
+                    {talles.length === 0 ? (
+                        <span style={{ color: '#aaa', fontSize: 13, gridColumn: '1/-1' }}>Selecciona un tipo de talle</span>
+                    ) : (
+                        talles.map(talle => (
+                            <button
+                                key={talle.id}
+                                className={
+                                    selectedTalle === talle.valor
+                                        ? `${styles.filtrosTallesBtnUnico} ${styles.filtrosTalleSelectedUnico}`
+                                        : styles.filtrosTallesBtnUnico
+                                }
+                                onClick={() => setSelectedTalle(selectedTalle === talle.valor ? "" : talle.valor)}
+                                type="button"
+                            >
+                                {talle.valor || talle.nombre}
+                            </button>
+                        ))
+                    )}
                 </div>
             </div>
 
             {/* Filtro por Precio */}
-            <div className={styles.seccion}>
+            <div className={styles.filtrosSeccionUnico}>
                 <h4>Precio</h4>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div className={styles.filtrosPrecioInputsUnico}>
                     <input
                         type="number"
                         placeholder="Mín"
                         value={minPrice}
                         min={0}
                         onChange={e => setMinPrice(e.target.value)}
-                        style={{ width: '70px' }}
+                        className={styles.filtrosPrecioInputUnico}
                     />
                     <span>-</span>
                     <input
@@ -159,15 +164,16 @@ const Filters: React.FC<FiltersProps> = ({
                         value={maxPrice}
                         min={0}
                         onChange={e => setMaxPrice(e.target.value)}
-                        style={{ width: '70px' }}
+                        className={styles.filtrosPrecioInputUnico}
                     />
                 </div>
             </div>
 
             {/* Filtro por Color */}
-            <div className={styles.seccion}>
+            <div className={styles.filtrosSeccionUnico}>
                 <h4>Color</h4>
                 <select
+                    className={styles.filtrosSelectUnico}
                     value={selectedColor}
                     onChange={e => setSelectedColor(e.target.value)}
                 >
@@ -179,9 +185,10 @@ const Filters: React.FC<FiltersProps> = ({
             </div>
 
             {/* Filtro por Marca */}
-            <div className={styles.seccion}>
+            <div className={styles.filtrosSeccionUnico}>
                 <h4>Marca</h4>
                 <select
+                    className={styles.filtrosSelectUnico}
                     value={selectedMarca}
                     onChange={e => setSelectedMarca(e.target.value)}
                 >
