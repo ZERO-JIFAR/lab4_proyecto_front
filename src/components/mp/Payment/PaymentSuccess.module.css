@@ -1,0 +1,107 @@
+.containerPageSuccess {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(
+    135deg,
+    #2a7b9b 0%,
+    #eafaf1 60%,
+    #fff 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.containerCardSuccess {
+  position: relative;
+  z-index: 2;
+  padding: 2.5rem 2rem 2rem 2rem;
+  text-align: center;
+  background: rgba(234, 250, 241, 0.95);
+  border-radius: 18px;
+  min-width: 340px;
+  max-width: 90vw;
+  margin: 0 auto;
+  box-shadow: 0 8px 32px rgba(42, 123, 155, 0.18);
+  border: 2px solid #2a7b9b;
+  animation: popIn 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.7) translateY(60px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.successIcon {
+  font-size: 4rem;
+  color: #2e7d32;
+  margin-bottom: 1rem;
+  animation: bounce 1.2s infinite alternate;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0);}
+  100% { transform: translateY(-10px);}
+}
+
+.containerCardSuccess h1 {
+  color: #2e7d32;
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.containerCardSuccess p {
+  margin-top: 1rem;
+  font-size: 1.15rem;
+  color: #333;
+}
+
+.btnSuccessLink {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 0.9rem 2.2rem;
+  background: linear-gradient(90deg, #2e7d32 60%, #2a7b9b 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(42, 123, 155, 0.13);
+  transition: background 0.3s, transform 0.2s;
+  border: none;
+}
+
+.btnSuccessLink:hover {
+  background: linear-gradient(90deg, #1b5e20 60%, #17607a 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+
+@media (max-width: 600px) {
+  .containerCardSuccess {
+    min-width: 90vw;
+    padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+  }
+  .containerCardSuccess h1 {
+    font-size: 1.3rem;
+  }
+  .successIcon {
+    font-size: 2.5rem;
+  }
+}

@@ -1,0 +1,138 @@
+.filtrosSidebarUnico {
+  background-color: var(--text-color);
+  padding: 2.2% 1.5%;
+  border-radius: 10px;
+  width: 17vw;
+  min-width: 210px;
+  max-width: 320px;
+  color: var(--bg-color);
+  font-family: 'Poppins', 'Anton', Arial, sans-serif;
+  font-size: 1em;
+  margin-top: 2%;
+  margin-bottom: 2%;
+  box-shadow: 0 2px 12px #0001;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.filtrosTituloUnico {
+  font-size: 1.45em;
+  text-align: center;
+  margin-bottom: 5%;
+  border-bottom: 0.1em solid #444;
+  padding-bottom: 3%;
+  font-family: 'Anton', 'Poppins', Arial, sans-serif;
+  color: #fff; /* Cambiado a blanco */
+  letter-spacing: 0.04em;
+}
+.filtrosSeccionUnico {
+  margin-bottom: 8%;
+  border-bottom: 0.1em solid #444;
+  padding-bottom: 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.filtrosSeccionUnico h4 {
+  margin-bottom: 3%;
+  font-size: 1.08em;
+  color: #737373;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 600;
+}
+
+.filtrosSeccionUnico label {
+  display: block;
+  margin: 2% 0;
+  font-size: 0.97em;
+}
+
+.filtrosSelectUnico {
+  font-size: 1em;
+  padding: 0.6em 0.8em;
+  border-radius: 7px;
+  border: 1.5px solid #888;
+  background: #fff;
+  color: #222;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 0.5em;
+  outline: none;
+  transition: border 0.18s;
+}
+
+.filtrosSelectUnico:focus {
+  border: 1.5px solid #d90429;
+}
+
+.filtrosTallesUnico {
+  display: grid;
+  justify-content: center;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.filtrosTallesBtnUnico {
+  background-color: #e0e0e0;
+  color: #000;
+  border: none;
+  padding: 0.4rem 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: background-color 0.2s;
+  min-width: 2.2em;
+}
+
+.filtrosTallesBtnUnico:hover,
+.filtrosTalleSelectedUnico {
+  background-color: #d90429;
+  color: #fff;
+}
+
+.filtrosGridLabelsUnico {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5em 1em;
+}
+
+.filtrosPrecioInputsUnico {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.filtrosPrecioInputUnico {
+  width: 70px;
+  font-size: 0.98em;
+  border-radius: 6px;
+  border: 1.2px solid #888;
+  padding: 0.3em 0.7em;
+  background: #fff;
+  color: #222;
+  outline: none;
+  transition: border 0.18s;
+}
+
+.filtrosPrecioInputUnico:focus {
+  border: 1.2px solid #d90429;
+}
+
+@media (max-width: 900px) {
+  .filtrosSidebarUnico {
+    width: 98vw;
+    min-width: 0;
+    max-width: 100vw;
+    padding: 2.5vw 2vw;
+    font-size: 0.97em;
+  }
+  .filtrosTallesUnico {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

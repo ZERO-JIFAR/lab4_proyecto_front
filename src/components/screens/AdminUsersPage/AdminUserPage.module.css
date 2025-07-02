@@ -1,0 +1,142 @@
+.landingContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-width: 100vw;
+}
+
+.container {
+  min-height: 100vh;
+  width: 100%;
+  padding: 32px;
+  background: #f3f4f6;
+  box-sizing: border-box;
+}
+
+.content {
+  max-width: 100%;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+}
+
+.title {
+  margin-bottom: 32px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #f9fafb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table th,
+.table td {
+  padding: 14px 12px;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.table th {
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 600;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.table tr {
+  transition: background 0.2s ease;
+}
+
+.table tr:hover {
+  background: #f1f5f9;
+}
+
+.table tr.disabled {
+  background: #fef2f2 !important;
+  color: #991b1b;
+  text-decoration: line-through;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-right: 8px;
+}
+
+.button svg {
+  font-size: 1rem;
+}
+
+.button:disabled {
+  background: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.enable {
+  background: #10b981;
+  color: white;
+}
+
+.enable:hover {
+  background: #059669;
+}
+
+.disable {
+  background: #ef4444;
+  color: white;
+}
+
+.disable:hover {
+  background: #dc2626;
+}
+
+.role {
+  background: #3b82f6;
+  color: white;
+}
+
+.role:hover {
+  background: #2563eb;
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding: 16px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 6px;
+    font-size: 0.85rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .button {
+    margin: 4px 0;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+}

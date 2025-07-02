@@ -1,0 +1,146 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal {
+    background: #1e1e1e;
+    color: #fff;
+    padding: 1.5rem;
+    border-radius: 6px;
+    width: 95vw;
+    max-width: 1000px;
+    max-height: 85vh;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.closeButton {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 1.2rem;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.inputGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.inputColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+label {
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+}
+
+input,
+select {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    border: none;
+    background-color: #2e2e2e;
+    color: white;
+}
+
+input[type="file"] {
+    padding: 0.2rem;
+    background: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.confirmText {
+    text-align: right;
+    margin-right: 6%;
+    font-size: 1rem;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    padding-right: 1rem;
+    margin-top: -1rem;
+}
+
+.yesButton,
+.noButton {
+    padding: 0.1rem 1.4rem;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.yesButton {
+    background-color: #f0f0f0;
+    color: #000;
+}
+
+.noButton {
+    background-color: #3a3a3a;
+    color: #fff;
+}
+
+.yesButton:hover {
+    background-color: #d6d6d6;
+}
+
+.noButton:hover {
+    background-color: #222;
+}
+
+/* Responsive: en pantallas chicas, una sola columna y menos padding */
+@media (max-width: 700px) {
+    .modal {
+        padding: 1rem;
+        max-width: 98vw;
+        width: 98vw;
+        max-height: 98vh;
+    }
+    .inputGrid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    img {
+        max-width: 90vw;
+    }
+}

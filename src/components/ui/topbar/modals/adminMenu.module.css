@@ -1,0 +1,134 @@
+.adminMenuContainerUnico {
+  position: absolute;
+  top: 44px;
+  left: 0.5vw;
+  background: rgba(0,0,0,0.97);
+  padding: 14px 10px 10px 10px;
+  border-radius: 14px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 4px 18px #000a, 0 1px 6px #fff2;
+  border: 1.5px solid #fff;
+  min-width: 140px;
+  font-family: 'Poppins', 'Anton', Arial, sans-serif;
+}
+
+.adminMenuDropdownWrapperUnico {
+  position: relative;
+  width: 100%;
+}
+
+.adminMenuDropdownButtonUnico {
+  background: linear-gradient(90deg, #fff 60%, #000 100%);
+  color: #000;
+  border: none;
+  border-radius: 9px;
+  margin: 5px 0;
+  padding: 8px 0;
+  cursor: pointer;
+  width: 120px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 5px #0003;
+  transition: background 0.18s, color 0.18s, transform 0.18s;
+  outline: none;
+  text-align: left;
+  padding-left: 14px;
+}
+
+.adminMenuDropdownButtonUnico:hover,
+.adminMenuDropdownButtonUnico:focus {
+  background: linear-gradient(90deg, #000 60%, #fff 100%);
+  color: #fff;
+  transform: scale(1.04);
+  box-shadow: 0 4px 14px #fff4;
+}
+
+.adminMenuDropdownUnico {
+  position: absolute;
+  left: 120px;
+  top: 0;
+  background: #181818;
+  border: 1.5px solid #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 18px #000a, 0 1px 6px #fff2;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  z-index: 1300;
+}
+
+.adminMenuDropdownItemUnico {
+  background: none;
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  padding: 8px 18px;
+  text-align: left;
+  font-size: 0.93rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.adminMenuDropdownItemUnico:hover {
+  background: #fff;
+  color: #000;
+}
+
+.adminMenuButtonUnico {
+  background: linear-gradient(90deg, #fff 60%, #000 100%);
+  color: #000;
+  border: none;
+  border-radius: 9px;
+  margin: 5px 0;
+  padding: 8px 0;
+  cursor: pointer;
+  width: 120px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 5px #0003;
+  transition: background 0.18s, color 0.18s, transform 0.18s;
+  outline: none;
+}
+
+.adminMenuButtonUnico:hover {
+  background: linear-gradient(90deg, #000 60%, #fff 100%);
+  color: #fff;
+  transform: scale(1.04);
+  box-shadow: 0 4px 14px #fff4;
+}
+
+@media (max-width: 700px) {
+  .adminMenuContainerUnico {
+    top: 30px;
+    left: 0.2vw;
+    min-width: 90px;
+    padding: 6px 3px 4px 3px;
+    border-radius: 9px;
+  }
+  .adminMenuDropdownButtonUnico,
+  .adminMenuButtonUnico {
+    width: 70px;
+    font-size: 0.7rem;
+    padding: 4px 0;
+    margin: 2px 0;
+    border-radius: 6px;
+    padding-left: 7px;
+  }
+  .adminMenuDropdownUnico {
+    left: 70px;
+    min-width: 70px;
+    border-radius: 7px;
+    padding: 2px 0;
+  }
+  .adminMenuDropdownItemUnico {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+  }
+}
