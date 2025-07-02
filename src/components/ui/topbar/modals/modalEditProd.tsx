@@ -11,6 +11,7 @@ import { ITalle } from '../../../../types/ITalle';
 import { uploadToCloudinary } from '../../../../utils/UploadToCloudinary';
 import { IProduct, IColorProducto } from '../../../../types/IProduct';
 import { getProductoById } from '../../../../http/productRequest';
+import axios from 'axios';
 
 interface ModalEditProdProps {
     isOpen: boolean;
@@ -355,8 +356,25 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             return;
         }
 
-        // Si quieres actualizar colores y talles, aquí deberías hacer un PUT a /productos/con-colores/{id}
-        // Por ahora solo PATCH de campos simples:
+        // --- Construir DTO completo ---
+        const dto = {
+            nombre: form.nombre,
+            precio: Number(form.precio),
+            descripcion: form.descripcion,
+            marca: form.marca,
+            imagenUrl: mainImageUrl,
+            categoriaId: categoriaObj.id,
+            colores: colores.map(c => ({
+                color: c.color,
+                imagenUrl: c.imagenUrl,
+                imagenesAdicionales: c.imagenesAdicionales,
+                talles: c.talles.map(ts => ({
+                    talleId: ts.talle.id,
+                    stock: ts.stock
+                }))
+            }))
+        };
+
         const APIURL = import.meta.env.VITE_API_URL;
         const token = localStorage.getItem("token");
         const headers = {
@@ -364,21 +382,12 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             ...(token ? { Authorization: `Bearer ${token}` } : {})
         };
 
-        const updateDTO: any = {
-            nombre: form.nombre,
-            precio: Number(form.precio),
-            descripcion: form.descripcion,
-            marca: form.marca,
-            imagenUrl: mainImageUrl,
-            categoriaId: categoriaObj.id,
-        };
-
         try {
-            await fetch(`${APIURL}/productos/${product?.id}`, {
-                method: 'PATCH',
-                headers,
-                body: JSON.stringify(updateDTO)
-            });
+            await axios.put(
+                `${APIURL}/productos/con-colores/${product?.id}`,
+                dto,
+                { headers }
+            );
             alert('Producto actualizado!');
             onClose();
         } catch (err) {
