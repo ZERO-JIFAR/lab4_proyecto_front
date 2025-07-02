@@ -20,9 +20,20 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
   const [loading, setLoading] = useState(false);
   const [discountInput, setDiscountInput] = useState<string>('');
   const [discount, setDiscount] = useState<number>(0);
-  const [editProduct, setEditProduct] = useState<IProduct | null>(null);
+  const [editProduct, setEditProduct] = useState<IProduct | null>(product);
   const { isAdmin } = useAuth();
   const { cart } = useCart();
+
+  // NUEVO: Refrescar producto tras edición
+  const refreshProduct = async () => {
+    try {
+      const prod = await getProductoById(product.id);
+      setEditProduct(prod);
+      if (onUpdate) onUpdate();
+    } catch (e) {
+      alert("Error al refrescar producto");
+    }
+  };
 
   useEffect(() => {
     if (product.precioOriginal && product.precioOriginal > product.precio) {
@@ -32,7 +43,8 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
       setDiscount(0);
     }
     setEliminado(product.eliminado);
-  }, [product.precio, product.precioOriginal, product.eliminado]);
+    setEditProduct(product); // Si cambia el prop, actualiza el estado local
+  }, [product.precio, product.precioOriginal, product.eliminado, product]);
 
   const getDiscountedPrice = () => {
     if (!discount || discount <= 0) return product.precio;
@@ -64,7 +76,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
         setEliminado(!eliminado);
       }
 
-      if (onUpdate) onUpdate();
+      await refreshProduct();
     } catch (error) {
       console.error('Error al actualizar producto:', error);
       alert('Hubo un error al intentar actualizar el producto.');
@@ -84,7 +96,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
       await applyDiscount(product.id, value);
       setDiscount(value);
       setDiscountInput('');
-      if (onUpdate) onUpdate();
+      await refreshProduct();
     } catch (e) {
       alert("Error al aplicar descuento");
     }
@@ -97,7 +109,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
     try {
       await removeDiscount(product.id);
       setDiscount(0);
-      if (onUpdate) onUpdate();
+      await refreshProduct();
     } catch (e) {
       alert("Error al quitar descuento");
     }
@@ -116,6 +128,12 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
     setLoading(false);
   };
 
+  // Cuando se cierra el modal de edición, refresca el producto
+  const handleCloseEditModal = async () => {
+    setModalEdit(false);
+    await refreshProduct();
+  };
+
   return (
     <div className={`${styles.card} ${eliminado ? styles.disabled : ''}`}>
       <div
@@ -124,22 +142,22 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
         onClick={() => setModalProduct(true)}
         title="Ver y comprar producto"
       >
-        <img src={product.imagenUrl || '/images/zapatillas/default.png'} alt={product.nombre} className={styles.image} />
+        <img src={editProduct?.imagenUrl || '/images/zapatillas/default.png'} alt={editProduct?.nombre || ''} className={styles.image} />
       </div>
       <div className={styles.details}>
-        <h4 className={styles.title}>{product.nombre}</h4>
+        <h4 className={styles.title}>{editProduct?.nombre}</h4>
         <p className={styles.price}>
-          {discount > 0 && product.precioOriginal ? (
+          {discount > 0 && editProduct?.precioOriginal ? (
             <>
               <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
-                ${product.precioOriginal}
+                ${editProduct.precioOriginal}
               </span>
               <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
-                ${getDiscountedPrice()} (-{discount}%)
+                ${getDiscountedPrice()}
               </span>
             </>
           ) : (
-            <>${product.precio}</>
+            <>${editProduct?.precio}</>
           )}
         </p>
       </div>
@@ -186,7 +204,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
         </button>
         <ModalEditProd
           isOpen={modalEdit}
-          onClose={() => setModalEdit(false)}
+          onClose={handleCloseEditModal}
           product={editProduct || product}
         />
         <button
@@ -199,7 +217,7 @@ const CardAdminProduct: React.FC<CardAdminProductProps> = ({ product, onUpdate }
       </div>
       {modalProduct && (
         <ModalProduct
-          product={product}
+          product={editProduct || product}
           cart={cart}
           onClose={() => setModalProduct(false)}
         />
