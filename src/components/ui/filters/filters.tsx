@@ -57,19 +57,27 @@ const Filters: React.FC<FiltersProps> = ({
 
     // Cargar tipos de talle al montar
     useEffect(() => {
-        getWaistTypes().then(setWaistTypes).catch(() => setWaistTypes([]));
+        getWaistTypes()
+            .then(data => setWaistTypes(Array.isArray(data) ? data.filter(wt => !wt.eliminado) : []))
+            .catch(() => setWaistTypes([]));
     }, []);
 
     // Cargar talles cuando cambia el tipo de talle
     useEffect(() => {
         if (selectedWaistType) {
-            getTallesByTipoId(Number(selectedWaistType)).then(setTalles).catch(() => setTalles([]));
+            getTallesByTipoId(Number(selectedWaistType))
+                .then(data => setTalles(Array.isArray(data) ? data.filter(t => !t.eliminado) : []))
+                .catch(() => setTalles([]));
             setSelectedTalle(""); // Limpiar talle seleccionado al cambiar tipo
         } else {
             setTalles([]);
             setSelectedTalle("");
         }
     }, [selectedWaistType, setSelectedTalle]);
+
+    // Filtrar tipos, categorías y talles eliminados
+    const tiposFiltrados = Array.isArray(tipos) ? tipos.filter(tipo => !tipo.eliminado) : [];
+    const categoriasFiltradas = Array.isArray(categorias) ? categorias.filter(cat => !cat.eliminado) : [];
 
     return (
         <aside className={styles.filtrosSidebarUnico}>
@@ -84,7 +92,7 @@ const Filters: React.FC<FiltersProps> = ({
                     onChange={e => setSelectedTipo(e.target.value === "" ? "" : Number(e.target.value))}
                 >
                     <option value="">Todos</option>
-                    {tipos.map(tipo => (
+                    {tiposFiltrados.map(tipo => (
                         <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
                     ))}
                 </select>
@@ -99,7 +107,7 @@ const Filters: React.FC<FiltersProps> = ({
                     onChange={e => setSelectedCategoria(e.target.value === "" ? "" : Number(e.target.value))}
                 >
                     <option value="">Todas</option>
-                    {categorias.map(cat => (
+                    {categoriasFiltradas.map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.nombre}</option>
                     ))}
                 </select>
