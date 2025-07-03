@@ -334,68 +334,69 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
     };
 
     // --- Submit ---
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+   const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
-        let mainImageUrl = mainImagePreview;
-        if (mainImageFile) {
-            try {
-                mainImageUrl = await uploadToCloudinary(mainImageFile);
-            } catch (err) {
-                alert('Error al subir la imagen principal del producto');
-                setLoading(false);
-                return;
-            }
-        }
-
-        const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
-        if (!categoriaObj) {
-            alert('Selecciona una categoría válida');
+    let mainImageUrl = mainImagePreview;
+    if (mainImageFile) {
+        try {
+            mainImageUrl = await uploadToCloudinary(mainImageFile);
+        } catch (err) {
+            alert('Error al subir la imagen principal del producto');
             setLoading(false);
             return;
         }
+    }
 
-        // --- Construir DTO completo ---
-        const dto = {
-            nombre: form.nombre,
-            precio: Number(form.precio),
-            descripcion: form.descripcion,
-            marca: form.marca,
-            imagenUrl: mainImageUrl,
-            categoriaId: categoriaObj.id,
-            colores: colores.map(c => ({
-                color: c.color,
-                imagenUrl: c.imagenUrl,
-                imagenesAdicionales: c.imagenesAdicionales,
-                talles: c.talles.map(ts => ({
-                    talleId: ts.talle.id,
-                    stock: ts.stock
-                }))
+    const categoriaObj = categorias.find(cat => cat.id === Number(form.categoria));
+    if (!categoriaObj) {
+        alert('Selecciona una categoría válida');
+        setLoading(false);
+        return;
+    }
+
+    // --- Construir DTO completo ---
+    const dto = {
+        nombre: form.nombre,
+        precio: Number(form.precio),
+        precioOriginal: form.precioOriginal ? Number(form.precioOriginal) : undefined,
+        descripcion: form.descripcion,
+        marca: form.marca,
+        imagenUrl: mainImageUrl,
+        categoriaId: categoriaObj.id,
+        colores: colores.map(c => ({
+            color: c.color,
+            imagenUrl: c.imagenUrl,
+            imagenesAdicionales: c.imagenesAdicionales,
+            talles: c.talles.map(ts => ({
+                talleId: ts.talle.id,
+                stock: ts.stock
             }))
-        };
-
-        const APIURL = import.meta.env.VITE_API_URL;
-        const token = localStorage.getItem("token");
-        const headers = {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {})
-        };
-
-        try {
-            await axios.put(
-                `${APIURL}/productos/con-colores/${product?.id}`,
-                dto,
-                { headers }
-            );
-            alert('Producto actualizado!');
-            onClose();
-        } catch (err) {
-            alert('Error al actualizar producto');
-        } finally {
-            setLoading(false);
-        }
+        }))
     };
+
+    const APIURL = import.meta.env.VITE_API_URL;
+    const token = localStorage.getItem("token");
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+    };
+
+    try {
+        await axios.put(
+            `${APIURL}/productos/con-colores/${product?.id}`,
+            dto,
+            { headers }
+        );
+        alert('Producto actualizado!');
+        onClose();
+    } catch (err: any) {
+        alert('Error al actualizar producto: ' + (err?.response?.data || err.message));
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <div className={styles.overlay}>

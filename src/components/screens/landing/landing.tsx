@@ -111,6 +111,23 @@ const Landing = () => {
     setShowModal(true);
   };
 
+  // Utilidad para calcular descuento
+  const getDiscountData = (product: IProduct) => {
+    if (product.precioOriginal && product.precioOriginal > product.precio) {
+      const discount = Math.round(100 - (product.precio / product.precioOriginal) * 100);
+      return {
+        hasDiscount: true,
+        discount,
+        discountedPrice: Math.round(product.precio),
+      };
+    }
+    return {
+      hasDiscount: false,
+      discount: 0,
+      discountedPrice: product.precio,
+    };
+  };
+
   return (
     <div className={styles.landingContainerUnico}>
       <Topbar />
@@ -130,17 +147,42 @@ const Landing = () => {
             </button>
           )}
           <div className={styles.landingProductsUnico}>
-            {visibleFeatured.map((prod, idx) => (
-              <img
-                key={prod.id || idx}
-                src={prod.imagenUrl || (prod.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'}
-                alt={prod.nombre}
-                className={styles.landingProductImageUnico}
-                title={prod.nombre}
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleOpenModal(prod)}
-              />
-            ))}
+            {visibleFeatured.map((prod, idx) => {
+              const mainImage = prod.imagenUrl || (prod.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png';
+              const { hasDiscount, discount } = getDiscountData(prod);
+              return (
+                <div key={prod.id || idx} style={{ position: 'relative', display: 'inline-block' }}>
+                  <img
+                    src={mainImage}
+                    alt={prod.nombre}
+                    className={styles.landingProductImageUnico}
+                    title={prod.nombre}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => handleOpenModal(prod)}
+                  />
+                  {hasDiscount && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        left: 8,
+                        background: '#f44336',
+                        color: '#fff',
+                        borderRadius: 6,
+                        padding: '2px 8px',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
+                        zIndex: 2,
+                        boxShadow: '0 2px 8px #0003',
+                        letterSpacing: '1px'
+                      }}
+                    >
+                      -{discount}%
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
           {featured.length > NUM_FEATURED_VISIBLE && (
             <button className={styles.carouselButtonUnico} onClick={handleNext}>
@@ -170,30 +212,67 @@ const Landing = () => {
               {(!productsByCategory[category] || productsByCategory[category].length === 0) && (
                 <p>No hay productos de esta categoría.</p>
               )}
-              {productsByCategory[category]?.map((product, index) => (
-                <div key={product.id || index} className={styles.landingProductCardUnico}>
-                  <img
-                    src={product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png'}
-                    alt={product.nombre}
-                    className={styles.cardImageUnico}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleOpenModal(product)}
-                  />
-                  <div className={styles.cardContentUnico}>
-                    <h4>{product.nombre}</h4>
-                    <p>{product.descripcion || 'Sin descripción.'}</p>
-                    <div className={styles.cardPriceWrapperUnico}>
-                      <span className={styles.cardPriceUnico}>${product.precio}</span>
-                      <button
-                        className={styles.cardButtonUnico}
+              {productsByCategory[category]?.map((product, index) => {
+                const mainImage = product.imagenUrl || (product.imagenesAdicionales?.[0]) || '/images/zapatillas/default.png';
+                const { hasDiscount, discount, discountedPrice } = getDiscountData(product);
+                return (
+                  <div key={product.id || index} className={styles.landingProductCardUnico} style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative' }}>
+                      <img
+                        src={mainImage}
+                        alt={product.nombre}
+                        className={styles.cardImageUnico}
+                        style={{ cursor: 'pointer' }}
                         onClick={() => handleOpenModal(product)}
-                      >
-                        Comprar
-                      </button>
+                      />
+                      {hasDiscount && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: 8,
+                            left: 8,
+                            background: '#f44336',
+                            color: '#fff',
+                            borderRadius: 6,
+                            padding: '2px 8px',
+                            fontWeight: 700,
+                            fontSize: '0.9rem',
+                            zIndex: 2,
+                            boxShadow: '0 2px 8px #0003',
+                            letterSpacing: '1px'
+                          }}
+                        >
+                          -{discount}%
+                        </span>
+                      )}
+                    </div>
+                    <div className={styles.cardContentUnico}>
+                      <h4>{product.nombre}</h4>
+                      <p>{product.descripcion || 'Sin descripción.'}</p>
+                      <div className={styles.cardPriceWrapperUnico}>
+                        {hasDiscount ? (
+                          <>
+                            <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
+                              ${product.precioOriginal}
+                            </span>
+                            <span style={{ color: '#4caf50', fontWeight: 'bold', marginRight: 8 }}>
+                              ${discountedPrice}
+                            </span>
+                          </>
+                        ) : (
+                          <span className={styles.cardPriceUnico}>${product.precio}</span>
+                        )}
+                        <button
+                          className={styles.cardButtonUnico}
+                          onClick={() => handleOpenModal(product)}
+                        >
+                          Comprar
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ))}
         </div>
