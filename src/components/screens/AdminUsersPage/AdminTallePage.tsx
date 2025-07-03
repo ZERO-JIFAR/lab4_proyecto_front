@@ -109,20 +109,20 @@ const AdminTallePage: React.FC = () => {
                 <h2 className={styles.title}>Administrar Talles</h2>
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <div className={styles.formRow}>
-                        <label>Nombre:</label>
-                        <input
-                            type="text"
-                            value={nombre}
-                            onChange={e => setNombre(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className={styles.formRow}>
                         <label>Valor:</label>
                         <input
                             type="text"
                             value={valor}
                             onChange={e => setValor(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className={styles.formRow}>
+                        <label>Descripción:</label>
+                        <input
+                            type="text"
+                            value={nombre}
+                            onChange={e => setNombre(e.target.value)}
                             required
                         />
                     </div>
