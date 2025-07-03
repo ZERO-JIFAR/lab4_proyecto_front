@@ -14,9 +14,12 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
 
     if (!product) return null;
 
-    // Imagen principal: la del primer color, o la del producto
-    const mainColor = product.colores && product.colores.length > 0 ? product.colores[0] : null;
-    const mainImage = mainColor?.imagenUrl || product.imagenUrl || '/images/zapatillas/default.png';
+    // Imagen principal: la imagenUrl del producto, o la primera imagen adicional, o default
+    const mainImage =
+        product.imagenUrl ||
+        (product.colores && product.colores.length > 0 && product.colores[0].imagenesAdicionales && product.colores[0].imagenesAdicionales.length > 0
+            ? product.colores[0].imagenesAdicionales[0]
+            : '/images/zapatillas/default.png');
 
     // Descuento real desde backend
     const hasDiscount = !!product.precioOriginal && product.precioOriginal > product.precio;
