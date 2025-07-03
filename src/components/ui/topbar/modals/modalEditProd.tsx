@@ -465,7 +465,6 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
 
                         {/* Colores */}
                         <div className={styles.inputColumn}>
-                            <h4>{editColorIdx !== null ? "Editar Color" : "Agregar Color"}</h4>
                             <label>Color:</label>
                             <select name="color" value={colorForm.color} onChange={handleColorChange}>
                                 <option value="">Seleccionar</option>

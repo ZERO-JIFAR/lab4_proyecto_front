@@ -250,14 +250,14 @@
   font-weight: bold;
   font-size: 1.18rem;
   color: #fff;
-  background: #1db954;
+  background: transparent;
   padding: 4px 12px;
   border-radius: 6px;
   box-shadow: 0 1px 4px #0004;
 }
 
 .cardButtonUnico {
-  background-color: #e91e63;
+  background-color: #1db954;
   border: none;
   padding: 0.5rem 1.1rem;
   color: #fff;
@@ -269,7 +269,7 @@
 }
 
 .cardButtonUnico:hover {
-  background-color: #f06292;
+  background-color: #24d562;
   transform: scale(1.06);
 }
 
