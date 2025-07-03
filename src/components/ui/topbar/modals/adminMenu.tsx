@@ -38,20 +38,20 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ visible }) => {
             <button
               className={styles.adminMenuDropdownItemUnico}
               onClick={() => {
-                navigate('/admin/categorias');
-                setShowDropdown(false);
-              }}
-            >
-              Categoría
-            </button>
-            <button
-              className={styles.adminMenuDropdownItemUnico}
-              onClick={() => {
                 navigate('/admin/tipos');
                 setShowDropdown(false);
               }}
             >
               Tipo
+            </button>
+            <button
+              className={styles.adminMenuDropdownItemUnico}
+              onClick={() => {
+                navigate('/admin/categorias');
+                setShowDropdown(false);
+              }}
+            >
+              Categoría
             </button>
             <button
               className={styles.adminMenuDropdownItemUnico}
