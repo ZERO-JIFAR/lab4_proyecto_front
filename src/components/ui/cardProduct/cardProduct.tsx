@@ -41,10 +41,10 @@ const CardProduct: React.FC<CardProductProps> = ({ product }) => {
                     <p className={styles.price}>
                         {hasDiscount ? (
                             <>
-                                <span style={{ textDecoration: 'line-through', color: '#f44336', marginRight: 8 }}>
+                                <span className={styles.precioOriginal}>
                                     ${product.precioOriginal}
                                 </span>
-                                <span style={{ color: '#4caf50', fontWeight: 'bold' }}>
+                                <span className={styles.discountedPrice}>
                                     ${discountedPrice}
                                 </span>
                             </>

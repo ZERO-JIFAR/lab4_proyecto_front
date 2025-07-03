@@ -3,6 +3,7 @@ import { getWaistTypes } from "../../../http/waistTypeRequest";
 import axios from "axios";
 import { IWaistType } from "../../../types/IWaistType";
 import styles from "./AdminCaTaTiTitaPage.module.css";
+import Topbar from "../../ui/topbar/topbar";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -89,6 +90,7 @@ const AdminTipoTallePage: React.FC = () => {
 
     return (
         <div className={styles.pageWrapper}>
+            <Topbar />
             <div className={styles.container}>
                 <h2 className={styles.title}>Administrar Tipos de Talle</h2>
                 <form onSubmit={handleSubmit} className={styles.form}>

@@ -29,11 +29,16 @@
 }
 
 .filtElim{
-    background-color: #1c1c1c;
+    background-color: var(--text-color);
     margin-top: -5%;
     margin-block-end: 1%;
     border-radius: 6px;
     padding: 1%;
+}
+
+.filtElim label {
+    color: var(--bg-color);
+    margin-left: 10px;
 }
 
 .noEncontrado {

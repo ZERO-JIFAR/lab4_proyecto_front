@@ -429,7 +429,6 @@ return (
 
           {/* Colores */}
           <div className={styles.inputColumn}>
-            <h4>Agregar Color</h4>
             <label>Color:</label>
             <select name="color" value={colorForm.color} onChange={handleColorChange}>
               <option value="">Seleccionar</option>

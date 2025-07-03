@@ -9,17 +9,20 @@
   min-height: 100vh;
   width: 100%;
   padding: 32px;
-  background: #f3f4f6;
+  background: var(--text-color);
   box-sizing: border-box;
 }
 
 .content {
-  max-width: 100%;
-  background: #ffffff;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  background: white;
   padding: 24px;
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
   overflow-x: auto;
+  margin-top: 3%;
 }
 
 .title {
@@ -30,12 +33,13 @@
   text-align: center;
   border-bottom: 2px solid #e5e7eb;
   padding-bottom: 8px;
+  letter-spacing: 0.5px;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background: #f9fafb;
+  background-color: #f9fafb;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -48,10 +52,12 @@
 }
 
 .table th {
-  background: #f3f4f6;
-  color: #374151;
+  background: #1f2937;
+  color: #f9fafb;
   font-weight: 600;
-  border-bottom: 1px solid #d1d5db;
+  border-bottom: 1px solid #374151;
+  text-transform: uppercase;
+  font-size: 0.85rem;
 }
 
 .table tr {
@@ -78,8 +84,8 @@
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  margin-right: 8px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .button svg {
@@ -99,6 +105,7 @@
 
 .enable:hover {
   background: #059669;
+  transform: scale(1.03);
 }
 
 .disable {
@@ -108,20 +115,44 @@
 
 .disable:hover {
   background: #dc2626;
+  transform: scale(1.03);
 }
 
 .role {
-  background: #3b82f6;
+  background: #007bff;
   color: white;
 }
 
 .role:hover {
-  background: #2563eb;
+  background: #007bff;
+}
+
+.yesButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  margin-bottom: 1.2rem;
+  transition: background 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.yesButton:hover {
+  background: #007bff;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 700px) {
   .container {
     padding: 16px;
+  }
+
+  .content {
+    padding: 24px;
   }
 
   .table th,
@@ -135,7 +166,6 @@
   }
 
   .button {
-    margin: 4px 0;
     font-size: 0.8rem;
     padding: 5px 10px;
   }

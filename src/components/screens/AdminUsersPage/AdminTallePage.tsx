@@ -5,6 +5,7 @@ import axios from "axios";
 import { ITalle } from "../../../types/ITalle";
 import { IWaistType } from "../../../types/IWaistType";
 import styles from "./AdminCaTaTiTitaPage.module.css";
+import Topbar from "../../ui/topbar/topbar";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -101,6 +102,7 @@ const AdminTallePage: React.FC = () => {
 
     return (
         <div className={styles.pageWrapper}>
+            <Topbar />
             <div className={styles.container}>
                 <h2 className={styles.title}>Administrar Talles</h2>
                 <form onSubmit={handleSubmit} className={styles.form}>

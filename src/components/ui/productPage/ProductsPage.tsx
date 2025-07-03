@@ -153,7 +153,7 @@ const ProductsPage = () => {
                 <div className={isAdmin ? styles.adminList : styles.productsGrid}>
                     {isAdmin && (
                         <div className={styles.filtElim}>
-                            <label style={{ marginLeft: '10px' }}>
+                            <label>
                                 <input
                                     type="checkbox"
                                     checked={showEliminados}

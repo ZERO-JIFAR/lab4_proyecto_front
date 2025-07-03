@@ -1,4 +1,4 @@
-footerContainerUnico {
+.footerContainerUnico {
   width: 100%;
   border-top: 2px solid #222;
   padding: 2.2rem 1rem 1.2rem 1rem;
@@ -32,18 +32,7 @@ footerContainerUnico {
 
 .footerSocialIconsUnico a {
   color: #000;
-  background: #fff;
-  border-radius: 50%;
   padding: 0.25em 0.32em;
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-  box-shadow: 0 2px 8px #0002;
-  border: 1.5px solid #000;
-}
-
-.footerSocialIconsUnico a:hover {
-  background: #000;
-  color: #fff;
-  box-shadow: 0 4px 18px #0004;
 }
 
 .footerTitleUnico {

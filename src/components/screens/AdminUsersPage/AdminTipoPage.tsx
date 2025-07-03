@@ -3,6 +3,7 @@ import { getTipos } from "../../../http/typeRequest";
 import axios from "axios";
 import { ITipo } from "../../../types/IType";
 import styles from "./AdminCaTaTiTitaPage.module.css";
+import Topbar from "../../ui/topbar/topbar";
 
 const APIURL = import.meta.env.VITE_API_URL;
 
@@ -89,6 +90,7 @@ const AdminTipoPage: React.FC = () => {
 
     return (
         <div className={styles.pageWrapper}>
+            <Topbar />
             <div className={styles.container}>
                 <h2 className={styles.title}>Administrar Tipos</h2>
                 <form onSubmit={handleSubmit} className={styles.form}>
