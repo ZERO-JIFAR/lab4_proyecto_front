@@ -9,9 +9,9 @@ import { ICategory } from '../../../../types/ICategory';
 import { IWaistType } from '../../../../types/IWaistType';
 import { ITalle } from '../../../../types/ITalle';
 import { uploadToCloudinary } from '../../../../utils/UploadToCloudinary';
-import axios from "axios";
 import { IProduct, IColorProducto } from '../../../../types/IProduct';
-import { useAuth } from '../../../../context/AuthContext';
+import { getProductoById } from '../../../../http/productRequest';
+import axios from 'axios';
 
 interface ModalEditProdProps {
     isOpen: boolean;
@@ -46,7 +46,6 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
     const [waistTypes, setWaistTypes] = useState<IWaistType[]>([]);
     const [selectedWaistTypeId, setSelectedWaistTypeId] = useState<number | "">("");
     const [talles, setTalles] = useState<ITalle[]>([]);
-    const { token } = useAuth();
     const [form, setForm] = useState({
         nombre: '',
         precio: '',
@@ -60,12 +59,7 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
 
     // Colores
     const [colores, setColores] = useState<ColorForm[]>([]);
-    const [colorForm, setColorForm] = useState<Omit<ColorForm, 'imageFile' | 'imagePreview' | 'imageAdicionalFiles' | 'imageAdicionalPreviews'> & {
-        imageFile: File | null;
-        imagePreview: string;
-        imageAdicionalFiles: File[];
-        imageAdicionalPreviews: string[];
-    }>({
+    const [colorForm, setColorForm] = useState<ColorForm>({
         color: '',
         imagenUrl: '',
         imagenesAdicionales: [],
@@ -77,60 +71,71 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
     });
     const [selectedTalleId, setSelectedTalleId] = useState<number | "">("");
     const [talleStock, setTalleStock] = useState<string>("");
+    const [editColorIdx, setEditColorIdx] = useState<number | null>(null);
 
-    // Inicializa el formulario con los datos del producto
+    // Cargar producto completo al abrir el modal
     useEffect(() => {
-        if (isOpen && product) {
-            setForm({
-                nombre: product.nombre || '',
-                precio: String(product.precio),
-                descripcion: product.descripcion || '',
-                marca: product.marca || '',
-                categoria: product.categoria?.id ? String(product.categoria.id) : '',
-            });
-            setMainImagePreview(product.imagenUrl || '');
-            setMainImageFile(null);
+        const fetchFullProduct = async () => {
+            if (isOpen && product) {
+                try {
+                    const prod = await getProductoById(product.id);
+                    setForm({
+                        nombre: prod?.nombre || '',
+                        precio: String(prod?.precio ?? ''),
+                        descripcion: prod?.descripcion || '',
+                        marca: prod?.marca || '',
+                        categoria: prod?.categoria?.id ? String(prod.categoria.id) : '',
+                    });
+                    setMainImagePreview(prod?.imagenUrl || '');
+                    setMainImageFile(null);
 
-            // Colores
-            setColores(
-                (product.colores || []).map(c => ({
-                    color: c.color,
-                    imagenUrl: c.imagenUrl || '',
-                    imagenesAdicionales: c.imagenesAdicionales || [],
-                    talles: (c.talles || []).map(ts => ({
-                        talle: {
-                            id: ts.talleId,
-                            valor: ts.talleValor ?? "",
-                            nombre: ts.talleValor ?? ""
-                        },
-                        stock: ts.stock
-                    })),
-                    imageFile: null,
-                    imagePreview: c.imagenUrl || '',
-                    imageAdicionalFiles: [],
-                    imageAdicionalPreviews: (c.imagenesAdicionales || []).map(url => url),
-                }))
-            );
-            setColorForm({
-                color: '',
-                imagenUrl: '',
-                imagenesAdicionales: [],
-                talles: [],
-                imageFile: null,
-                imagePreview: '',
-                imageAdicionalFiles: [],
-                imageAdicionalPreviews: [],
-            });
-            setSelectedTalleId("");
-            setTalleStock("");
-        }
+                    // Colores completos
+                    setColores(
+                        (prod?.colores || []).map((c: IColorProducto) => ({
+                            color: c.color,
+                            imagenUrl: c.imagenUrl || '',
+                            imagenesAdicionales: c.imagenesAdicionales || [],
+                            talles: (c.talles || []).map(ts => ({
+                                talle: {
+                                    id: ts.talleId,
+                                    valor: ts.talleValor ?? "",
+                                    nombre: ts.talleValor ?? ""
+                                },
+                                stock: ts.stock
+                            })),
+                            imageFile: null,
+                            imagePreview: c.imagenUrl || '',
+                            imageAdicionalFiles: [],
+                            imageAdicionalPreviews: (c.imagenesAdicionales || []).map(url => url),
+                        }))
+                    );
+                    setColorForm({
+                        color: '',
+                        imagenUrl: '',
+                        imagenesAdicionales: [],
+                        talles: [],
+                        imageFile: null,
+                        imagePreview: '',
+                        imageAdicionalFiles: [],
+                        imageAdicionalPreviews: [],
+                    });
+                    setSelectedTalleId("");
+                    setTalleStock("");
+                    setEditColorIdx(null);
+                } catch (e) {
+                    alert("Error al cargar datos completos del producto");
+                }
+            }
+        };
+        fetchFullProduct();
     }, [isOpen, product]);
 
+    // Filtrar tipos, categorías, waistTypes y talles eliminados
     useEffect(() => {
         if (isOpen) {
-            getTipos().then(setTipos).catch(() => setTipos([]));
-            getCategorias().then(setCategorias).catch(() => setCategorias([]));
-            getWaistTypes().then(setWaistTypes).catch(() => setWaistTypes([]));
+            getTipos().then(data => setTipos(data.filter(t => !t.eliminado))).catch(() => setTipos([]));
+            getCategorias().then(data => setCategorias(data.filter(c => !c.eliminado))).catch(() => setCategorias([]));
+            getWaistTypes().then(data => setWaistTypes(data.filter(wt => !wt.eliminado))).catch(() => setWaistTypes([]));
         }
     }, [isOpen]);
 
@@ -149,7 +154,7 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
 
     useEffect(() => {
         if (selectedWaistTypeId) {
-            getTallesByTipoId(Number(selectedWaistTypeId)).then(setTalles).catch(() => setTalles([]));
+            getTallesByTipoId(Number(selectedWaistTypeId)).then(data => setTalles(data.filter(t => !t.eliminado))).catch(() => setTalles([]));
             setSelectedTalleId("");
         } else {
             setTalles([]);
@@ -157,7 +162,7 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
         }
     }, [selectedWaistTypeId]);
 
-    if (!isOpen || !product) return null;
+    if (!isOpen) return null;
 
     // --- Color handlers ---
     const handleColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -215,6 +220,20 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
         }));
     };
 
+    // Permite editar colores ya agregados
+    const handleEditColor = (idx: number) => {
+        const c = colores[idx];
+        setColorForm({
+            ...c,
+            imageFile: null,
+            imagePreview: c.imagenUrl || '',
+            imageAdicionalFiles: [],
+            imageAdicionalPreviews: c.imagenesAdicionales || [],
+        });
+        setEditColorIdx(idx);
+    };
+
+    // Agregar o actualizar color
     const handleAddColor = async () => {
         if (!colorForm.color) {
             alert('Selecciona un color');
@@ -222,6 +241,15 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
         }
         if (!colorForm.imageFile && !colorForm.imagePreview) {
             alert('Selecciona una imagen principal para el color');
+            return;
+        }
+
+        // No permitir colores repetidos (excepto si se está editando ese color)
+        const colorExists = colores.some(
+            (c, idx) => c.color.trim().toLowerCase() === colorForm.color.trim().toLowerCase() && idx !== editColorIdx
+        );
+        if (colorExists) {
+            alert('Este color ya está agregado al producto');
             return;
         }
 
@@ -252,20 +280,27 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             }
         }
 
-        setColores([
-            ...colores,
-            {
-                color: colorForm.color,
-                imagenUrl: colorImageUrl,
-                imagenesAdicionales,
-                talles: colorForm.talles,
-                imageFile: null,
-                imagePreview: '',
-                imageAdicionalFiles: [],
-                imageAdicionalPreviews: [],
-            }
-        ]);
-        // Reset color form
+        const newColor: ColorForm = {
+            color: colorForm.color,
+            imagenUrl: colorImageUrl,
+            imagenesAdicionales,
+            talles: colorForm.talles,
+            imageFile: null,
+            imagePreview: '',
+            imageAdicionalFiles: [],
+            imageAdicionalPreviews: [],
+        };
+
+        let newColores: ColorForm[];
+        if (editColorIdx !== null) {
+            // Si se está editando, reemplaza el color en la posición correspondiente
+            newColores = colores.map((c, idx) => (idx === editColorIdx ? newColor : c));
+        } else {
+            newColores = [...colores, newColor];
+        }
+        setColores(newColores);
+
+        // Reset color form y modo edición
         setColorForm({
             color: '',
             imagenUrl: '',
@@ -276,10 +311,12 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             imageAdicionalFiles: [],
             imageAdicionalPreviews: [],
         });
+        setEditColorIdx(null);
     };
 
     const handleRemoveColor = (colorIdx: number) => {
         setColores(colores.filter((_, idx) => idx !== colorIdx));
+        if (editColorIdx === colorIdx) setEditColorIdx(null);
     };
 
     // --- Producto principal ---
@@ -319,7 +356,25 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             return;
         }
 
-        // PATCH solo los campos principales (no colores ni talles)
+        // --- Construir DTO completo ---
+        const dto = {
+            nombre: form.nombre,
+            precio: Number(form.precio),
+            descripcion: form.descripcion,
+            marca: form.marca,
+            imagenUrl: mainImageUrl,
+            categoriaId: categoriaObj.id,
+            colores: colores.map(c => ({
+                color: c.color,
+                imagenUrl: c.imagenUrl,
+                imagenesAdicionales: c.imagenesAdicionales,
+                talles: c.talles.map(ts => ({
+                    talleId: ts.talle.id,
+                    stock: ts.stock
+                }))
+            }))
+        };
+
         const APIURL = import.meta.env.VITE_API_URL;
         const token = localStorage.getItem("token");
         const headers = {
@@ -327,18 +382,12 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
             ...(token ? { Authorization: `Bearer ${token}` } : {})
         };
 
-        const updateDTO: any = {
-            nombre: form.nombre,
-            precio: Number(form.precio),
-            descripcion: form.descripcion,
-            marca: form.marca,
-            imagenUrl: mainImageUrl,
-            categoriaId: categoriaObj.id,
-            // Solo agrega los campos que quieras actualizar
-        };
-
         try {
-            await axios.patch(`${APIURL}/productos/${product.id}`, updateDTO, { headers });
+            await axios.put(
+                `${APIURL}/productos/con-colores/${product?.id}`,
+                dto,
+                { headers }
+            );
             alert('Producto actualizado!');
             onClose();
         } catch (err) {
@@ -415,7 +464,7 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
 
                         {/* Colores */}
                         <div className={styles.inputColumn}>
-                            <h4>Agregar Color</h4>
+                            <h4>{editColorIdx !== null ? "Editar Color" : "Agregar Color"}</h4>
                             <label>Color:</label>
                             <select name="color" value={colorForm.color} onChange={handleColorChange}>
                                 <option value="">Seleccionar</option>
@@ -493,7 +542,7 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
                             )}
 
                             <button type="button" className={styles.yesButton} style={{ marginTop: 12 }} onClick={handleAddColor}>
-                                Agregar Color
+                                {editColorIdx !== null ? "Actualizar Color" : "Agregar Color"}
                             </button>
 
                             {colores.length > 0 && (
@@ -503,6 +552,9 @@ const ModalEditProd: React.FC<ModalEditProdProps> = ({ isOpen, onClose, product 
                                         {colores.map((c, idx) => (
                                             <li key={idx}>
                                                 <span style={{ fontWeight: 600 }}>{c.color}</span> - {c.talles.length} talles
+                                                <button type="button" style={{ marginLeft: 8 }} onClick={() => handleEditColor(idx)}>
+                                                    Editar
+                                                </button>
                                                 <button type="button" style={{ marginLeft: 8 }} onClick={() => handleRemoveColor(idx)}>
                                                     Quitar
                                                 </button>

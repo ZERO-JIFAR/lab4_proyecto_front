@@ -22,7 +22,9 @@ const AdminTallePage: React.FC = () => {
     const fetchData = async () => {
         try {
             setTalles(await getTalles());
-            setWaistTypes(await getWaistTypes());
+            // Filtrar los tipoTalle eliminados
+            const waistTypesData = await getWaistTypes();
+            setWaistTypes(waistTypesData.filter(wt => !wt.eliminado));
         } catch {
             setError("Error al cargar datos");
         }
@@ -132,11 +134,13 @@ const AdminTallePage: React.FC = () => {
                             required
                         >
                             <option value="">Seleccionar</option>
-                            {waistTypes.map(wt => (
-                                <option key={wt.id} value={wt.id}>
-                                    {wt.nombre}
-                                </option>
-                            ))}
+                            {waistTypes
+                                .filter(wt => !wt.eliminado)
+                                .map(wt => (
+                                    <option key={wt.id} value={wt.id}>
+                                        {wt.nombre}
+                                    </option>
+                                ))}
                         </select>
                     </div>
                     <div className={styles.buttonGroup}>
